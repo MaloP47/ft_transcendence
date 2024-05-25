@@ -1,2 +1,3 @@
-# ft_transcendence
-Transcendence is the final common core project @42
+https://github.com/docker/awesome-compose/tree/master/official-documentation-samples/django/
+
+
