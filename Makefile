@@ -7,13 +7,13 @@ all:
 	sudo mkdir -p ./srcs/requirements/postgresql/data
 	sudo docker compose -f srcs/docker-compose.yml run web django-admin startproject composeexample .
 	# sudo chown -R $(USER):$(USER) ./srcs/requirements/django/data/composeexample ./srcs/requirements/django/data/manage.py
-	sudo docker compose -f srcs/docker-compose.yml up
+	sudo docker compose -f srcs/docker-compose.yml up -d
 	
 down:
 	sudo docker compose -f srcs/docker-compose.yml down
 
 up:
-	sudo docker compose -f srcs/docker-compose.yml up
+	sudo docker compose -f srcs/docker-compose.yml up -d
 
 clean:
 	docker-compose -f srcs/docker-compose.yml down -v

@@ -1,6 +1,6 @@
 # !/bin/sh
 # python /code/manage.py runserver
-# sleep 5;
+# sleep 10;
 # pwd >> /logs.txt
 # ls -l / >> /logs.txt
 # ls -l /code >> /logs.txt
