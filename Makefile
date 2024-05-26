@@ -3,22 +3,23 @@ USER = guderram
 
 
 all:
-	sudo docker compose run web django-admin startproject composeexample .
-	sudo chown -R $(USER):$(USER) composeexample manage.py
-	sudo docker compose up
+	sudo mkdir -p ./srcs/requirements/django/data
+	sudo mkdir -p ./srcs/requirements/postgresql/data
+	sudo docker compose -f srcs/docker-compose.yml run web django-admin startproject composeexample .
+	# sudo chown -R $(USER):$(USER) ./srcs/requirements/django/data/composeexample ./srcs/requirements/django/data/manage.py
+	sudo docker compose -f srcs/docker-compose.yml up
 	
 down:
-	sudo docker compose down
+	sudo docker compose -f srcs/docker-compose.yml down
 
 up:
-	sudo docker compose up
+	sudo docker compose -f srcs/docker-compose.yml up
 
 clean:
-	docker-compose down -v
+	docker-compose -f srcs/docker-compose.yml down -v
 	docker rmi $$(docker images -q)
-	rm -rf ./data
-	rm -rf ./composeexample
-	rm -rf ./manage.py
+	sudo rm -rf ./srcs/requirements/django/data
+	sudo rm -rf ./srcs/requirements/postgresql/data
 
 fclean: clean
 	docker system prune -af

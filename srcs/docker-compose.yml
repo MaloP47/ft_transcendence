@@ -3,17 +3,19 @@ services:
     container_name: postgresql
     image: postgres
     volumes:
-      - ./data/db:/var/lib/postgresql/data
+      - ./requirements/postgresql/data:/var/lib/postgresql/data
     environment:
       - POSTGRES_DB=postgres
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
   web:
     container_name: django
-    build: .
+    build:
+      context: requirements/django
+      dockerfile: Dockerfile
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
-      - .:/code
+      - ./requirements/django/data:/code
     ports:
       - "8000:8000"
     environment:
