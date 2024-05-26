@@ -90,7 +90,7 @@ export default class ImpactParticles {
 
 	reset() {
 		this.impactParticles = [];
-		this.UpdateParticles();
+		this.UpdateGeometry();
 	}
 
 	Update() {

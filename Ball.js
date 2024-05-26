@@ -34,7 +34,7 @@ export default class Ball {
 		this.velocity.y = Math.cos((this.initAngle - 45) * Math.PI / 180);
 
 		this.maxXPos = 6.8;
-		this.maxYPos = 10;
+		this.maxYPos = 10.5;
 		this.maxPlayerPos = 9;
 	}
 
@@ -49,10 +49,14 @@ export default class Ball {
 			this.pong.impactParticles.AddParticles();
 		}
 		// Top - Bottom collisions
-		if (this.ball.position.y + this.velocity.y * this.speed * this.pong.elapsedTime / 10 > this.maxYPos)
+		if (this.ball.position.y + this.velocity.y * this.speed * this.pong.elapsedTime / 10 > this.maxYPos) {
+			this.pong.impactParticles.AddParticles();
 			this.resetBall(1);
-		if (this.ball.position.y + this.velocity.y * this.speed * this.pong.elapsedTime / 10 < -this.maxYPos)
+		}
+		if (this.ball.position.y + this.velocity.y * this.speed * this.pong.elapsedTime / 10 < -this.maxYPos) {
+			this.pong.impactParticles.AddParticles();
 			this.resetBall(2);
+		}
 		// Line Bonus collisions
 		if (this.pong.p1.bonus.line.on && this.ball.position.y + this.velocity.y * this.speed * this.pong.elapsedTime / 10 < -8.5) {
 			this.velocity.y = -this.velocity.y;
@@ -72,8 +76,8 @@ export default class Ball {
 			let distanceSq = distSq(this.getPos(), this.pong.bonus.getPos());
 			if (distanceSq < 0.3) {
 				this.pong.bonus.setActive(false);
-			} else if (distanceSq < 6) {
-				this.velocity.add(this.pong.bonus.getPos().sub(this.getPos()).normalize().divideScalar(distanceSq * 5));
+			} else if (distanceSq < 5) {
+				this.velocity.add(this.pong.bonus.getPos().sub(this.getPos()).normalize().divideScalar(distanceSq * 4));
 				this.velocity.normalize();
 			}
 		}
@@ -104,9 +108,11 @@ export default class Ball {
 		if (player == 1) {
 			this.pong.p1.score += 1;
 			this.ball.position.y = -0.5;
+			this.pong.p1score.innerHTML = this.pong.p1.score + "";
 		} else {
 			this.pong.p2.score += 1;
 			this.ball.position.y = 0.5;
+			this.pong.p2score.innerHTML = this.pong.p2.score + "";
 		}
 		clearTimeout(this.pong.bonus.nextTimeout);
 		this.nextTimeout = setTimeout(() => {

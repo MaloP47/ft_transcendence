@@ -34,19 +34,19 @@ vec3 palette(float t) {
 	return (a + b * cos(6.28318 * (c * t + d)));
 }
 
-vec3 sidesColor() {
+vec3 sidesColor(vec2 pos) {
 	float vSides = 1.0;
-	vSides *= abs(vPosition.x / 7.1);
+	vSides *= abs((pos.x - 0.07) / 7.1);
 	vSides = clamp(vSides, 0.0, 1.0);
-	vSides = pow(vSides, 40.0);
+	vSides = pow(vSides, 60.0);
 	float tSide = 1.0;
-	tSide *= vPosition.y / 10.3;
+	tSide *= (pos.y - 0.07) / 10.3;
 	tSide = clamp(tSide, 0.0, 1.0);
-	tSide = pow(tSide, 40.0);
+	tSide = pow(tSide, 60.0);
 	float bSide = 1.0;
-	bSide *= vPosition.y / -10.3;
+	bSide *= pos.y / -10.3;
 	bSide = clamp(bSide, 0.0, 1.0);
-	bSide = pow(bSide, 40.0);
+	bSide = pow(bSide, 60.0);
 	return (vec3(1.0, 2.0, 3.0) * vSides + vec3(1.5, 2.0, 1.0) * tSide + vec3(2.0, 1.2, 1.0) * bSide);
 }
 
@@ -154,10 +154,11 @@ void main() {
 	// Noised pos
 	vec2 nP = p + noise(p + uInfos.time / 200.0) / 10.0;
 	vec2 nP2 = nP + noise(nP * 10.0 + uInfos.time / 50.0) / 30.0;
+	vec2 nP3 = nP + noise(nP * 3.0 + uInfos.time / 300.0) / 20.0;
 
 	// Line bonus
 	vec3 lineP1 = bonusLine(p, nP2, vec2(0.0, 8.5), vec3(3.0, 1.5, 1.0), uInfos.p1Bonus);
 	vec3 lineP2 = bonusLine(p, nP2, vec2(0.0, -8.5), vec3(1.5, 3.0, 1.0), uInfos.p2Bonus);
 
-	gl_FragColor = vec4((sidesColor() + p1Full + p2Full + lineP1 + lineP2) * fadeBg(), 1.0);
+	gl_FragColor = vec4((sidesColor(nP3) + p1Full + p2Full + lineP1 + lineP2) * fadeBg(), 1.0);
 }`;

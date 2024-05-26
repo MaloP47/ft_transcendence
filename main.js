@@ -39,6 +39,9 @@ import fadeFragmentShader from './assets/shaders/fadeF.glsl'
 import dotVertexShader from './assets/shaders/dotV.glsl'
 import dotFragmentShader from './assets/shaders/dotF.glsl'
 
+import vignetteVertexShader from './assets/shaders/vignetteV.glsl'
+import vignetteFragmentShader from './assets/shaders/vignetteF.glsl'
+
 var WIDTH = window.innerWidth;
 var HEIGHT = window.innerHeight;
 
@@ -70,13 +73,21 @@ class Pong {
 		});
 		this.threejs.setSize(WIDTH, HEIGHT);
 		this.canvas = document.getElementById('pongCanvas').appendChild(this.threejs.domElement);
-		this.info = document.getElementById('info');
-		this.info.style.opacity = "0";
-		this.camera = new THREE.PerspectiveCamera(45, WIDTH / HEIGHT, 0.1, 1000);
+		this.scores = document.getElementById('scoresContainer');
+		this.scoresText = document.getElementById('scores');
+		this.p1score = document.getElementById('p1score');
+		this.p2score = document.getElementById('p2score');
+		this.loginForm = document.getElementById('loginForm');
+		this.loginForm.style.display = "none";
+		this.loginBtn = document.getElementById('loginBtn');
+		this.topBar = document.getElementById('topBar');
+		this.scores.style.opacity = "0";
+		this.SetStyle();
+		this.camera = new THREE.PerspectiveCamera(58, WIDTH / HEIGHT, 0.1, 1000);
 		this.camera.position.set(0, 0, 27);
 		this.camera.lookAt(new THREE.Vector3(0, 0, 0));
 		this.scene = new THREE.Scene();	
-		this.scene.background = new THREE.Color(0x0D1B2A);
+		this.scene.background = new THREE.Color(0x596077);
 		this.composer = new EffectComposer(this.threejs);
 		const renderPass = new RenderPass( this.scene, this.camera );
 		this.composer.addPass( renderPass );
@@ -93,7 +104,6 @@ class Pong {
 			fragmentShader: dotFragmentShader,
 		}));
 		this.composer.addPass(this.dot);
-//		const effect2 = new ShaderPass( RGBShiftShader );
 		this.fade = new ShaderPass(new THREE.ShaderMaterial({
 			uniforms: {
 				'tDiffuse': { value: null },
@@ -102,8 +112,22 @@ class Pong {
 			vertexShader: fadeVertexShader,
 			fragmentShader: fadeFragmentShader,
 		}));
-//		effect2.uniforms[ 'amount' ].value = 0.002;
 		this.composer.addPass(this.fade);
+		this.vignette = new ShaderPass(new THREE.ShaderMaterial({
+			uniforms: {
+				'tDiffuse': { value: null },
+				'amount': {value: 1},
+				'lines': {value: HEIGHT / 4},
+				'time': {value: this.totalTime},
+			},
+			vertexShader: vignetteVertexShader,
+			fragmentShader: vignetteFragmentShader,
+		}));
+		this.composer.addPass(this.vignette);
+	}
+
+	SetStyle() {
+
 	}
 
 	InitKeys() {
@@ -183,11 +207,8 @@ class Pong {
 				this.p2Right = false;
 			} else if (keyCode == 32) {
 			//	this.start = true;
-				if (this.currentState == this.states.intro && this.currentState.status == "active")
-					this.ToState(this.states.ready);
 				if (this.currentState == this.states.ready && this.currentState.status == "active" && !this.start) {
 					this.start = true;
-					this.info.innerHTML = "";
 					this.p2.setAI(true);
 					this.p2.startAI();
 				}
@@ -202,23 +223,15 @@ class Pong {
 			this.camera.updateProjectionMatrix();
 			// Update renderer
 			this.threejs.setSize(WIDTH, HEIGHT);
+			this.SetStyle();
 		});
-		window.addEventListener('dblclick', () => {
-			const fullscreenElement = document.fullscreenElement || document.webkitFullscreenElement;
-			if (!fullscreenElement) {
-				if (this.canvas.requestFullscreen) {
-					this.canvas.requestFullscreen();
-				}
-				else if (this.canvas.webkitRequestFullscreen) {
-					this.canvas.webkitRequestFullscreen();
-				}
-			} else {
-				if (document.exitFullscreen) {
-					document.exitFullscreen();
-				} else if (document.webkitExitFullscreen) {
-					document.webkitExitFullscreen();
-				}
-			}
+		this.loginBtn.addEventListener("click", () => {
+			this.loginForm.classList.add("hided");
+			setTimeout(() => {
+				this.loginForm.style.display = "none";
+			}, "500")
+			this.loginForm.style.display = "block";
+			this.ToState(this.states.ready);
 		});
 	}
 
@@ -249,25 +262,29 @@ class Pong {
 					}
 				},
 				run(pong) {
-					pong.ToState(pong.states.intro);
+					pong.ToState(pong.states.login);
+					pong.loginForm.style.display = "block";
 				},
 				fadeOut(pong) {
 					this.status = "in";
+					pong.topBar.classList.remove("hided");
 				}
 			},
-			intro: {
+			login: {
 				status: "in",
 				time: 0,
 				inTime: 1500,
 				outTime: 1500,
 				fadeIn(pong) {
 					this.time += pong.elapsedTime;
-					var progress = pong.Smooth(Math.min(this.time / this.inTime, 1));
+					pong.vignette.uniforms['amount'].value = 0;
+					var progress = pong.easeOutCubic(Math.min(this.time / this.inTime, 1));
 					pong.fade.uniforms['amount'].value = progress * 0.5;
-					pong.info.style.opacity = Math.max(0, progress - 0.75) / 0.25;
-					pong.camera.position.set(Math.cos(pong.totalTime / 3000) * 20, Math.sin(pong.totalTime / 2000) * 20, Math.sin(pong.totalTime / 2500) * 7 + 23 + (1 - progress) * 100);
+					pong.camera.position.set(Math.cos(pong.totalTime / 3000) * 18, Math.sin(pong.totalTime / 2000) * 18, Math.sin(pong.totalTime / 2500) * 7 + 18 + (1 - progress) * 100);
 					pong.camera.lookAt(new THREE.Vector3(0, 0, 0));
 					pong.camera.rotation.z = pong.totalTime / 2000 + 3.1415 / 2 - (1 - progress) * 3;
+					if (progress >= .75)
+						pong.loginForm.classList.remove("hided");
 					if (this.time > this.inTime) {
 						this.status = "active";
 						pong.p1.startAI();
@@ -276,7 +293,7 @@ class Pong {
 					}
 				},
 				run(pong) {
-					pong.camera.position.set(Math.cos(pong.totalTime / 3000) * 20, Math.sin(pong.totalTime / 2000) * 20, Math.sin(pong.totalTime / 2500) * 7 + 23);
+					pong.camera.position.set(Math.cos(pong.totalTime / 3000) * 18, Math.sin(pong.totalTime / 2000) * 18, Math.sin(pong.totalTime / 2500) * 7 + 18);
 					pong.camera.lookAt(new THREE.Vector3(0, 0, 0));
 					pong.camera.rotation.z = pong.totalTime / 2000 + 3.1415 / 2;
 					pong.p1.Update();
@@ -290,10 +307,9 @@ class Pong {
 				},
 				fadeOut(pong) {
 					this.time += pong.elapsedTime;
-					var progress = pong.Smooth(Math.min(this.time / this.inTime, 1));
+					var progress = pong.easeInCubic(Math.min(this.time / this.inTime, 1));
 					pong.fade.uniforms['amount'].value = (1 - progress) * 0.5;
-					pong.info.style.opacity = 1 - progress;
-					pong.camera.position.set(Math.cos(pong.totalTime / 3000) * 20, Math.sin(pong.totalTime / 2000) * 20, Math.sin(pong.totalTime / 2500) * 7 + 23 + progress * 100);
+					pong.camera.position.set(Math.cos(pong.totalTime / 3000) * 18, Math.sin(pong.totalTime / 2000) * 18, Math.sin(pong.totalTime / 2500) * 7 + 18 + progress * 100);
 					pong.camera.lookAt(new THREE.Vector3(0, 0, 0));
 					pong.camera.rotation.z = pong.totalTime / 2000 + 3.1415 / 2 - progress * 3;
 					pong.p1.Update();
@@ -317,7 +333,6 @@ class Pong {
 						pong.ballFire.reset();
 						pong.impactParticles.reset();
 						pong.ballParticles.reset();
-						pong.info.innerHTML = "Press space to start";
 					}
 				}
 			},
@@ -328,17 +343,32 @@ class Pong {
 				outTime: 1000,
 				fadeIn(pong) {
 					this.time += pong.elapsedTime;
-					var progress = pong.Smooth(Math.min(this.time / this.inTime, 1));
+					pong.vignette.uniforms['amount'].value = 1;
+					var progress = pong.easeOutCubic(Math.min(this.time / this.inTime, 1));
+					if (HEIGHT < 800) {
+						pong.camera.position.set(0, (1 - progress) * -20 - 11, 17 + (800 - HEIGHT) / 70);
+						pong.camera.lookAt(new THREE.Vector3(0, progress * (1 - (HEIGHT / 800) * 3), 0));
+					} else {
+						pong.camera.position.set(0, (1 - progress) * -20 - 11, 17 + (1 - progress) * 10);
+						pong.camera.lookAt(new THREE.Vector3(0, progress * -2, 0));	
+					}
 					pong.fade.uniforms['amount'].value = Math.min(progress, 0.75) / 0.75;
 					pong.dot.uniforms['amount'].value = 1 - Math.max(progress - 0.25, 0) / 0.75;
-					pong.info.style.opacity = Math.max(0, progress - 0.75) / 0.25;
-					pong.info.style.paddingBottom = (progress * 100) + "px";
+					pong.scores.style.opacity = Math.max(0, progress - 0.75) / 0.25;
 					if (this.time > this.inTime) {
 						this.status = "active";
 						this.time = 0;
 					}
 				},
 				run(pong) {
+					if (HEIGHT < 800) {
+						pong.camera.position.set(0, -11, 17 + (800 - HEIGHT) / 70);
+						pong.camera.lookAt(new THREE.Vector3(0, 1 - (HEIGHT / 800) * 3, 0));
+					} else {
+						pong.camera.position.set(0, -11, 17);
+						pong.camera.lookAt(new THREE.Vector3(0, -2, 0));	
+					}
+					console.log(HEIGHT);
 					if (pong.start) {
 						pong.p1.Update();
 						pong.p2.Update();
@@ -482,6 +512,7 @@ class Pong {
 	}
 
 	UpdateShaders() {
+		this.vignette.material.uniforms.time = {value: this.totalTime};
 		this.bonusParticles.particleShader.uniforms.uCenter = {value: this.bonus.getPos()};
 		this.bonusParticles.particleShader.uniforms.uType = {value: this.bonus.type};
 		this.ballParticles.particleShader.uniforms.uTime = {value: this.totalTime};
@@ -510,6 +541,14 @@ class Pong {
 	Smooth(t) {
 		var sqr = t * t;
 		return (sqr / (2 * (sqr - t) + 1));
+	}
+
+	easeInCubic(t) {
+		return (t * t * t);
+	}
+
+	easeOutCubic(t) {
+		return (1 - Math.pow(1 - t, 3));
 	}
 
 	LerpCamera(initCam, endCam, t) {

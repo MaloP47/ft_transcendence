@@ -107,5 +107,5 @@ void main() {
 	// Noised pos
 	vec2 nP = p + noise(p + uInfos.time / 200.0) / 10.0;
 
-	gl_FragColor = vec4((sidesColor() * 0.2 + dashedLine + frozen(nP)) * fadeBg(), 1.0);
+	gl_FragColor = vec4((sidesColor() * 0.2 + dashedLine + frozen(nP)) * fadeBg() + vec3(25.0 / 255.0, 30.0 / 255.0, 47.0 / 255.0) * (1.0 - fadeBg()), 1.0);
 }`;
