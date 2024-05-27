@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<!-- <title>Titre de la page</title> -->
+	<title>{% block title %}Titre de la page{% endblock %}</title>
+	<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+	<header>
+		<h1>Titre de votre site</h1>
+		<nav>
+			<ul>
+				<li><a href="#">Accueil</a></li>
+				<li><a href="#">À propos</a></li>
+				<li><a href="#">Contact</a></li>
+			</ul>
+		</nav>
+	</header>
+	
+	<main>
+		<!-- <h2>Contenu principal</h2>
+		<p>Contenu de votre page ici.</p> -->
+		{% block content %}
+		{% endblock %}
+	</main>
+	
+	<footer>
+		<p>© 2024 guderram</p>
+	</footer>
+</body>
+</html>
