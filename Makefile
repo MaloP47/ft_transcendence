@@ -3,6 +3,7 @@ USER = guderram
 
 
 all:
+	sudo rm -rf ./srcs/requirements/postgresql/data
 	sudo mkdir -p ./srcs/requirements/django/data
 	sudo mkdir -p ./srcs/requirements/postgresql/data
 	# sudo docker compose -f srcs/docker-compose.yml run web django-admin startproject djangodepot .

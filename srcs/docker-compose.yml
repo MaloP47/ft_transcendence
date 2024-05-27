@@ -2,8 +2,8 @@ services:
   db:
     container_name: postgresql
     image: postgres
-    volumes:
-      - ./requirements/postgresql/data:/var/lib/postgresql/data
+    # volumes:
+    #   - ./requirements/postgresql/data:/var/lib/postgresql/data
     environment:
       - POSTGRES_DB=postgres
       - POSTGRES_USER=postgres
