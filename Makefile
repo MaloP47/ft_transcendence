@@ -16,10 +16,10 @@ up:
 	sudo docker compose -f srcs/docker-compose.yml up -d
 
 clean:
-	docker-compose -f srcs/docker-compose.yml down -v
+	docker compose -f srcs/docker-compose.yml down -v
 	docker rmi $$(docker images -q)
 	# sudo rm -rf ./srcs/requirements/django/data
-	# sudo rm -rf ./srcs/requirements/postgresql/data
+	sudo rm -rf ./srcs/requirements/postgresql/data
 
 fclean: clean
 	docker system prune -af

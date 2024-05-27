@@ -3,7 +3,11 @@ FROM debian:bullseye
 
 # FROM python:3
 RUN apt-get update
-RUN apt install -y python3 python3-distutils libpq-dev gcc python3-dev
+RUN apt install -y python3
+RUN apt install -y python3-distutils
+RUN apt install -y libpq-dev
+RUN apt-get install -y gcc
+RUN apt install -y python3-dev
 RUN apt-get install -y curl
 # RUN apt install -y python3-pip
 # RUN export PATH="$HOME/.local/bin:$PATH"
