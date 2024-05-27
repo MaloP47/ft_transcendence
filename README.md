@@ -1,4 +1,17 @@
-Dans le cas ou ca ne fonctionne plus :
+Un probleme pour push ?
+Pas de soucis :
+
+cd /home/guderram/Documents/django/srcs/requirements/postgresql
+
+sudo chmod -R +rx data
+
+
+
+
+
+
+
+Dans le cas ou ca ne fonctionne plus (le projet ne se lance plus, ou alors il se lance mais rien ne foncitonne) :
 
 django : Dockerfile :
 commenter :

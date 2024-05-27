@@ -27,3 +27,8 @@ fclean: clean
 rere: fclean all
 
 re: clean all
+
+gitmoica : 
+	sudo chmod -R +rx ./srcs/requirements/postgresql/data
+	git add .
+	git status
