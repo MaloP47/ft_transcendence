@@ -223,6 +223,8 @@ class Pong {
 			this.camera.updateProjectionMatrix();
 			// Update renderer
 			this.threejs.setSize(WIDTH, HEIGHT);
+			this.composer.setSize(WIDTH, HEIGHT);
+			this.vignette.uniforms['lines'].value = HEIGHT / 4;
 			this.SetStyle();
 		});
 		this.loginBtn.addEventListener("click", () => {
@@ -361,6 +363,7 @@ class Pong {
 					}
 				},
 				run(pong) {
+					console.log(pong.elapsedTime);
 					if (HEIGHT < 800) {
 						pong.camera.position.set(0, -11, 17 + (800 - HEIGHT) / 70);
 						pong.camera.lookAt(new THREE.Vector3(0, 1 - (HEIGHT / 800) * 3, 0));
@@ -368,7 +371,6 @@ class Pong {
 						pong.camera.position.set(0, -11, 17);
 						pong.camera.lookAt(new THREE.Vector3(0, -2, 0));	
 					}
-					console.log(HEIGHT);
 					if (pong.start) {
 						pong.p1.Update();
 						pong.p2.Update();

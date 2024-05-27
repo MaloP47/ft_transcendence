@@ -43,13 +43,13 @@ export default class BallFire {
 	}
 
 	AddParticles() {
-		for (let i = 0; i < 20 + 50 * this.pong.ball.getSpeed(); i++) {
+		for (let i = 0; i < (30 + 50 * this.pong.ball.getSpeed()) * this.pong.elapsedTime / 10; i++) {
 			const life = (Math.random() + 0.5) / 2 * this.pong.ball.getSpeed() * 5;
 			var rdm = new THREE.Vector3(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5);
 			rdm.divideScalar(4);
 			this.ballFire.push({
 				position: this.pong.ball.getPos(),
-				velocity: this.pong.ball.getVelocity().multiplyScalar(-0.55).add(rdm).multiplyScalar(Math.random() + 0.5),
+				velocity: this.pong.ball.getVelocity().multiplyScalar(-0.55).add(rdm).multiplyScalar(Math.random() + 0.5 * this.pong.elapsedTime / 20),
 				size: Math.random(),
 				life: life,
 				age: life,

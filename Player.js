@@ -72,18 +72,19 @@ export default class Player {
 			this.RIGHT = this.pong.p2Right;
 		}
 		if (!this.LEFT && !this.RIGHT) {
-			if (this.bar.position.x + this.speed > maxPos) {
+			if (this.bar.position.x + this.speed * this.pong.elapsedTime / 12 > maxPos && Math.abs(this.speed) > 0.1) {
 				this.bar.position.x = maxPos;
-				this.speed = -this.speed / 1.15 * this.pong.elapsedTime / 12;
-			} else if (this.bar.position.x + this.speed < -maxPos) {
+				this.speed = -this.speed / 1.75;
+			} else if (this.bar.position.x + this.speed * this.pong.elapsedTime / 12 < -maxPos && Math.abs(this.speed) > 0.1) {
 				this.bar.position.x = -maxPos;
-				this.speed = -this.speed / 1.15 * this.pong.elapsedTime / 12;
+				this.speed = -this.speed / 1.75;
 			}
-			this.bar.position.x += this.speed * this.pong.elapsedTime / 12;
+			this.bar.position.x = Math.min(maxPos, Math.max(-maxPos, this.bar.position.x + this.speed * this.pong.elapsedTime / 12));
 		} else {
 			this.bar.position.x = Math.min(maxPos, Math.max(-maxPos, this.bar.position.x + this.speed * this.pong.elapsedTime / 12));
-			if (this.bar.position.x == -maxPos || this.bar.position.x == maxPos)
+			if (this.bar.position.x <= -maxPos || this.bar.position.x >= maxPos) {
 				this.speed = 0;
+			}
 		}
 		this.updateSpeed();
 		this.prevPos = this.currentPos.clone();
@@ -101,7 +102,7 @@ export default class Player {
 	subSpeed() { this.speed = sub(this.speed, this.speedInc * this.pong.elapsedTime / 12, 0.3); }
 	updateSpeed() {
 		if (Math.abs(this.speed) > 0.005)
-			this.speed /= (1 + ((this.drag - (this.bonus.frozen.time * 0.9))) * this.pong.elapsedTime / 100);
+			this.speed /= (1 + ((this.drag - (this.bonus.frozen.time * 0.9))) * this.pong.elapsedTime / 50);
 		else
 			this.speed = 0;
 	}
