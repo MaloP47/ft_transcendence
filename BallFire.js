@@ -12,8 +12,8 @@
 
 import * as THREE from 'three';
 import LinearSpline from './LinearSpline.js';
-import fireVertexShader from './assets/shaders/fireV.glsl'
-import fireFragmentShader from './assets/shaders/fireF.glsl'
+import fireVertexShader from './assets/shaders/fireV.js'
+import fireFragmentShader from './assets/shaders/fireF.js'
 
 export default class BallFire {
 	constructor(params) {

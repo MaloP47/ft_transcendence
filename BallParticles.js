@@ -12,8 +12,8 @@
 
 import * as THREE from 'three';
 import LinearSpline from './LinearSpline.js';
-import ballParticleVertexShader from './assets/shaders/ballParticleV.glsl'
-import ballParticleFragmentShader from './assets/shaders/ballParticleF.glsl'
+import ballParticleVertexShader from './assets/shaders/ballParticleV.js'
+import ballParticleFragmentShader from './assets/shaders/ballParticleF.js'
 
 export default class BallParticles {
 	constructor(params) {

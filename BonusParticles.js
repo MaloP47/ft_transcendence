@@ -12,8 +12,8 @@
 
 import * as THREE from 'three';
 import LinearSpline from './LinearSpline.js';
-import bonusParticlesVertexShader from './assets/shaders/bonusParticlesV.glsl'
-import bonusParticlesFragmentShader from './assets/shaders/bonusParticlesF.glsl'
+import bonusParticlesVertexShader from './assets/shaders/bonusParticlesV.js'
+import bonusParticlesFragmentShader from './assets/shaders/bonusParticlesF.js'
 
 export default class BonusParticles {
 	constructor(params) {

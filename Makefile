@@ -16,7 +16,7 @@ bonus : $(NAME_BONUS)
 
 $(NAME) :
 	@npm i
-	@npx vite
+	@npx serve .
 
 clean : 
 	@$(RM) -rf node_modules package-lock.json

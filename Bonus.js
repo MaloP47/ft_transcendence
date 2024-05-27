@@ -11,8 +11,8 @@
 // ************************************************************************** //
 
 import * as THREE from 'three';
-import bonusVertexShader from './assets/shaders/bonusV.glsl'
-import bonusFragmentShader from './assets/shaders/bonusF.glsl'
+import bonusVertexShader from './assets/shaders/bonusV.js'
+import bonusFragmentShader from './assets/shaders/bonusF.js'
 
 export default class Bonus {
 	constructor(params) {

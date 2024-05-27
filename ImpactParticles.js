@@ -12,8 +12,8 @@
 
 import * as THREE from 'three';
 import LinearSpline from './LinearSpline.js';
-import impactParticlesVertexShader from './assets/shaders/impactParticlesV.glsl'
-import impactParticlesFragmentShader from './assets/shaders/impactParticlesF.glsl'
+import impactParticlesVertexShader from './assets/shaders/impactParticlesV.js'
+import impactParticlesFragmentShader from './assets/shaders/impactParticlesF.js'
 
 export default class ImpactParticles {
 	constructor(params) {

@@ -27,20 +27,20 @@ import Bonus from './Bonus.js';
 import Ball from './Ball.js';
 import Player from './Player.js';
 
-import bgVertexShader from './assets/shaders/bgV.glsl'
-import bgFragmentShader from './assets/shaders/bgF.glsl'
+import bgVertexShader from './assets/shaders/bgV.js'
+import bgFragmentShader from './assets/shaders/bgF.js'
 
-import playerVertexShader from './assets/shaders/playerV.glsl'
-import playerFragmentShader from './assets/shaders/playerF.glsl'
+import playerVertexShader from './assets/shaders/playerV.js'
+import playerFragmentShader from './assets/shaders/playerF.js'
 
-import fadeVertexShader from './assets/shaders/fadeV.glsl'
-import fadeFragmentShader from './assets/shaders/fadeF.glsl'
+import fadeVertexShader from './assets/shaders/fadeV.js'
+import fadeFragmentShader from './assets/shaders/fadeF.js'
 
-import dotVertexShader from './assets/shaders/dotV.glsl'
-import dotFragmentShader from './assets/shaders/dotF.glsl'
+import dotVertexShader from './assets/shaders/dotV.js'
+import dotFragmentShader from './assets/shaders/dotF.js'
 
-import vignetteVertexShader from './assets/shaders/vignetteV.glsl'
-import vignetteFragmentShader from './assets/shaders/vignetteF.glsl'
+import vignetteVertexShader from './assets/shaders/vignetteV.js'
+import vignetteFragmentShader from './assets/shaders/vignetteF.js'
 
 var WIDTH = window.innerWidth;
 var HEIGHT = window.innerHeight;
