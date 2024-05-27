@@ -24,9 +24,9 @@ RUN pip install -r requirements.txt
 COPY ./conf/run_me.sh /run_me.sh
 RUN chmod +x /run_me.sh
 
-# RUN touch /logs.txt
-# RUN chmod 777 /logs.txt
-# WORKDIR /code
+RUN touch /logs.txt
+RUN chmod 777 /logs.txt
+WORKDIR /code
 
 # RUN pwd >> /logs.txt
 # RUN ls -l / >> /logs.txt

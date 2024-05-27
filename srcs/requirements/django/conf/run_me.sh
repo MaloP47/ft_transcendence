@@ -1,4 +1,7 @@
 # !/bin/sh
+python3 manage.py migrate >> /logs.txt
+
+
 python3 manage.py runserver 0.0.0.0:8000
 sleep 1;
 # pwd >> /logs.txt
