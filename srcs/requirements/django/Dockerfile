@@ -18,10 +18,11 @@ ENV PYTHONUNBUFFERED=1
 WORKDIR /code
 COPY ./conf/requirements.txt /code/
 RUN pip install -r requirements.txt
-COPY ./data/ /code/
+# COPY ./data/ /code/
+# RUN python3 manage.py migrate
 # WORKDIR /
-# COPY ./conf/run_me.sh /run_me.sh
-# RUN chmod +x /run_me.sh
+COPY ./conf/run_me.sh /run_me.sh
+RUN chmod +x /run_me.sh
 
 # RUN touch /logs.txt
 # RUN chmod 777 /logs.txt
@@ -31,7 +32,7 @@ COPY ./data/ /code/
 # RUN ls -l / >> /logs.txt
 # RUN ls -l /code >> /logs.txt
 
-# ENTRYPOINT [ "bash", "/run_me.sh" ]
+ENTRYPOINT [ "bash", "/run_me.sh" ]
 
 # CMD ["python3", "manage.py", "runserver"]
 

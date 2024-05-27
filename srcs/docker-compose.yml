@@ -13,9 +13,9 @@ services:
     build:
       context: requirements/django
       dockerfile: Dockerfile
-    command: python3 manage.py runserver 0.0.0.0:8000
+    # command: python3 manage.py runserver 0.0.0.0:8000
     volumes:
-      - ./requirements/django/data:/code
+      - django:/code
     ports:
       - "8000:8000"
     environment:
@@ -24,3 +24,14 @@ services:
       - POSTGRES_PASSWORD=postgres
     depends_on:
       - db
+
+
+
+#Volumes
+volumes:
+    django:
+        driver: local
+        driver_opts:
+            type: 'none'
+            o: 'bind'
+            device: './requirements/django/data'
