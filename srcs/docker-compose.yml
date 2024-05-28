@@ -1,37 +1,30 @@
 services:
-  db:
-    container_name: postgresql
-    image: postgres
-    # volumes:
-    #   - ./requirements/postgresql/data:/var/lib/postgresql/data
-    environment:
-      - POSTGRES_DB=postgres
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
   web:
-    container_name: django
-    build:
-      context: requirements/django
-      dockerfile: Dockerfile
-    # command: python3 manage.py runserver 0.0.0.0:8000
-    volumes:
-      - django:/code
+    container_name: transcendence_web
+    build: ./requirements/django/
     ports:
       - "8000:8000"
-    environment:
-      - POSTGRES_NAME=postgres
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
+    command: ["python", "manage.py",  "runserver",  "0.0.0.0:8000"]
+    volumes:
+      - ./requirements/django/app:/code
+    networks:
+      - transcendence
     depends_on:
       - db
 
+  db:
+    container_name: transcendence_db
+    image: postgres:16.3
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    networks:
+      - transcendence
+    environment:
+      - "POSTGRES_HOST_AUTH_METHOD=trust"
 
-
-#Volumes
 volumes:
-    django:
-        driver: local
-        driver_opts:
-            type: 'none'
-            o: 'bind'
-            device: './requirements/django/data'
+  postgres_data:
+
+networks:
+  transcendence:
+    driver: bridge

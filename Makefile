@@ -1,35 +1,62 @@
-USER_HOME = /home/guderram
-USER = guderram
+# **************************************************************************** #
+#                                                                              #
+#                                                         :::      ::::::::    #
+#    Makefile                                           :+:      :+:    :+:    #
+#                                                     +:+ +:+         +:+      #
+#    By: gbrunet <gbrunet@student.42.fr>            +#+  +:+       +#+         #
+#                                                 +#+#+#+#+#+   +#+            #
+#    Created: 2024/05/28 10:17:29 by gbrunet           #+#    #+#              #
+#    Updated: 2024/05/28 10:40:28 by gbrunet          ###   ########.fr        #
+#                                                                              #
+# **************************************************************************** #
 
+_BLACK = \033[0;30m
+_RED = \033[0;31m
+_GREEN = \033[0;32m
+_BLUE = \033[0;34m
+_YELLOW = \033[0;33m
+_PURPLE = \033[0;35m
+_CYAN = \033[0;36m
+_WHITE = \033[0;37m
+
+_BOLD = \e[1m
+_THIN = \e[2m
+
+_END = \033[0m
+
+.PHONY : all stop re clean
 
 all:
-	sudo rm -rf ./srcs/requirements/postgresql/data
-	sudo mkdir -p ./srcs/requirements/django/data
-	sudo mkdir -p ./srcs/requirements/postgresql/data
-	# sudo docker compose -f srcs/docker-compose.yml run web django-admin startproject djangodepot .
-	# sudo chown -R $(USER):$(USER) ./srcs/requirements/django/data/composeexample ./srcs/requirements/django/data/manage.py
-	sudo docker compose -f srcs/docker-compose.yml up -d
-	
-down:
-	sudo docker compose -f srcs/docker-compose.yml down
+	@echo "$(_GREEN)Building and running Transcendence...$(_END)"
+	docker compose -f ./srcs/docker-compose.yml up -d --build
 
-up:
-	sudo docker compose -f srcs/docker-compose.yml up -d
+stop:
+	@echo "$(_YELLOW)Stoping Transcendence...$(_END)"
+	docker compose -f ./srcs/docker-compose.yml down
 
 clean:
-	docker compose -f srcs/docker-compose.yml down -v
-	docker rmi $$(docker images -q)
-	# sudo rm -rf ./srcs/requirements/django/data
-	sudo rm -rf ./srcs/requirements/postgresql/data
+	make stop --no-print-directory
+	@echo "$(_YELLOW)Removing all unused containers...$(_END)"
+	docker system prune
+	docker volume prune
 
-fclean: clean
-	docker system prune -af
+migrate:
+	docker compose -f ./srcs/docker-compose.yml exec web python manage.py migrate
 
-rere: fclean all
+createsuperuser:
+	docker compose -f ./srcs/docker-compose.yml exec web python manage.py createsuperuser
 
-re: clean all
+list:
+	@docker ps
 
-gitmoica : 
-	sudo chmod -R +rx ./srcs/requirements/postgresql/data
-	git add .
-	git status
+help:
+	@echo "$(_CYAN)make / make all       $(_THIN)=> build and run transcendence$(_END)"
+	@echo "$(_CYAN)make stop             $(_THIN)=> stop transcendence$(_END)"
+	@echo "$(_CYAN)make clean            $(_THIN)=> $(_RED)WARNING$(_CYAN) $(_THIN)stop transcendence and remove ALL containers and volumes$(_END)"
+	@echo "$(_CYAN)make list             $(_THIN)=> list all running container$(_END)"
+	@echo "$(_CYAN)make migrate          $(_THIN)=> migrate db for django$(_END)"
+	@echo "$(_CYAN)make createsuperuser  $(_THIN)=> create a superuser for django$(_END)"
+
+re:
+	make clean --no-print-directory
+	make all --no-print-directory
