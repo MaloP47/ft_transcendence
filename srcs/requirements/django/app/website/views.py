@@ -18,8 +18,14 @@ def test_form_view(request):
     if request.method == 'POST':
         form = TestForm(request.POST)
         if form.is_valid():
-            form.save()
-            return JsonResponse({'message': 'Form submitted successfully!'}, status=200)
+            saved_data = form.save()
+            return JsonResponse({
+                'message': 'Form submitted successfully!',
+                'data': {
+                    'name': saved_data.name,
+                    'email': saved_data.email,
+                }
+            }, status=200)
         else:
             errors = form.errors.as_json()
             return JsonResponse({'errors': errors}, status=400)

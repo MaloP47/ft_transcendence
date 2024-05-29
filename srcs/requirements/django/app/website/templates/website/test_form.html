@@ -38,6 +38,10 @@
         {{ form.as_p }}
         <button type="submit">Submit</button>
     </form>
+    <div id="submitted-data">
+        <h2>Submitted Data</h2>
+        <ul id="data-list"></ul>
+    </div>
     <script>
         $(document).ready(function() {
             $('#test-form').on('submit', function(event) {
@@ -48,6 +52,10 @@
                     data: $(this).serialize(),
                     success: function(response) {
                         $('#message').html('<p>' + response.message + '</p>');
+                        // Update the submitted data list
+                        let newData = '<li>Name: ' + response.data.name + ', Email: ' + response.data.email + '</li>';
+                        $('#data-list').html(newData);	// Remplace par le dernier ajout
+                        // $('#data-list').append(newData);	// Ajoute a la fin, liste tout donc
                     },
                     error: function(response) {
                         const errors = JSON.parse(response.responseText).errors;
