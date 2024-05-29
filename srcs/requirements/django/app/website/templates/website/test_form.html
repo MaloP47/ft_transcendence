@@ -54,6 +54,7 @@
                         $('#message').html('<p>' + response.message + '</p>');
                         // Update the submitted data list
                         let newData = '<li>Name: ' + response.data.name + ', Email: ' + response.data.email + '</li>';
+                        // let newData = '<li>Name: ' + response.data.name + ', Email: ' + response.data.email + ', Coucou: ' + response.data.coucou + '</li>';
                         $('#data-list').html(newData);	// Remplace par le dernier ajout
                         // $('#data-list').append(newData);	// Ajoute a la fin, liste tout donc
                     },
