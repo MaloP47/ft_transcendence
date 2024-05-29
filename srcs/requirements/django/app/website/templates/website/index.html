@@ -1,3 +1,9 @@
 {% extends 'website/base.html' %}
 {% block 'body' %}
+<div id="test" class="position-fixed"></div>
+{% if user.is_authenticated %}
+	user authenticated
+{% else %}
+	{% include "website/login.html" %}
+{% endif %}
 {% endblock %}
