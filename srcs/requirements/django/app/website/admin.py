@@ -3,11 +3,7 @@ from .models import *
 
 # Register your models here.
 
-# admin.py
 
 
-# admin.site.register(ModelName)
+admin.site.register(TestTable)
 
-
-# class AllEntiryAdmin(admin.ModelAdmin):
-#     list_display = ("name", "email")
