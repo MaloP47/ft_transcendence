@@ -8,3 +8,7 @@
 body {
 	font-family: "Bebas Neue", sans-serif;
 }
+
+.login {
+	backdrop-filter: blur(5px);
+}
