@@ -2,9 +2,5 @@
 {% block 'body' %}
 <div id="test" class="position-fixed"></div>
 <a href="{% url 'getUser' %}" style="top: 500px; position:absolute;"><span data-api="{% url 'getUser' %}">sdfsdf<span></a>
-{% if user.is_authenticated %}
-	user authenticated
-{% else %}
-	{% include "website/login.html" %}
-{% endif %}
+<a href="{% url 'getUser' %}" style="top: 540px; position:absolute;"><span data-api="/api/user">sdfsdf<span></a>
 {% endblock %}

@@ -1,11 +1,39 @@
 from django.http import JsonResponse
 from django.shortcuts import render
+from django.contrib.auth import logout
+from django.template.loader import render_to_string
 
 def index(request):
     return render(request, "website/index.html");
 
 def getUser(request):
     if request.method == 'POST':
-        return JsonResponse({'ok':'super'})
-    else:
-        return JsonResponse({'ok':'bof'})
+        if request.user.is_authenticated:
+           return JsonResponse({
+                'authenticated': True,
+                'username': request.user.username,
+                'email': request.user.email,
+                'last_login': request.user.last_login,
+            })
+        else:
+            return JsonResponse({
+                'authenticated': False,
+            })
+
+def logoutUser(request):
+    if request.method == 'POST':
+        if request.user.is_authenticated:
+            logout(request);
+            return JsonResponse({
+                'success': True,
+            })
+    return JsonResponse({
+        'success': False,
+    })
+
+def profilMenu(request):
+    if request.method == 'POST':
+        return JsonResponse({
+            'success': True,
+            'html': render_to_string('website/profilMenu.html'),
+        });

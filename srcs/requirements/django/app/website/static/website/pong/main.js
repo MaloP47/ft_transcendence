@@ -6,7 +6,7 @@
 //   By: gbrunet <gbrunet@student.42.fr>            +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2024/05/21 13:52:15 by gbrunet           #+#    #+#             //
-//   Updated: 2024/05/30 17:26:43 by gbrunet          ###   ########.fr       //
+//   Updated: 2024/05/31 11:23:20 by gbrunet          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -44,87 +44,6 @@ import vignetteFragmentShader from './assets/shaders/vignetteF.js'
 
 var WIDTH = window.innerWidth;
 var HEIGHT = window.innerHeight;
-
-let home = "<h1>home</h1>";
-let about = "<h1>about</h1>";
-const routes = {
-	"/": {title: "home", render: home},
-	"/about": {title: "about", render: about}
-}
-
-function router() {
-	let view = routes[location.pathname];
-
-	if (view) {
-		document.title = view.title;
-		document.getElementById('test').innerHTML = view.render;
-	} else {
-		history.replaceState("", "", "/");
-		router();
-	}
-}
-
-function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            // Does this cookie string begin with the name we want?
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
-            }
-        }
-    }
-    return cookieValue;
-}
-const csrftoken = getCookie('csrftoken');
-
-function makeApiRequest(url) {
-	return new Promise(function (resolve, reject) {
-		let xhr = new XMLHttpRequest();
-		xhr.open("POST", url);
-		xhr.onload = function () {
-			if (this.status >= 200 && this.status < 300) {
-				resolve(xhr.response);
-			} else {
-				reject({
-					status: this.status,
-					statusText: xhr.statusText
-				});
-			}
-		};
-		xhr.onerror = function () {
-			reject({
-				status: this.status,
-				statusText: xhr.statusText
-			});
-		};
-		xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
-		xhr.send();
-	});
-}
-
-async function getApiResponse(url) {
-	let response = await makeApiRequest(url);
-	return response;
-}
-
-window.addEventListener("click", e => {
-	if (e.target.matches("[data-link]")) {
-		e.preventDefault();
-		history.pushState("", "", e.target.href);
-		router();
-	} else if (e.target.matches("[data-api]")) {
-		e.preventDefault();
-		let test = getApiResponse(e.target.dataset.api);
-		console.log(test);
-	}
-});
-
-window.addEventListener("popstate", router);
-window.addEventListener("DOMContentLoaded", router);
 
 function add(val, add, max) {
 	if (val < 0) val = 0;
@@ -654,6 +573,129 @@ class Pong {
 
 let APP = null;
 
+class Transcendence {
+	constructor() {
+
+	window.addEventListener("click", e => {
+		if (e.target.matches("[data-api]")) {
+			e.preventDefault();
+			this.getApiResponse(e.target.dataset.api).then((val) => {
+				this.logged = false;
+				this.updateView();
+			});
+		}
+	});
+	
+	// check if user is logged in
+	this.user = {};
+	this.getApiResponse("/api/user/")
+		.then((response) => {
+			let user = JSON.parse(response);
+			if (user.authenticated) {
+				this.logged = true;
+				this.user.username = user.username;
+				this.updateView();
+				console.log("oui")
+			}
+			else {
+				this.logged = false;
+				this.updateView();
+				console.log("nope")
+			}
+			console.log(JSON.parse(response));
+		});
+	}
+
+/*
+window.addEventListener("popstate", router);
+window.addEventListener("DOMContentLoaded", router);
+	let home = "<h1>home</h1>";
+	let about = "<h1>about</h1>";
+	const routes = {
+		"/": {title: "home", render: home},
+		"/about": {title: "about", render: about}
+	}
+
+function router() {
+	let view = routes[location.pathname];
+
+	if (view) {
+		document.title = view.title;
+		document.getElementById('test').innerHTML = view.render;
+	} else {
+		history.replaceState("", "", "/");
+		router();
+	}
+}*/
+
+	getCookie(name) {
+		let cookieValue = null;
+		if (document.cookie && document.cookie !== '') {
+			const cookies = document.cookie.split(';');
+			for (let i = 0; i < cookies.length; i++) {
+				const cookie = cookies[i].trim();
+				if (cookie.substring(0, name.length + 1) === (name + '=')) {
+					cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+					break;
+				}
+			}
+		}
+		return cookieValue;
+	}
+
+	makeApiRequest(url) {
+		let csrf = this.getCookie('csrftoken');
+		return new Promise(function (resolve, reject) {
+			let xhr = new XMLHttpRequest();
+			xhr.open("POST", url);
+			xhr.onload = function () {
+				if (this.status >= 200 && this.status < 300) {
+					resolve(xhr.response);
+				} else {
+					reject({
+						status: this.status,
+						statusText: xhr.statusText
+					});
+				}
+			};
+			xhr.onerror = function () {
+				reject({
+					status: this.status,
+					statusText: xhr.statusText
+				});
+			};
+			xhr.setRequestHeader("X-CSRFToken", csrf);
+			xhr.send();
+		});
+	}
+
+	async getApiResponse(url) {
+		return await this.makeApiRequest(url);
+	}
+
+	updateView() {
+		this.toggleProfilMenu();
+	}
+
+	toggleProfilMenu() {
+		let profilMenu = document.getElementById("profilMenu");
+		if (this.logged) {
+			this.getApiResponse("/api/view/profilMenu/")
+				.then((response) => {
+					let res = JSON.parse(response);
+					if (res.success)
+						profilMenu.innerHTML = res.html;
+					let username = document.getElementById("username");
+					username.innerHTML = this.user.username;
+				})
+		} else {
+			profilMenu.innerHTML = "";
+		}
+	}
+
+}
+
 window.addEventListener('DOMContentLoaded', () => {
-	APP = new Pong();
+	APP = new Transcendence();
+//	APP = new Pong();
 })
