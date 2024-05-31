@@ -29,7 +29,7 @@ _END = \033[0m
 all:
 	@echo "$(_GREEN)Building and running Transcendence...$(_END)"
 	docker compose -f ./srcs/docker-compose.yml up -d --build
-	sleep 5;
+	sleep 2;
 	make migrate --no-print-directory
 
 stop:
@@ -41,6 +41,13 @@ clean:
 	@echo "$(_YELLOW)Removing all unused containers...$(_END)"
 	docker system prune
 	docker volume prune
+
+
+fclean:
+	make stop --no-print-directory
+	@echo "$(_YELLOW)Removing all unused containers...$(_END)"
+	docker system prune -af
+	docker volume prune -af
 
 migrate:
 	docker compose -f ./srcs/docker-compose.yml exec web python manage.py migrate
@@ -64,4 +71,8 @@ help:
 
 re:
 	make clean --no-print-directory
+	make all --no-print-directory
+
+rere:
+	make fclean --no-print-directory
 	make all --no-print-directory
