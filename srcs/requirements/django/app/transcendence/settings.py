@@ -43,7 +43,7 @@ INSTALLED_APPS = [
 ]
 
 
-ASGI_APPLICATION = 'myproject.asgi.application'
+ASGI_APPLICATION = 'transcendence.asgi.application'
 
 CHANNEL_LAYERS = {
     'default': {
