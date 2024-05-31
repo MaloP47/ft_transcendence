@@ -1,6 +1,6 @@
 from django.http import JsonResponse
 from django.shortcuts import render
-from django.contrib.auth import logout
+from django.contrib.auth import login, logout, authenticate
 from django.template.loader import render_to_string
 
 def index(request):
@@ -31,9 +31,29 @@ def logoutUser(request):
         'success': False,
     })
 
+def signinUser(request):
+    if request.method == 'POST':
+        if request.user.is_authenticated == False:
+            user = authenticate(username="admin", password="admin")
+            if user is not None:
+                login(request, user)
+                return JsonResponse({ 'success': True, 'user': request.POST["username"] })
+            else:
+                return JsonResponse({ 'success': False })
+    return JsonResponse({
+        'success': False,
+    })
+
 def profilMenu(request):
     if request.method == 'POST':
         return JsonResponse({
             'success': True,
             'html': render_to_string('website/profilMenu.html'),
+        });
+
+def loginForm(request):
+    if request.method == 'POST':
+        return JsonResponse({
+            'success': True,
+            'html': render_to_string('website/login.html'),
         });

@@ -12,3 +12,23 @@ body {
 .login {
 	backdrop-filter: blur(5px);
 }
+
+#profilMenu {
+	transition: 200ms;
+}
+
+#loginForm {	
+	transition: 200ms;
+}
+
+.hided {
+	opacity:0;
+}
+
+.trXm100 {
+	transform: translate(0, -100px);
+}
+
+.trXp100 {
+	transform: translate(0, 100px);
+}

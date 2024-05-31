@@ -1,24 +1,24 @@
-<div class="h-100 d-flex align-items-center justify-content-center">
+{% load static %}
+<div id="loginForm" class="h-100 d-flex align-items-center justify-content-center hided">
 	<div class="login rounded p-4 border border-light" style="--bs-border-opacity:0.1; width:350px">
 		<center><h1>LOGIN</h1></center>
-		<form>
+		<form method="post">
 			<!-- Email input -->
 			<div class="input-group input-group-lg mb-3">
 				<span class="input-group-text text-bg-dark border border-light" id="username" style="--bs-bg-opacity: .5; --bs-border-opacity: .1;">username</span>
-				<input type="text" class="form-control text-bg-dark border border-light border-start-0" style="--bs-bg-opacity: .5; --bs-border-opacity: .1;" aria-label="Sizing example input" aria-describedby="username">
+				<input type="text" class="form-control text-bg-dark border border-light border-start-0" style="--bs-bg-opacity: .5; --bs-border-opacity: .1;" name="username" id="loginFormUsername">
 			</div>
 			<!-- Password input -->
 			<div class="input-group input-group-lg mb-3">
 				<span class="input-group-text text-bg-dark border border-light" id="username" style="--bs-bg-opacity: .5; --bs-border-opacity: .1;">password</span>
-				<input type="password" class="form-control text-bg-dark border border-light border-start-0" style="--bs-bg-opacity: .5; --bs-border-opacity: .1;" aria-label="Sizing example input" aria-describedby="username">
+				<input type="password" class="form-control text-bg-dark border border-light border-start-0" style="--bs-bg-opacity: .5; --bs-border-opacity: .1;" name="password" id="loginFormPassword">
 			</div>
 			<!-- 2 column grid layout for inline styling -->
+			<button class="w-100 btn btn-primary btn-block mb-4 mt-3" href="" id="submitBtn">Sign in</button>
+			<!-- Register buttons -->
 			<div>
 				<center><a href="#!">Forgot password?</a></center>
 			</div>
-			<!-- Submit button -->
-			<button  type="button" data-mdb-button-init data-mdb-ripple-init class="w-100 btn btn-primary btn-block mb-4">Sign in</button>
-			<!-- Register buttons -->
 			<div class="text-center">
 				<p>Not a member? <a href="#!">Register</a></p>
 			</div>

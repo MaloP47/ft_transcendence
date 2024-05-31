@@ -6,7 +6,7 @@
 //   By: gbrunet <gbrunet@student.42.fr>            +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2024/05/21 13:52:15 by gbrunet           #+#    #+#             //
-//   Updated: 2024/05/31 11:23:20 by gbrunet          ###   ########.fr       //
+//   Updated: 2024/05/31 15:29:29 by gbrunet          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -26,6 +26,7 @@ import BallFire from './BallFire.js';
 import Bonus from './Bonus.js';
 import Ball from './Ball.js';
 import Player from './Player.js';
+import App from './../state/StateMachine.js';
 
 import bgVertexShader from './assets/shaders/bgV.js'
 import bgFragmentShader from './assets/shaders/bgF.js'
@@ -575,34 +576,39 @@ let APP = null;
 
 class Transcendence {
 	constructor() {
+		this.pong = new Pong();
+		window.addEventListener("click", e => {
+			if (e.target.matches("[data-api]")) {
+				e.preventDefault();
+				this.getApiResponse(e.target.dataset.api).then((val) => {
+					console.log(val);
+					this.updateUser();
+				});
+			}
+		});
+		this.initUser();
+		this.updateUser();
+	}
 
-	window.addEventListener("click", e => {
-		if (e.target.matches("[data-api]")) {
-			e.preventDefault();
-			this.getApiResponse(e.target.dataset.api).then((val) => {
-				this.logged = false;
-				this.updateView();
-			});
-		}
-	});
-	
-	// check if user is logged in
-	this.user = {};
-	this.getApiResponse("/api/user/")
-		.then((response) => {
+	initUser() {
+		this.user = {
+			authenticated: false,
+			username: "",
+		};
+	}
+
+	updateUser() {
+		this.getApiResponse("/api/user/").then((response) => {
 			let user = JSON.parse(response);
 			if (user.authenticated) {
-				this.logged = true;
+				this.user.authenticated = true;
 				this.user.username = user.username;
-				this.updateView();
-				console.log("oui")
 			}
 			else {
-				this.logged = false;
-				this.updateView();
-				console.log("nope")
+				this.user.authenticated = false;
+				this.user.username = "";
 			}
-			console.log(JSON.parse(response));
+			this.updateView();
 		});
 	}
 
@@ -648,6 +654,7 @@ function router() {
 		return new Promise(function (resolve, reject) {
 			let xhr = new XMLHttpRequest();
 			xhr.open("POST", url);
+			xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
 			xhr.onload = function () {
 				if (this.status >= 200 && this.status < 300) {
 					resolve(xhr.response);
@@ -675,27 +682,66 @@ function router() {
 
 	updateView() {
 		this.toggleProfilMenu();
+		this.toggleLoginForm();
 	}
 
 	toggleProfilMenu() {
 		let profilMenu = document.getElementById("profilMenu");
-		if (this.logged) {
+		if (this.user.authenticated) {
 			this.getApiResponse("/api/view/profilMenu/")
 				.then((response) => {
 					let res = JSON.parse(response);
-					if (res.success)
+					if (res.success) {
 						profilMenu.innerHTML = res.html;
-					let username = document.getElementById("username");
-					username.innerHTML = this.user.username;
+						let username = document.getElementById("navBarUsername");
+						username.innerHTML = this.user.username;
+						profilMenu.classList.remove("hided");
+					}
 				})
 		} else {
-			profilMenu.innerHTML = "";
+			profilMenu.classList.add("hided");
+			setTimeout(() => {
+				profilMenu.innerHTML = "";
+			}, 200);
 		}
 	}
 
+	toggleLoginForm() {
+		let loginForm = document.getElementById("loginForm");
+		if (this.user.authenticated) {
+			if (loginForm) {
+				loginForm.classList.add("hided");
+				loginForm.classList.add("trXp100");
+				setTimeout(() => {
+					loginForm.remove();
+				}, 200);
+			}
+		} else {
+			this.getApiResponse("/api/view/login/").then((response) => {
+				let res = JSON.parse(response);
+				if (res.success) {
+					let topContent = document.getElementById("topContent");
+					topContent.innerHTML += res.html;
+					let loginForm = document.getElementById("loginForm");
+					loginForm.classList.add("trXm100");
+					document.getElementById("submitBtn").addEventListener("click", e => {
+						e.preventDefault();
+						console.log(document.getElementById("loginFormUsername").value());
+						console.log(document.getElementById("loginFormPassword").value());
+						console.log(e);
+					});
+					setTimeout(() => {
+						loginForm.classList.remove("hided");
+						loginForm.classList.remove("trXm100");
+					}, 15);
+				}
+			})
+		}
+	}
 }
 
 window.addEventListener('DOMContentLoaded', () => {
+	const test = App.get();
 	APP = new Transcendence();
 //	APP = new Pong();
 })
