@@ -1,5 +1,7 @@
 import json
+import datetime
 from channels.generic.websocket import AsyncWebsocketConsumer
+from datetime import date
 
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
@@ -31,9 +33,21 @@ class ChatConsumer(AsyncWebsocketConsumer):
             }
         )
 
+    # async def chat_message(self, event):
+    #     message = event['message']
+
+    #     await self.send(text_data=json.dumps({
+    #         'message': message
+    #     }))
+
     async def chat_message(self, event):
         message = event['message']
-
+        username = self.scope['user'].username
+        timestamp = str(date.today())
+        
+        # Envoyer le message au WebSocket
         await self.send(text_data=json.dumps({
-            'message': message
+            'message': message,
+            'user': {'username': username},
+            'timestamp': timestamp,
         }))

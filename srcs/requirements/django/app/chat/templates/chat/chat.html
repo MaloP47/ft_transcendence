@@ -22,12 +22,18 @@
         );
 
         chatSocket.onmessage = function(e) {
-            const data = JSON.parse(e.data);
-            const chatBox = document.getElementById('chat-box');
-            const messageElement = document.createElement('p');
-            messageElement.innerHTML = `<strong>${data.user}:</strong> ${data.message} <em>${data.timestamp}</em>`;
-            chatBox.appendChild(messageElement);
-        };
+			const data = JSON.parse(e.data);
+			const chatBox = document.getElementById('chat-box');
+			const messageElement = document.createElement('p');
+			if(data.user && data.message && data.timestamp) {
+				messageElement.innerHTML = `<strong>${data.user.username}:</strong> ${data.message} <em>${data.timestamp}</em>`;
+			} else {
+				console.error('Message data incomplete:', data);
+			}
+			console.log(data);
+			chatBox.appendChild(messageElement);
+		};
+
 
         chatSocket.onclose = function(e) {
             console.error('Chat socket closed unexpectedly');
