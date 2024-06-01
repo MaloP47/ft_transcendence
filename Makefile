@@ -50,13 +50,13 @@ fclean:
 	docker volume prune -af
 
 migrate:
-	docker compose -f ./srcs/docker-compose.yml exec web python manage.py migrate
+	docker compose -f ./srcs/docker-compose.yml exec django python manage.py migrate
 
 makemigrations:
-	docker compose -f ./srcs/docker-compose.yml exec web python manage.py makemigrations
+	docker compose -f ./srcs/docker-compose.yml exec django python manage.py makemigrations
 
 createsuperuser:
-	docker compose -f ./srcs/docker-compose.yml exec web python manage.py createsuperuser
+	docker compose -f ./srcs/docker-compose.yml exec django python manage.py createsuperuser
 
 list:
 	@docker ps
