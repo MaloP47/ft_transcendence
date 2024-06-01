@@ -13,12 +13,13 @@
 export default class App {
 	constructor() {
 		this.preventLinkDefaultBehavior();
-		window.onpopstate = function(event) {
-			this.router();
+		window.onpopstate = function(e) {
+			console.log(history)
+			this.router(true);
 		}.bind(this);
 		this.initRoutes();
 		this.initUser();
-//		this.updateUser();
+		this.updateUser();
 		this.router();
 	}
 
@@ -44,7 +45,8 @@ export default class App {
 	initRoutes() {
 		this.routes = {
 			"/": {title: "Transcendence", state: "Home"},
-			"/register": {title: "Register - Transcendence", state: "Register"},
+			"/login": {title: "Transcendence - Login", state: "Login"},
+			"/register": {title: "Transcendence - Register", state: "Register"},
 		}
 	}
 
@@ -59,7 +61,6 @@ export default class App {
 		if (this.getCookie('csrftoken') == null) {
 			this.user.authenticated = false;
 			this.user.username = "";
-			this.updateView();
 			return ;
 		}
 		this.getApiResponse("/api/user/").then((response) => {
@@ -72,21 +73,36 @@ export default class App {
 				this.user.authenticated = false;
 				this.user.username = "";
 			}
-			this.updateView();
 		});
 	}
 
-	router() {
+	router(back) {
 		let view = this.routes[location.pathname];
 		if (view) {
 			document.title = view.title;
 			console.log(view);
 			switch(view.state) {
 				case "Home":
+					if (!this.user.authenticated && !back) {
+						history.pushState("", "", "/login");
+						this.router();
+					} else if(!this.user.authenticated && back) {
+						history.back();
+						this.router();
+					}
 					if (document.getElementById("registerForm"))
 						this.hideRegisterForm();
 					setTimeout(() => {
 						this.updateUser();
+					}, document.getElementById("registerForm") ? 210 : 10);
+					break;
+				case "Login":
+					if (document.getElementById("registerForm"))
+						this.hideRegisterForm();
+					if (document.getElementById("loginForm"))
+						this.hideLoginForm();
+					setTimeout(() => {
+						this.getLoginForm();
 					}, document.getElementById("registerForm") ? 210 : 10);
 					break;
 				case "Register":
@@ -243,6 +259,44 @@ export default class App {
 				}
 			})
 		}
+	}
+
+	getLoginForm() {
+		this.getApiResponse("/api/view/login/").then((response) => {
+			let res = JSON.parse(response);
+			if (res.success) {
+				let topContent = document.getElementById("topContent");
+				topContent.innerHTML = res.html;
+				let loginForm = document.getElementById("loginForm");
+				loginForm.classList.add("trXm100");
+				let form = document.getElementById("loginFormForm");
+				document.getElementById("loginFormSubmitBtn").addEventListener("click", e => {
+					e.preventDefault();
+					let formData = new FormData(form);
+					this.getApiResponse("/api/user/signin/", formData).then((response) => {
+						let res = JSON.parse(response);
+						if (res.success) {
+							this.updateUser();
+						} else {
+							loginForm.classList.add("shake");
+							loginFormPassword.value = "";
+							let loginFormAlert = document.getElementById("loginFormAlert");
+							loginFormAlert.classList.remove("hided");
+							setTimeout(() => {
+								loginForm.classList.remove("shake");
+							}, 500);
+							setTimeout(() => {
+								loginFormAlert.classList.add("hided");
+							}, 5000);
+						}
+					})
+				});
+				setTimeout(() => {
+					loginForm.classList.remove("hided");
+					loginForm.classList.remove("trXm100");
+				}, 15);
+			}
+		})
 	}
 
 	hideRegisterForm() {
