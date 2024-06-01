@@ -8,5 +8,6 @@ urlpatterns = [
     path('api/user/', views.getUser, name="getUser"),
     path('api/view/profilMenu/', views.profilMenu, name="profilMenu"),
     path('api/view/login/', views.loginForm, name="loginForm"),
+    path('api/view/register/', views.registerForm, name="registerForm"),
     re_path(r'^', views.index, name="index"),
 ]

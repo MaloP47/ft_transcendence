@@ -742,6 +742,6 @@ function router() {
 
 window.addEventListener('DOMContentLoaded', () => {
 	const test = App.get();
-	APP = new Transcendence();
+//	APP = new Transcendence();
 //	APP = new Pong();
 })

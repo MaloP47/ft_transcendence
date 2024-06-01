@@ -2,6 +2,7 @@ from django.http import JsonResponse
 from django.shortcuts import render
 from django.contrib.auth import login, logout, authenticate
 from django.template.loader import render_to_string
+from django.views.decorators.csrf import csrf_exempt
 
 def index(request):
     return render(request, "website/index.html");
@@ -26,24 +27,27 @@ def logoutUser(request):
             logout(request);
             return JsonResponse({
                 'success': True,
+                'needUserUpdate' : True,
             })
     return JsonResponse({
         'success': False,
     })
 
+@csrf_exempt
 def signinUser(request):
     if request.method == 'POST':
         if request.user.is_authenticated == False:
-            user = authenticate(username="admin", password="admin")
+            user = authenticate(username=request.POST["username"], password=request.POST["password"])
             if user is not None:
                 login(request, user)
-                return JsonResponse({ 'success': True, 'user': request.POST["username"] })
+                return JsonResponse({ 'success': True, 'username': request.POST["username"] })
             else:
                 return JsonResponse({ 'success': False })
     return JsonResponse({
         'success': False,
     })
 
+@csrf_exempt
 def profilMenu(request):
     if request.method == 'POST':
         return JsonResponse({
@@ -51,9 +55,18 @@ def profilMenu(request):
             'html': render_to_string('website/profilMenu.html'),
         });
 
+@csrf_exempt
 def loginForm(request):
     if request.method == 'POST':
         return JsonResponse({
             'success': True,
             'html': render_to_string('website/login.html'),
+        });
+
+@csrf_exempt
+def registerForm(request):
+    if request.method == 'POST':
+        return JsonResponse({
+            'success': True,
+            'html': render_to_string('website/register.html'),
         });

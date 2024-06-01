@@ -1,12 +1,23 @@
 @font-face {
-  font-family: "Bebas Neue";
-  src:
-    local("Bebas Neue"),
-    url("../fonts/BebasNeue-Regular.ttf");
+	font-family: "Bebas Neue";
+	src:
+		local("Bebas Neue"),
+		url("../fonts/BebasNeue-Regular.ttf");
+}
+@font-face {
+	font-family: "Roboto";
+	src:
+		local("Bebas Neue"),
+		url("../fonts/Roboto.ttf");
 }
 
 body {
 	font-family: "Bebas Neue", sans-serif;
+}
+
+.roboto {
+	font-family: "Roboto", sans-serif;
+	font-size: 1rem !important;
 }
 
 .login {
@@ -21,6 +32,14 @@ body {
 	transition: 200ms;
 }
 
+#loginFormAlert {	
+	transition: 200ms;
+}
+
+#registerForm {	
+	transition: 200ms;
+}
+
 .hided {
 	opacity:0;
 }
@@ -31,4 +50,16 @@ body {
 
 .trXp100 {
 	transform: translate(0, 100px);
+}
+
+.shake {
+  animation: horizontal-shaking 250ms 2;
+}
+
+@keyframes horizontal-shaking {
+	0% { transform: translateX(0) }
+	25% { transform: translateX(5px) }
+	50% { transform: translateX(-5px) }
+	75% { transform: translateX(5px) }
+	100% { transform: translateX(0) }
 }

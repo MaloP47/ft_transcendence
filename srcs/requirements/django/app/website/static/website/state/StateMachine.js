@@ -12,7 +12,40 @@
 
 export default class App {
 	constructor() {
+		this.preventLinkDefaultBehavior();
+		window.onpopstate = function(event) {
+			this.router();
+		}.bind(this);
+		this.initRoutes();
 		this.initUser();
+//		this.updateUser();
+		this.router();
+	}
+
+	preventLinkDefaultBehavior() {
+		window.addEventListener("click", e => {
+			if (e.target.matches("[data-api]")) {
+				e.preventDefault();
+				this.getApiResponse(e.target.dataset.api).then((response) => {
+					console.log(response);
+					let res = JSON.parse(response)
+					if (res.needUserUpdate)
+						this.updateUser();
+				});
+			}
+			else if (e.target.matches("[data-link]")) {
+				e.preventDefault();
+				history.pushState("", "", e.target.href);
+        		this.router();
+			}
+		});
+	}
+
+	initRoutes() {
+		this.routes = {
+			"/": {title: "Transcendence", state: "Home"},
+			"/register": {title: "Register - Transcendence", state: "Register"},
+		}
 	}
 
 	initUser() {
@@ -23,6 +56,12 @@ export default class App {
 	}
 	
 	updateUser() {
+		if (this.getCookie('csrftoken') == null) {
+			this.user.authenticated = false;
+			this.user.username = "";
+			this.updateView();
+			return ;
+		}
 		this.getApiResponse("/api/user/").then((response) => {
 			let user = JSON.parse(response);
 			if (user.authenticated) {
@@ -35,6 +74,33 @@ export default class App {
 			}
 			this.updateView();
 		});
+	}
+
+	router() {
+		let view = this.routes[location.pathname];
+		if (view) {
+			document.title = view.title;
+			console.log(view);
+			switch(view.state) {
+				case "Home":
+					if (document.getElementById("registerForm"))
+						this.hideRegisterForm();
+					setTimeout(() => {
+						this.updateUser();
+					}, document.getElementById("registerForm") ? 210 : 10);
+					break;
+				case "Register":
+					if (document.getElementById("loginForm"))
+						this.hideLoginForm();
+					setTimeout(() => {
+						this.getRegisterForm();
+					}, document.getElementById("loginForm") ? 210 : 10);
+					break;
+			}
+		} else {
+			history.replaceState("", "", "/");
+			this.router();
+		}
 	}
 
 	//----------------------------------------------------------//
@@ -61,7 +127,6 @@ export default class App {
 		return new Promise(function (resolve, reject) {
 			let xhr = new XMLHttpRequest();
 			xhr.open("POST", url);
-			xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
 			xhr.onload = function () {
 				if (this.status >= 200 && this.status < 300) {
 					resolve(xhr.response);
@@ -79,14 +144,17 @@ export default class App {
 				});
 			};
 			xhr.setRequestHeader("X-CSRFToken", csrf);
-			xhr.send(data);
+			if (data != undefined)
+				xhr.send(data)
+			else
+				xhr.send();
 		});
 	}
 
 	
 
-	async getApiResponse(url) {
-		return await this.makeApiRequest(url);
+	async getApiResponse(url, data) {
+		return await this.makeApiRequest(url, data);
 	}
 
 	//----------------------------------------------------------//
@@ -123,30 +191,50 @@ export default class App {
 		}
 	}
 
+	hideLoginForm() {
+		let loginForm = document.getElementById("loginForm");
+		if (loginForm) {
+			loginForm.classList.add("hided");
+			loginForm.classList.add("trXp100");
+			setTimeout(() => {
+				loginForm.remove();
+			}, 200);
+		}
+	}
+
 	toggleLoginForm() {
-		console.log(Appli.get());
 		let loginForm = document.getElementById("loginForm");
 		if (this.user.authenticated) {
-			if (loginForm) {
-				loginForm.classList.add("hided");
-				loginForm.classList.add("trXp100");
-				setTimeout(() => {
-					loginForm.remove();
-				}, 200);
-			}
+			this.hideLoginForm();
 		} else {
 			this.getApiResponse("/api/view/login/").then((response) => {
 				let res = JSON.parse(response);
 				if (res.success) {
 					let topContent = document.getElementById("topContent");
-					topContent.innerHTML += res.html;
+					topContent.innerHTML = res.html;
 					let loginForm = document.getElementById("loginForm");
 					loginForm.classList.add("trXm100");
-					document.getElementById("submitBtn").addEventListener("click", e => {
+					let form = document.getElementById("loginFormForm");
+					document.getElementById("loginFormSubmitBtn").addEventListener("click", e => {
 						e.preventDefault();
-						console.log(document.getElementById("loginFormUsername").value());
-						console.log(document.getElementById("loginFormPassword").value());
-						console.log(e);
+						let formData = new FormData(form);
+						this.getApiResponse("/api/user/signin/", formData).then((response) => {
+							let res = JSON.parse(response);
+							if (res.success) {
+								this.updateUser();
+							} else {
+								loginForm.classList.add("shake");
+								loginFormPassword.value = "";
+								let loginFormAlert = document.getElementById("loginFormAlert");
+								loginFormAlert.classList.remove("hided");
+								setTimeout(() => {
+									loginForm.classList.remove("shake");
+								}, 500);
+								setTimeout(() => {
+									loginFormAlert.classList.add("hided");
+								}, 5000);
+							}
+						})
 					});
 					setTimeout(() => {
 						loginForm.classList.remove("hided");
@@ -155,6 +243,56 @@ export default class App {
 				}
 			})
 		}
+	}
+
+	hideRegisterForm() {
+		let registerForm = document.getElementById("registerForm");
+		if (registerForm) {
+			registerForm.classList.add("hided");
+			registerForm.classList.add("trXp100");
+			setTimeout(() => {
+				registerForm.remove();
+			}, 200);
+		}
+	}
+
+	getRegisterForm() {
+		let registerForm = document.getElementById("registerForm");
+		this.getApiResponse("/api/view/register/").then((response) => {
+			let res = JSON.parse(response);
+			if (res.success) {
+				let topContent = document.getElementById("topContent");
+				topContent.innerHTML = res.html;
+				let loginForm = document.getElementById("registerForm");
+				loginForm.classList.add("trXm100");
+				let form = document.getElementById("registerFormForm");
+				document.getElementById("registerFormSubmitBtn").addEventListener("click", e => {
+					e.preventDefault();
+					let formData = new FormData(form);
+					/*this.getApiResponse("/api/user/signin/", formData).then((response) => {
+						let res = JSON.parse(response);
+						if (res.success) {
+							this.updateUser();
+						} else {
+							loginForm.classList.add("shake");
+							loginFormPassword.value = "";
+							let loginFormAlert = document.getElementById("loginFormAlert");
+							loginFormAlert.classList.remove("hided");
+							setTimeout(() => {
+								loginForm.classList.remove("shake");
+							}, 500);
+							setTimeout(() => {
+								loginFormAlert.classList.add("hided");
+							}, 5000);
+						}
+					})*/
+				});
+				setTimeout(() => {
+					loginForm.classList.remove("hided");
+					loginForm.classList.remove("trXm100");
+				}, 15);
+			}
+		})
 	}
 
 	//----------------------------------------------------------//
