@@ -49,8 +49,23 @@ services:
       - transcendence
     restart: on-failure
 
+  # Ajout du service Grafana
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=adminpassword
+    volumes:
+      - grafana_data:/var/lib/grafana
+    networks:
+      - transcendence
+    restart: on-failure
+
 volumes:
   postgres_data:
+  grafana_data:
 
 networks:
   transcendence:

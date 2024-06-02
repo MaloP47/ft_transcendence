@@ -1,11 +1,11 @@
 #Image used from Dockerhub
-FROM debian:bullseye
+FROM nginx:latest
 
 #Updating sources
 RUN apt update -y && apt upgrade -y
 
 #Dependencies
-RUN apt install nginx -y
+# RUN apt install nginx -y
 RUN apt install openssl -y
 
 #TSL Setup
