@@ -1,4 +1,4 @@
-
+version: '3'
 
 services:
   django:
@@ -38,15 +38,19 @@ services:
     container_name: nginx
     ports:
       - "443:443"
+      - "80:80"
     networks:
       transcendence:
         aliases:
           - nginx
     depends_on:
       - django
+      - grafana
     build:
       context: requirements/nginx
       dockerfile: Dockerfile
+    volumes:
+      - ./requirements/nginx/conf.d:/etc/nginx/conf.d
     restart: on-failure
 
   rabbitmq:
