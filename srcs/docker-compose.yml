@@ -1,5 +1,3 @@
-version: '3'
-
 services:
   django:
     container_name: django
@@ -79,9 +77,35 @@ services:
       - transcendence
     restart: on-failure
 
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - prometheus_data:/prometheus
+      - ./requirements/prometheus/conf/prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - transcendence
+    restart: on-failure
+
+  docker-exporter:
+    image: prom/node-exporter
+    container_name: docker-exporter
+    ports:
+      - "9100:9100"
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    networks:
+      - transcendence
+    restart: always
+
 volumes:
   postgres_data:
   grafana_data:
+  prometheus_data:
 
 networks:
   transcendence:
