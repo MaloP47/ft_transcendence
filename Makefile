@@ -30,6 +30,8 @@ all:
 	@echo "$(_GREEN)Building and running Transcendence...$(_END)"
 	docker compose -f ./srcs/docker-compose.yml up -d --build
 	sleep 2;
+	make makemigrations --no-print-directory
+	sleep 2;
 	make migrate --no-print-directory
 
 stop:

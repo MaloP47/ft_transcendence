@@ -12,6 +12,9 @@ services:
         aliases:
           - django
     restart: on-failure
+    depends_on:
+      db:
+        condition: service_healthy
 
   db:
     container_name: postgres
@@ -23,11 +26,16 @@ services:
     environment:
       - "POSTGRES_HOST_AUTH_METHOD=trust"
     restart: on-failure
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   nginx:
     container_name: nginx
     ports:
-          - "443:443"
+      - "443:443"
     networks:
       transcendence:
         aliases:
@@ -35,8 +43,8 @@ services:
     depends_on:
       - django
     build:
-            context: requirements/nginx
-            dockerfile: Dockerfile
+      context: requirements/nginx
+      dockerfile: Dockerfile
     restart: on-failure
 
   rabbitmq:
@@ -49,7 +57,6 @@ services:
       - transcendence
     restart: on-failure
 
-  # Ajout du service Grafana
   grafana:
     image: grafana/grafana:latest
     container_name: grafana
