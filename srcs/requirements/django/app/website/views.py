@@ -8,9 +8,15 @@ import logging
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 
-
 from django.contrib.auth import login, authenticate
 from .forms import SignUpForm
+
+
+
+from rest_framework import viewsets
+from .models import Task
+from .serializers import TaskSerializer
+
 
 logger = logging.getLogger('django')
 
@@ -61,3 +67,9 @@ def signup(request):
     else:
         form = SignUpForm()
     return render(request, 'registration/signup.html', {'form': form})
+
+
+
+class TaskViewSet(viewsets.ModelViewSet):
+    queryset = Task.objects.all()
+    serializer_class = TaskSerializer

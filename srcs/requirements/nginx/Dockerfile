@@ -6,7 +6,7 @@ RUN apt update -y && apt upgrade -y
 
 #Dependencies
 RUN apt install nginx -y
-RUN apt-get install openssl -y
+RUN apt install openssl -y
 
 #TSL Setup
 RUN mkdir -p /etc/nginx/ssl
