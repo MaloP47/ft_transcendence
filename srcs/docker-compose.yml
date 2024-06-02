@@ -1,3 +1,5 @@
+
+
 services:
   django:
     container_name: django
@@ -64,8 +66,11 @@ services:
       - "3000:3000"
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=adminpassword
+      - GF_SERVER_ROOT_URL=%(protocol)s://%(domain)s:%(http_port)s/grafana/
+      - GF_SERVER_SERVE_FROM_SUB_PATH=true
     volumes:
       - grafana_data:/var/lib/grafana
+      - ./requirements/grafana/conf/grafana.ini:/etc/grafana/grafana.ini
     networks:
       - transcendence
     restart: on-failure

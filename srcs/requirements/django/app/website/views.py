@@ -73,3 +73,9 @@ def signup(request):
 class TaskViewSet(viewsets.ModelViewSet):
     queryset = Task.objects.all()
     serializer_class = TaskSerializer
+
+
+
+
+def grafana_dashboard(request):
+    return render(request, 'website/grafana_dashboard.html')
