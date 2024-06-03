@@ -26,6 +26,7 @@ SECRET_KEY = 'django-insecure-m9w%(t-*skf-zw=w0=1gfobllres35883!)7s3u7t0%&ao%p_n
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']
+CSRF_TRUSTED_ORIGINS = ['https://derramond.fr', 'https://localhost:1443']
 
 
 # Application definition
