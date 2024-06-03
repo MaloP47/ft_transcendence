@@ -1,19 +1,23 @@
 services:
-  web:
-    container_name: transcendence_web
+  django:
+    container_name: django
     build: ./requirements/django/
-    ports:
-      - "8000:8000"
-    command: ["python", "manage.py",  "runserver",  "0.0.0.0:8000"]
+    expose:
+      - "8000"
+    command: ["python", "manage.py", "runserver", "0.0.0.0:8000"]
     volumes:
       - ./requirements/django/app:/code
     networks:
-      - transcendence
+      transcendence:
+        aliases:
+          - django
+    restart: on-failure
     depends_on:
-      - db
+      db:
+        condition: service_healthy
 
   db:
-    container_name: transcendence_db
+    container_name: postgres
     image: postgres:16.3
     volumes:
       - postgres_data:/var/lib/postgresql/data/
@@ -21,9 +25,87 @@ services:
       - transcendence
     environment:
       - "POSTGRES_HOST_AUTH_METHOD=trust"
+    restart: on-failure
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  nginx:
+    container_name: nginx
+    ports:
+      - "1443:443"
+      - "1080:80"
+    networks:
+      transcendence:
+        aliases:
+          - nginx
+    depends_on:
+      - django
+      - grafana
+    build:
+      context: requirements/nginx
+      dockerfile: Dockerfile
+    volumes:
+      - ./requirements/nginx/conf.d:/etc/nginx/conf.d
+    restart: on-failure
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - transcendence
+    restart: on-failure
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=adminpassword
+      - GF_SERVER_ROOT_URL=%(protocol)s://%(domain)s:%(http_port)s/grafana/
+      - GF_SERVER_SERVE_FROM_SUB_PATH=true
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./requirements/grafana/conf/grafana.ini:/etc/grafana/grafana.ini
+    networks:
+      - transcendence
+    restart: on-failure
+
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - prometheus_data:/prometheus
+      - ./requirements/prometheus/conf/prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - transcendence
+    restart: on-failure
+
+  docker-exporter:
+    image: prom/node-exporter
+    container_name: docker-exporter
+    ports:
+      - "9300:9100"
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    networks:
+      - transcendence
+    restart: always
 
 volumes:
   postgres_data:
+  grafana_data:
+  prometheus_data:
 
 networks:
   transcendence:

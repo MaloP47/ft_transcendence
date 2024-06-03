@@ -1,0 +1,76 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Form</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        const csrftoken = getCookie('csrftoken');
+
+        $.ajaxSetup({
+            beforeSend: function(xhr, settings) {
+                if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
+                    xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                }
+            }
+        });
+    </script>
+</head>
+<body>
+    <h1>Test Form</h1>
+    <div id="message"></div>
+    <form id="test-form" method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Submit</button>
+    </form>
+    <div id="submitted-data">
+        <h2>Submitted Data</h2>
+        <ul id="data-list"></ul>
+    </div>
+    <script>
+        $(document).ready(function() {
+            $('#test-form').on('submit', function(event) {
+                event.preventDefault();
+                $.ajax({
+                    url: "{% url 'test-form' %}",
+                    type: "POST",
+                    data: $(this).serialize(),
+                    success: function(response) {
+                        $('#message').html('<p>' + response.message + '</p>');
+                        // Update the submitted data list
+                        let newData = '<li>Name: ' + response.data.name + ', Email: ' + response.data.email + '</li>';
+                        // let newData = '<li>Name: ' + response.data.name + ', Email: ' + response.data.email + ', Coucou: ' + response.data.coucou + '</li>';
+                        $('#data-list').html(newData);	// Remplace par le dernier ajout
+                        // $('#data-list').append(newData);	// Ajoute a la fin, liste tout donc
+                    },
+                    error: function(response) {
+                        const errors = JSON.parse(response.responseText).errors;
+                        let errorMessages = '';
+                        for (let field in errors) {
+                            errors[field].forEach(error => {
+                                errorMessages += '<p>' + error.message + '</p>';
+                            });
+                        }
+                        $('#message').html(errorMessages);
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

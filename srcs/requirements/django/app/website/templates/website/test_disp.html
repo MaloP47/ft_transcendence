@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Display</title>
+</head>
+<body>
+    <h1>Test Display</h1>
+    <ul>
+        {% for entry in entries %}
+            <li>{{ entry.name }} - {{ entry.email }}</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
