@@ -18,6 +18,26 @@ from .models import Task
 from .serializers import TaskSerializer
 
 
+from django.contrib.auth.models import User
+from rest_framework import generics
+from rest_framework.response import Response
+from rest_framework_simplejwt.tokens import RefreshToken
+from two_factor.views import OTPRequiredMixin
+
+from .serializers import UserSerializer
+
+
+
+# views.py
+from django.contrib.auth import authenticate, login
+from django.shortcuts import render, redirect
+from django_otp import devices_for_user
+from django_otp.plugins.otp_totp.models import TOTPDevice
+from two_factor.views import LoginView as BaseLoginView
+from .forms import LoginForm
+
+
+
 logger = logging.getLogger('django')
 
 
@@ -79,3 +99,49 @@ class TaskViewSet(viewsets.ModelViewSet):
 
 def grafana_dashboard(request):
     return render(request, 'website/grafana_dashboard.html')
+
+
+
+class RegisterView(generics.CreateAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+
+    def post(self, request, *args, **kwargs):
+        response = super().post(request, *args, **kwargs)
+        user = User.objects.get(username=request.data['username'])
+        refresh = RefreshToken.for_user(user)
+        return Response({
+            'refresh': str(refresh),
+            'access': str(refresh.access_token),
+        })
+
+class LoginView(OTPRequiredMixin, generics.GenericAPIView):
+    def post(self, request, *args, **kwargs):
+        # Ajouter la logique de connexion ici
+        pass
+    
+
+
+
+class LoginView(BaseLoginView):
+    form_class = LoginForm
+
+    def post(self, request, *args, **kwargs):
+        form = self.form_class(request.POST)
+        if form.is_valid():
+            username = form.cleaned_data['username']
+            password = form.cleaned_data['password']
+            otp_token = form.cleaned_data['otp_token']
+
+            user = authenticate(request, username=username, password=password)
+            if user is not None:
+                # Verify OTP token
+                for device in devices_for_user(user):
+                    if device.verify_token(otp_token):
+                        login(request, user)
+                        return redirect('home')
+                form.add_error('otp_token', 'Invalid 2FA code.')
+            else:
+                form.add_error(None, 'Invalid username or password.')
+
+        return render(request, 'registration/login.html', {'form': form})

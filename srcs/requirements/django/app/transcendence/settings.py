@@ -42,7 +42,24 @@ INSTALLED_APPS = [
     'channels',
     'chat',
     'rest_framework',
+	'django_otp',
+    'django_otp.plugins.otp_totp',
+    'two_factor',
+    'rest_framework_simplejwt.token_blacklist',
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+}
+
+
+SIMPLE_JWT = {
+    'AUTH_HEADER_TYPES': ('Bearer',),
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
+}
 
 
 ASGI_APPLICATION = 'transcendence.asgi.application'
@@ -70,6 +87,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+	'django_otp.middleware.OTPMiddleware',
 ]
 
 ROOT_URLCONF = 'transcendence.urls'

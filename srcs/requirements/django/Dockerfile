@@ -14,6 +14,9 @@ COPY ./app/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 # RUN pip install channels channels-redis
 RUN pip install channels==3.0.5 channels-redis==3.3.1
+
+RUN pip install django-two-factor-auth
+RUN pip install djangorestframework-simplejwt
 # RUN pip install djangorestframework
 # RUN pip install psycopg2
 COPY ./app .

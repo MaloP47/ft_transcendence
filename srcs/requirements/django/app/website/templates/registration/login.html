@@ -10,6 +10,10 @@
     <form method="post">
         {% csrf_token %}
         {{ form.as_p }}
+        <div>
+            <label for="otp_token">2FA Code:</label>
+            <input type="text" id="otp_token" name="otp_token" required>
+        </div>
         <button type="submit">Login</button>
     </form>
     <p>Don't have an account? <a href="{% url 'signup' %}">Sign up here</a>.</p>
