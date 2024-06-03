@@ -35,8 +35,8 @@ services:
   nginx:
     container_name: nginx
     ports:
-      - "443:443"
-      - "80:80"
+      - "1443:443"
+      - "1080:80"
     networks:
       transcendence:
         aliases:
@@ -93,7 +93,7 @@ services:
     image: prom/node-exporter
     container_name: docker-exporter
     ports:
-      - "9100:9110"
+      - "9300:9100"
     volumes:
       - /proc:/host/proc:ro
       - /sys:/host/sys:ro
