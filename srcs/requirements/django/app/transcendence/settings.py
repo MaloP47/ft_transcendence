@@ -25,10 +25,6 @@ SECRET_KEY = 'django-insecure-m9w%(t-*skf-zw=w0=1gfobllres35883!)7s3u7t0%&ao%p_n
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-CSRF_TRUSTED_ORIGINS = ['https://derramond.fr']
-
-
-
 ALLOWED_HOSTS = ['*']
 
 
