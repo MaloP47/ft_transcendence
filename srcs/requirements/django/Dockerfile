@@ -1,6 +1,10 @@
-FROM python:3.11.5-slim-bullseye
-RUN apt update -y
-RUN apt install redis-server -y
+FROM python:3.11-alpine3.20
+# FROM python:3.11.5-slim-bullseye
+# RUN apt update -y
+# RUN apt install redis-server -y
+
+RUN apk update
+RUN apk add redis
 
 ENV PIP_DISABLE_PIP_VERSION_CHECK 1
 ENV PYTHONDONTWRITEBYTECODE 1
@@ -13,8 +17,8 @@ RUN pip install channels==3.0.5 channels-redis==3.3.1
 # RUN pip install djangorestframework
 # RUN pip install psycopg2
 COPY ./app .
-RUN service redis-server start
-
+# RUN service redis-server start
+CMD ["redis-server"]
 
 
 # RUN redis-server
