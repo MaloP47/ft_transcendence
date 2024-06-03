@@ -1,10 +1,148 @@
 @font-face {
-  font-family: "Bebas Neue";
-  src:
-    local("Bebas Neue"),
-    url("../fonts/BebasNeue-Regular.ttf");
+	font-family: "Bebas Neue";
+	src:
+		local("Bebas Neue"),
+		url("../fonts/BebasNeue-Regular.ttf");
+}
+@font-face {
+	font-family: "Roboto";
+	src:
+		local("Bebas Neue"),
+		url("../fonts/Roboto.ttf");
 }
 
 body {
 	font-family: "Bebas Neue", sans-serif;
+}
+
+.roboto {
+	font-family: "Roboto", sans-serif;
+	font-size: 1rem !important;
+}
+
+.login {
+	backdrop-filter: blur(5px);
+}
+
+#profilMenu {
+	transition: 200ms;
+}
+
+#loginForm {	
+	transition: 200ms;
+}
+
+#loginFormAlert {	
+	transition: 200ms;
+}
+
+#registerForm {	
+	transition: 200ms;
+}
+
+#homeView {	
+	transition: 200ms;
+}
+
+.hided {
+	opacity:0;
+}
+
+.trXm100 {
+	transform: translate(0, -100px);
+}
+
+.trXp100 {
+	transform: translate(0, 100px);
+}
+
+.shake {
+	animation: horizontal-shaking 250ms 2;
+}
+
+@keyframes horizontal-shaking {
+	0% { transform: translateX(0) }
+	25% { transform: translateX(5px) }
+	50% { transform: translateX(-5px) }
+	75% { transform: translateX(5px) }
+	100% { transform: translateX(0) }
+}
+::-webkit-scrollbar {
+	width: 6px;
+}
+
+::-webkit-scrollbar-track {
+	background: rgba(0, 0, 0, 0);
+}
+
+::-webkit-scrollbar-thumb {
+	border-radius: 3px;
+	background: rgba(255, 255, 255, 0.5);
+}
+
+::-webkit-scrollbar-thumb:hover {
+	background: rgba(255, 255, 255, 0.75);
+}
+
+.message__outer {
+	display: flex;
+}
+
+.message__inner {
+	flex: 1;
+	display: flex;
+	flex-direction: row-reverse;
+}
+
+.message__actions {
+	width: 67px;
+	padding-right: 5px;
+}
+
+.message__spacer {
+	flex: 1;
+}
+
+.message__bubble {
+	font-family: "Roboto", sans-serif;
+	font-size: 0.85rem !important;
+	max-width: 270px;
+	overflow-wrap: break-word;
+	backdrop-filter: blur(10px);
+}
+
+.message__actions {
+	flex-shrink: 0;
+}
+
+.message__avatar {
+	margin-top: auto;
+	padding-left: 6px;
+	padding-right: 8px;
+	width: 30px;
+	height: 30px;
+}
+
+.chatInput {
+	font-size: 0.85rem !important;
+	font-family: "Roboto", sans-serif;
+	backdrop-filter: blur(10px);
+	height:30px;
+}
+
+.chatInput input{
+	font-family: "Roboto", sans-serif;
+	background: transparent;
+	border: none;
+	color:white;
+	outline: none;
+	width: calc(100% - 35px);
+}
+
+.rounded-bottom-left-1 {
+	border-bottom-left-radius: 4px !important;
+}
+
+.rounded-bottom-right-1 {
+	border-bottom-right-radius: 4px !important;
 }
