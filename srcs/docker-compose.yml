@@ -48,7 +48,7 @@ services:
       context: requirements/nginx
       dockerfile: Dockerfile
     volumes:
-      - ./requirements/nginx/conf.d:/etc/nginx/conf.d
+      - ./requirements/nginx/conf:/etc/nginx/conf.d
     restart: on-failure
 
   rabbitmq:
@@ -70,9 +70,6 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=adminpassword
       - GF_SERVER_ROOT_URL=%(protocol)s://%(domain)s:%(http_port)s/grafana/
       - GF_SERVER_SERVE_FROM_SUB_PATH=true
-    volumes:
-      - grafana_data:/var/lib/grafana
-      - ./requirements/grafana/conf/grafana.ini:/etc/grafana/grafana.ini
     networks:
       - transcendence
     restart: on-failure
@@ -82,9 +79,6 @@ services:
     container_name: prometheus
     ports:
       - "9090:9090"
-    volumes:
-      - prometheus_data:/prometheus
-      - ./requirements/prometheus/conf/prometheus.yml:/etc/prometheus/prometheus.yml
     networks:
       - transcendence
     restart: on-failure
