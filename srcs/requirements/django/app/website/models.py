@@ -1,3 +1,5 @@
+from django.contrib.auth.models import AbstractUser
 from django.db import models
 
-# Create your models here.
+class User(AbstractUser):
+	profilPicture = models.ImageField(verbose_name="Profil picture", upload_to="profilPicture", default="default.jpg")

@@ -3,12 +3,13 @@ from django.urls import path, re_path
 from . import views
 
 urlpatterns = [
-    path('api/user/logout/', views.logoutUser, name="logout"),
-    path('api/user/signin/', views.signinUser, name="signin"),
-    path('api/user/', views.getUser, name="getUser"),
-    path('api/view/profilMenu/', views.profilMenu, name="profilMenu"),
-    path('api/view/login/', views.loginForm, name="loginForm"),
-    path('api/view/register/', views.registerForm, name="registerForm"),
-    path('api/view/home/', views.homeView, name="homeView"),
-    re_path(r'^', views.index, name="index"),
+	path('api/user/logout/', views.logoutUser, name="logout"),
+	path('api/user/signin/', views.signinUser, name="signin"),
+	path('api/user/', views.getUser, name="getUser"),
+	path('api/view/profilMenu/', views.profilMenu, name="profilMenu"),
+	path('api/view/login/', views.loginForm, name="loginForm"),
+	path('api/view/register/', views.registerForm, name="registerForm"),
+	path('api/view/home/', views.homeView, name="homeView"),
+	path('', views.index, name="index"),
+#	re_path(r'^', views.index, name="index"),
 ]
