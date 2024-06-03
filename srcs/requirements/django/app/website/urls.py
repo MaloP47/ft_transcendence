@@ -9,5 +9,6 @@ urlpatterns = [
     path('api/view/profilMenu/', views.profilMenu, name="profilMenu"),
     path('api/view/login/', views.loginForm, name="loginForm"),
     path('api/view/register/', views.registerForm, name="registerForm"),
+    path('api/view/home/', views.homeView, name="homeView"),
     re_path(r'^', views.index, name="index"),
 ]

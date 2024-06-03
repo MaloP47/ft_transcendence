@@ -1,10 +1,10 @@
 <div id="loginForm" class="h-100 d-flex flex-column align-items-center justify-content-center position-absolute w-100 hided">
-	{% if not user.is_authenticated %}
 	<div id="loginFormAlert" class="alert alert-danger mb-2 hided">
 		Incorrect username or password.
 	</div>
 	<div class="login rounded p-4 border border-light" style="--bs-border-opacity:0.1; width:350px">
 		<center><h1>LOGIN</h1></center>
+		Your currently logged has 
 		<form id="loginFormForm">
 			<div class="input-group input-group-lg mb-3">
 				<span class="input-group-text text-bg-dark border border-light" id="username" style="--bs-bg-opacity: .5; --bs-border-opacity: .1;">username</span>
@@ -20,12 +20,4 @@
 			</div>
 		</form>
 	</div>
-	{% else %}
-	<div class="login rounded p-4 border border-light" style="--bs-border-opacity:0.1; width:350px">
-		<center><h3 class="mt-3">Your currently logged has <span class="text-primary" >{{ user.username }}</span></h3></center>
-		<div class="text-center">
-			<p>Not you? <a href="/register" data-api="/api/user/logout/">Logout</a></p>
-		</div>
-	</div>
-	{% endif %}
 </div>

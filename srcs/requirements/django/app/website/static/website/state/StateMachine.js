@@ -14,7 +14,6 @@ export default class App {
 	constructor() {
 		this.preventLinkDefaultBehavior();
 		window.onpopstate = function(e) {
-			console.log(history)
 			this.router(true);
 		}.bind(this);
 		this.initRoutes();
@@ -58,6 +57,7 @@ export default class App {
 	}
 	
 	updateUser() {
+		let prev = this.user.authenticated;
 		if (this.getCookie('csrftoken') == null) {
 			this.user.authenticated = false;
 			this.user.username = "";
@@ -73,6 +73,9 @@ export default class App {
 				this.user.authenticated = false;
 				this.user.username = "";
 			}
+			if (prev != this.user.authenticated)
+				this.toggleProfilMenu();
+			this.router();
 		});
 	}
 
@@ -80,37 +83,23 @@ export default class App {
 		let view = this.routes[location.pathname];
 		if (view) {
 			document.title = view.title;
-			console.log(view);
 			switch(view.state) {
 				case "Home":
-					if (!this.user.authenticated && !back) {
-						history.pushState("", "", "/login");
-						this.router();
-					} else if(!this.user.authenticated && back) {
-						history.back();
-						this.router();
-					}
 					if (document.getElementById("registerForm"))
 						this.hideRegisterForm();
-					setTimeout(() => {
-						this.updateUser();
-					}, document.getElementById("registerForm") ? 210 : 10);
+					if (document.getElementById("loginForm"))
+						this.hideLoginForm();
+					this.getHomePage();
 					break;
 				case "Login":
 					if (document.getElementById("registerForm"))
 						this.hideRegisterForm();
-					if (document.getElementById("loginForm"))
-						this.hideLoginForm();
-					setTimeout(() => {
-						this.getLoginForm();
-					}, document.getElementById("registerForm") ? 210 : 10);
+					this.getLoginForm();
 					break;
 				case "Register":
 					if (document.getElementById("loginForm"))
 						this.hideLoginForm();
-					setTimeout(() => {
-						this.getRegisterForm();
-					}, document.getElementById("loginForm") ? 210 : 10);
+					this.getRegisterForm();
 					break;
 			}
 		} else {
@@ -181,11 +170,6 @@ export default class App {
 	//                      VIEW UPDATE                         //
 	//----------------------------------------------------------//
 
-	updateView() {
-		this.toggleProfilMenu();
-		this.toggleLoginForm();
-	}
-
 	toggleProfilMenu() {
 		let profilMenu = document.getElementById("profilMenu");
 		if (this.user.authenticated) {
@@ -194,8 +178,6 @@ export default class App {
 					let res = JSON.parse(response);
 					if (res.success) {
 						profilMenu.innerHTML = res.html;
-						let username = document.getElementById("navBarUsername");
-						username.innerHTML = this.user.username;
 						profilMenu.classList.remove("hided");
 					}
 				})
@@ -207,36 +189,61 @@ export default class App {
 		}
 	}
 
+	remove(domId) {
+		setTimeout(() => {
+			let dom = document.getElementById(domId);
+			if (dom)
+				dom.remove();
+		}, 200);
+	}
+
+	getHomePage() {
+		this.getApiResponse("/api/view/home/").then((response) => {
+			let res = JSON.parse(response);
+			if (res.success) {
+				let topContent = document.getElementById("topContent");
+				topContent.innerHTML = res.html;
+				let chatBottom = document.getElementById("chatBottom")
+				if (chatBottom)
+					chatBottom.scrollIntoView()
+				let homeView = document.getElementById("homeView");
+				homeView.classList.add("trXm100");
+				setTimeout(() => {
+					homeView.classList.remove("hided");
+					homeView.classList.remove("trXm100");
+				}, 15);
+			}
+		})
+	}
+
 	hideLoginForm() {
 		let loginForm = document.getElementById("loginForm");
 		if (loginForm) {
 			loginForm.classList.add("hided");
 			loginForm.classList.add("trXp100");
-			setTimeout(() => {
-				loginForm.remove();
-			}, 200);
+			this.remove("loginForm")
 		}
 	}
 
-	toggleLoginForm() {
-		let loginForm = document.getElementById("loginForm");
-		if (this.user.authenticated) {
-			this.hideLoginForm();
-		} else {
-			this.getApiResponse("/api/view/login/").then((response) => {
-				let res = JSON.parse(response);
-				if (res.success) {
-					let topContent = document.getElementById("topContent");
-					topContent.innerHTML = res.html;
-					let loginForm = document.getElementById("loginForm");
-					loginForm.classList.add("trXm100");
-					let form = document.getElementById("loginFormForm");
+	getLoginForm() {
+		this.getApiResponse("/api/view/login/").then((response) => {
+			let res = JSON.parse(response);
+			if (res.success) {
+				let topContent = document.getElementById("topContent");
+				topContent.innerHTML = res.html;
+				let loginForm = document.getElementById("loginForm");
+				loginForm.classList.add("trXm100");
+				let form = document.getElementById("loginFormForm");
+				let formBtn = document.getElementById("loginFormSubmitBtn");
+				if (formBtn) {
 					document.getElementById("loginFormSubmitBtn").addEventListener("click", e => {
 						e.preventDefault();
 						let formData = new FormData(form);
 						this.getApiResponse("/api/user/signin/", formData).then((response) => {
 							let res = JSON.parse(response);
 							if (res.success) {
+								history.pushState("", "", "/");
+								this.router();
 								this.updateUser();
 							} else {
 								loginForm.classList.add("shake");
@@ -251,46 +258,8 @@ export default class App {
 								}, 5000);
 							}
 						})
-					});
-					setTimeout(() => {
-						loginForm.classList.remove("hided");
-						loginForm.classList.remove("trXm100");
-					}, 15);
-				}
-			})
-		}
-	}
-
-	getLoginForm() {
-		this.getApiResponse("/api/view/login/").then((response) => {
-			let res = JSON.parse(response);
-			if (res.success) {
-				let topContent = document.getElementById("topContent");
-				topContent.innerHTML = res.html;
-				let loginForm = document.getElementById("loginForm");
-				loginForm.classList.add("trXm100");
-				let form = document.getElementById("loginFormForm");
-				document.getElementById("loginFormSubmitBtn").addEventListener("click", e => {
-					e.preventDefault();
-					let formData = new FormData(form);
-					this.getApiResponse("/api/user/signin/", formData).then((response) => {
-						let res = JSON.parse(response);
-						if (res.success) {
-							this.updateUser();
-						} else {
-							loginForm.classList.add("shake");
-							loginFormPassword.value = "";
-							let loginFormAlert = document.getElementById("loginFormAlert");
-							loginFormAlert.classList.remove("hided");
-							setTimeout(() => {
-								loginForm.classList.remove("shake");
-							}, 500);
-							setTimeout(() => {
-								loginFormAlert.classList.add("hided");
-							}, 5000);
-						}
 					})
-				});
+				};
 				setTimeout(() => {
 					loginForm.classList.remove("hided");
 					loginForm.classList.remove("trXm100");
@@ -304,9 +273,7 @@ export default class App {
 		if (registerForm) {
 			registerForm.classList.add("hided");
 			registerForm.classList.add("trXp100");
-			setTimeout(() => {
-				registerForm.remove();
-			}, 200);
+			this.remove("registerForm");
 		}
 	}
 

@@ -18,11 +18,12 @@
 	</head>
 	<body class="bg-black text-light">
 		{% include "website/canvas.html" %}
-		<div id="topContent" class="position-fixed w-100 h-100">
+		<div id="topContent" class="position-fixed top-0 w-100 h-100">
 			{% block 'body' %}
 			{% endblock %}
 		</div>
 		{% include "website/navbar.html" %}
+		test
 		<script src="{% static 'website/bootstrap/bootstrap.bundle.min.js' %}" crossorigin="anonymous"></script>
 		<script type="module" src="{% static 'website/pong/main.js' %}"></script>
 	</body>
