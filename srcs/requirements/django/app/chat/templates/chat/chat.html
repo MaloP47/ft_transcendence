@@ -23,6 +23,7 @@
 
         chatSocket.onmessage = function(e) {
 			const data = JSON.parse(e.data);
+			console.log(data);
 			const chatBox = document.getElementById('chat-box');
 			const messageElement = document.createElement('p');
 			if(data.user && data.message && data.timestamp) {
@@ -44,6 +45,7 @@
             const messageInputDom = document.getElementById('chat-message-input');
             const message = messageInputDom.value;
             if (chatSocket.readyState === WebSocket.OPEN) {
+				console.log(message);
                 chatSocket.send(JSON.stringify({
                     'message': message
                 }));

@@ -4,9 +4,11 @@ from django.contrib.auth import login, logout, authenticate
 from django.template.loader import render_to_string
 from django.views.decorators.csrf import csrf_exempt
 
+@csrf_exempt
 def index(request):
 	return render(request, "website/index.html");
 
+@csrf_exempt
 def getUser(request):
 	if request.method == 'POST':
 		if request.user.is_authenticated:
@@ -21,6 +23,7 @@ def getUser(request):
 				'authenticated': False,
 			})
 
+@csrf_exempt
 def logoutUser(request):
 	if request.method == 'POST':
 		if request.user.is_authenticated:
