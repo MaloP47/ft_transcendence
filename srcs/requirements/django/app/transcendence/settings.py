@@ -42,7 +42,7 @@ ALLOWED_HOSTS = ['*']
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
-#CSRF_TRUSTED_ORIGINS = ['https://derramond.fr', 'https://localhost:1443', 'https://*:1443']
+CSRF_TRUSTED_ORIGINS = ['https://derramond.fr', 'https://localhost:1443', 'https://127.0.0.1:1443']
 
 
 # Application definition

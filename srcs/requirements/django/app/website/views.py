@@ -12,7 +12,7 @@ def index(request):
 def getUser(request):
 	if request.method == 'POST':
 		if request.user.is_authenticated:
-		   return JsonResponse({
+			return JsonResponse({
 				'authenticated': True,
 				'username': request.user.username,
 				'email': request.user.email,

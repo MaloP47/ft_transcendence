@@ -1,27 +1,34 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Chat</title>
+	<title>Chat</title>
 </head>
 <body>
-    <h1>Chat Room</h1>
-    <div id="chat-box">
-        {% for message in messages %}
-            <p><strong>{{ message.user.username }}:</strong> {{ message.content }} <em>{{ message.timestamp }}</em></p>
-        {% endfor %}
-    </div>
-    <form id="chat-form">
-        {% csrf_token %}
-        <input type="text" id="chat-message-input" autocomplete="off" placeholder="Enter your message...">
-        <button type="submit">Send</button>
-    </form>
+	<h1>Chat Room</h1>
+	<div id="chat-box">
+		{% for message in messages %}
+			<p><strong>{{ message.user.username }}:</strong> {{ message.content }} <em>{{ message.timestamp }}</em></p>
+		{% endfor %}
+	</div>
+	<form id="chat-form">
+		{% csrf_token %}
+		<input type="text" id="chat-message-input" autocomplete="off" placeholder="Enter your message...">
+		<button type="submit">Send</button>
+	</form>
 
-    <script>
-        const chatSocket = new WebSocket(
-            'wss://' + window.location.host + '/ws/chat/'
-        );
+	<script>
+		const chatSocket = new WebSocket(
+			'wss://' + window.location.host + '/ws/chat/'
+		);
 
-        chatSocket.onmessage = function(e) {
+		console.log(chatSocket);
+		if (chatSocket.readyState === WebSocket.OPEN) {
+			chatSocket.send(JSON.stringify({
+				'message': "bonjour"
+			}));
+		}
+
+		chatSocket.onmessage = function(e) {
 			const data = JSON.parse(e.data);
 			console.log(data);
 			const chatBox = document.getElementById('chat-box');
@@ -35,25 +42,24 @@
 			chatBox.appendChild(messageElement);
 		};
 
+		chatSocket.onclose = function(e) {
+			console.error('Chat socket closed unexpectedly');
+		};
 
-        chatSocket.onclose = function(e) {
-            console.error('Chat socket closed unexpectedly');
-        };
-
-        document.getElementById('chat-form').onsubmit = function(e) {
-            e.preventDefault();
-            const messageInputDom = document.getElementById('chat-message-input');
-            const message = messageInputDom.value;
-            if (chatSocket.readyState === WebSocket.OPEN) {
+		document.getElementById('chat-form').onsubmit = function(e) {
+			e.preventDefault();
+			const messageInputDom = document.getElementById('chat-message-input');
+			const message = messageInputDom.value;
+			if (chatSocket.readyState === WebSocket.OPEN) {
 				console.log(message);
-                chatSocket.send(JSON.stringify({
-                    'message': message
-                }));
-                messageInputDom.value = '';
-            } else {
-                console.error('Chat socket is not open. Unable to send message.');
-            }
-        };
-    </script>
+				chatSocket.send(JSON.stringify({
+					'message': message
+				}));
+				messageInputDom.value = '';
+			} else {
+				console.error('Chat socket is not open. Unable to send message.');
+			}
+		};
+	</script>
 </body>
 </html>
