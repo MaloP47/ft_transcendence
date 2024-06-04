@@ -20,6 +20,13 @@ body {
 	--bs-bg-opacity:0.1;
 }
 
+.divider{
+	width: 80%;
+	height: 1px;
+	margin: 5px auto;
+	background-color: rgba(255,255,255, 0.3)
+}
+
 .user:hover {
 	--bs-bg-opacity:0.2;
 }

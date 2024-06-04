@@ -10,6 +10,8 @@ urlpatterns = [
 	path('api/view/login/', views.loginForm, name="loginForm"),
 	path('api/view/register/', views.registerForm, name="registerForm"),
 	path('api/view/home/', views.homeView, name="homeView"),
+	path('api/view/chatUserView/', views.chatUserView, name="chatUserView"),
+	path('api/view/chatMessageView/', views.chatMessageView, name="chatMessageView"),
 	path('', views.index, name="index"),
 #	re_path(r'^', views.index, name="index"),
 ]

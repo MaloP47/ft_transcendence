@@ -27,12 +27,14 @@ class ChatConsumer(AsyncWebsocketConsumer):
 		text_data_json = json.loads(text_data)
 		message = text_data_json['message']
 		username = self.scope['user'].username
+		userId = self.scope['user'].id
 		await self.channel_layer.group_send(
 			self.room_group_name,
 			{
 				'type': 'chat_message',
 				'message': message,
 				'user': username,
+				'id': userId,
 				'timestamp': str(date.today())
 			}
 		)
@@ -40,18 +42,19 @@ class ChatConsumer(AsyncWebsocketConsumer):
 	async def chat_message(self, event):
 		message = event['message']
 		username = event['user']
+		id = event['id']
 		timestamp = event['timestamp']
 		# Envoyer le message au WebSocket
 		await self.send(text_data=json.dumps({
 			'message': message,
-			'user': {'username': username},
+			'user': {'username': username, 'id': id},
 			'timestamp': timestamp,
 		}))
 
 	async def need_update(self, event):
 		users = []
 		async for user in User.objects.filter(online=True).order_by('username'):
-			users.append({"username": user.username, "id": user.id})
+			users.append({"username": user.username, "id": user.id, "profilPictureUrl": user.profilPicture.url})
 		await self.send(text_data=json.dumps({
 			'need_update': True,
 			'users': users,

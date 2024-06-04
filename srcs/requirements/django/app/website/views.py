@@ -4,6 +4,7 @@ from django.contrib.auth import login, logout, authenticate
 from django.template.loader import render_to_string
 from django.views.decorators.csrf import csrf_exempt
 from website.models import User
+import json
 
 @csrf_exempt
 def index(request):
@@ -78,13 +79,25 @@ def registerForm(request):
 @csrf_exempt
 def homeView(request):
 	if request.method == 'POST':
-		user_records = []
-		connectedUsers = User.objects.filter(online=True)
-		for user in connectedUsers:
-			record = {"username": user.username, "id": user.id}
-			user_records.append(record)
 		return JsonResponse({
 			'success': True,
 			'html': render_to_string('website/home.html', {"user": request.user}),
-			'users': user_records,
+		});
+
+@csrf_exempt
+def chatUserView(request):
+	if request.method == 'POST':
+		data = json.loads(request.POST["data"]);
+		return JsonResponse({
+			'success': True,
+			'html': render_to_string('website/chatUserBtn.html', {"data": data, "user": request.user}),
+		});
+
+@csrf_exempt
+def chatMessageView(request):
+	if request.method == 'POST':
+		data = json.loads(request.POST["data"]);
+		return JsonResponse({
+			'success': True,
+			'html': render_to_string('website/chatMessageView.html', {"data": data, "user": request.user}),
 		});
