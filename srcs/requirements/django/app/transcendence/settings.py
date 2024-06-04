@@ -1,3 +1,15 @@
+# **************************************************************************** #
+#                                                                              #
+#                                                         :::      ::::::::    #
+#    settings.py                                        :+:      :+:    :+:    #
+#                                                     +:+ +:+         +:+      #
+#    By: gbrunet <gbrunet@student.42.fr>            +#+  +:+       +#+         #
+#                                                 +#+#+#+#+#+   +#+            #
+#    Created: 2024/06/03 16:02:34 by gbrunet           #+#    #+#              #
+#    Updated: 2024/06/03 16:02:47 by gbrunet          ###   ########.fr        #
+#                                                                              #
+# **************************************************************************** #
+
 """
 Django settings for transcendence project.
 
@@ -11,6 +23,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -26,6 +39,9 @@ SECRET_KEY = 'django-insecure-m9w%(t-*skf-zw=w0=1gfobllres35883!)7s3u7t0%&ao%p_n
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']
+
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
 CSRF_TRUSTED_ORIGINS = ['https://derramond.fr', 'https://localhost:1443', 'https://127.0.0.1:1443']
 
 
@@ -107,6 +123,7 @@ DATABASES = {
     }
 }
 
+AUTH_USER_MODEL = 'website.User'
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
@@ -143,6 +160,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
 STATIC_URL = 'static/'
+
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = '/media/'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field

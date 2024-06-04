@@ -1,81 +1,90 @@
-from django.shortcuts import render, redirect
-from django.http import HttpResponse, JsonResponse
-from .models import TestTable
-from .forms import TestForm
+from django.http import JsonResponse
+from django.shortcuts import render
+from django.contrib.auth import login, logout, authenticate
 from django.template.loader import render_to_string
-import logging
-
 from django.views.decorators.csrf import csrf_exempt
-from django.utils.decorators import method_decorator
+from website.models import User
 
-from django.contrib.auth import login, authenticate
-from .forms import SignUpForm
-
-
-
-from rest_framework import viewsets
-from .models import Task
-from .serializers import TaskSerializer
-
-
-logger = logging.getLogger('django')
-
-
+@csrf_exempt
 def index(request):
-    return render(request, "website/index.html");
+	return render(request, "website/index.html");
 
+@csrf_exempt
+def getUser(request):
+	if request.method == 'POST':
+		if request.user.is_authenticated:
+			return JsonResponse({
+				'authenticated': True,
+				'username': request.user.username,
+				'email': request.user.email,
+				'last_login': request.user.last_login,
+			})
+		else:
+			return JsonResponse({
+				'authenticated': False,
+			})
 
-def test_form_view(request):
-    if request.method == 'POST':
-        form = TestForm(request.POST)
-        if form.is_valid():
-            saved_data = form.save()
-            return JsonResponse({
-                'message': 'Form submitted successfully!',
-                'data': {
-                    'name': saved_data.name,
-                    'email': saved_data.email,
-                    # 'coucou': render_to_string('website/test_disp.html', {'jean': 'michel'}),
-                }
-            }, status=200)
-        else:
-            errors = form.errors.as_json()
-            return JsonResponse({'errors': errors}, status=400)
-    else:
-        form = TestForm()
-        return render(request, 'website/test_form.html', {'form': form})
+@csrf_exempt
+def logoutUser(request):
+	if request.method == 'POST':
+		if request.user.is_authenticated:
+			logout(request);
+			return JsonResponse({
+				'success': True,
+				'needUserUpdate' : True,
+			})
+	return JsonResponse({
+		'success': False,
+	})
 
+@csrf_exempt
+def signinUser(request):
+	if request.method == 'POST':
+		if request.user.is_authenticated == False:
+			user = authenticate(username=request.POST["username"], password=request.POST["password"])
+			if user is not None:
+				login(request, user)
+				return JsonResponse({ 'success': True, 'username': request.POST["username"] })
+			else:
+				return JsonResponse({ 'success': False })
+	return JsonResponse({
+		'success': False,
+	})
 
-def test_disp_view(request):
-    entries = TestTable.objects.all()
-    return render(request, 'website/test_disp.html', {'entries': entries})
+@csrf_exempt
+def profilMenu(request):
+	if request.method == 'POST':
+		return JsonResponse({
+			'success': True,
+			'html': render_to_string('website/profilMenu.html', {"user": request.user}),
+		});
 
+@csrf_exempt
+def loginForm(request):
+	if request.method == 'POST':
+		return JsonResponse({
+			'success': True,
+			'html': render_to_string('website/login.html', {"user": request.user}),
+		});
 
+@csrf_exempt
+def registerForm(request):
+	if request.method == 'POST':
+		return JsonResponse({
+			'success': True,
+			'html': render_to_string('website/register.html'),
+		});
 
-def signup(request):
-    if request.method == 'POST':
-        form = SignUpForm(request.POST)
-        if form.is_valid():
-            user = form.save()
-            user.refresh_from_db()  # Load the profile instance created by the signal
-            user.email = form.cleaned_data.get('email')
-            user.save()
-            raw_password = form.cleaned_data.get('password1')
-            user = authenticate(username=user.username, password=raw_password)
-            login(request, user)
-            return redirect('login')
-    else:
-        form = SignUpForm()
-    return render(request, 'registration/signup.html', {'form': form})
-
-
-
-class TaskViewSet(viewsets.ModelViewSet):
-    queryset = Task.objects.all()
-    serializer_class = TaskSerializer
-
-
-
-
-def grafana_dashboard(request):
-    return render(request, 'website/grafana_dashboard.html')
+@csrf_exempt
+def homeView(request):
+	if request.method == 'POST':
+		user_records = []
+		connectedUsers = User.objects.filter(online=True)
+		for user in connectedUsers:
+			record = {"username": user.username, "id": user.id}
+			user_records.append(record)
+		return JsonResponse({
+			'success': True,
+			'html': render_to_string('website/home.html', {"user": request.user}),
+			'users': user_records,
+		});

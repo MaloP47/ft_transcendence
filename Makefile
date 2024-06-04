@@ -55,7 +55,8 @@ migrate:
 	docker compose -f ./srcs/docker-compose.yml exec django python manage.py migrate
 
 makemigrations:
-	docker compose -f ./srcs/docker-compose.yml exec django python manage.py makemigrations
+	docker compose -f ./srcs/docker-compose.yml exec django python manage.py makemigrations website
+	docker compose -f ./srcs/docker-compose.yml exec django python manage.py makemigrations chat
 
 createsuperuser:
 	docker compose -f ./srcs/docker-compose.yml exec django python manage.py createsuperuser

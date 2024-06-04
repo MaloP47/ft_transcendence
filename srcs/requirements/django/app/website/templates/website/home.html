@@ -1,0 +1,82 @@
+{% if user.is_authenticated %}
+<div id="homeView" class="h-100 w-100 position-fixed hided">
+	<div class="w-100">
+		configuration pour jouer
+		<br />
+		<br />
+		<br />
+		<br />
+		<br />
+	</div>
+	<div id="chatDocker" class="p-0 position-fixed end-0 bg-blur-5 rounded-start-3 d-flex flex-column border border-light overflow-y-auto overflow-x-hidden " style="--bs-border-opacity:0.1; width:80px; top:70px; bottom:70px">
+	</div>
+	<div class="p-0 position-fixed top-0 bottom-0" style="width:400px; right:80px;">
+		<div class="h-100 overflow-y-auto d-flex flex-column">
+			<div style="margin-top:auto; padding-top:70px;"></div>
+			<div class="message">
+				<div class="message__outer">
+					<div class="message__avatar rounded-circle bg-success mx-2 border border-white" style="background-image: url('{{user.profilPicture.url}}'); background-size: cover; --bs-border-opacity:0.2;"></div>
+					<div class="message__inner">
+						<div class="message__spacer"></div>
+						<div class="message__bubble bg-white text-dark rounded-4 rounded-bottom-left-1 p-1 px-2 pe-2 mb-3" style="--bs-bg-opacity:0.75">un test un peu long</div>
+					</div>
+				</div>
+			</div>
+			<div class="message">
+				<div class="message__outer">
+					<div class="message__inner">
+						<div class="message__bubble bg-primary rounded-4 rounded-bottom-right-1 p-1 px-2 pe-2 mb-3" style="--bs-bg-opacity:0.75">un test un peu long pour tester si ca marche bien ou pas</div>
+						<div class="message__spacer"></div>
+					</div>
+					<div class="message__avatar rounded-circle bg-success mx-2"></div>
+				</div>
+			</div>
+			<div class="message">
+				<div class="message__outer">
+					<div class="message__avatar rounded-circle bg-success mx-2"></div>
+					<div class="message__inner">
+						<div class="message__spacer"></div>
+						<div class="message__bubble bg-white text-dark rounded-4 rounded-bottom-left-1 p-1 px-2 pe-2 mb-3" style="--bs-bg-opacity:0.75">un test un peu long</div>
+					</div>
+				</div>
+			</div>
+			<div class="message">
+				<div class="message__outer">
+					<div class="message__inner">
+						<div class="message__bubble bg-primary rounded-4 rounded-bottom-right-1 p-1 px-2 pe-2 mb-3" style="--bs-bg-opacity:0.75">un test un peu long pour tester si ca marche bien ou pas</div>
+						<div class="message__spacer"></div>
+					</div>
+					<div class="message__avatar rounded-circle bg-success mx-2"></div>
+				</div>
+			</div>
+			<div class="message">
+				<div class="message__outer">
+					<div class="message__avatar rounded-circle bg-success mx-2"></div>
+					<div class="message__inner">
+						<div class="message__spacer"></div>
+						<div class="message__bubble bg-white text-dark rounded-4 rounded-bottom-left-1 p-1 px-2 pe-2 mb-3" style="--bs-bg-opacity:0.75">un test un peu long</div>
+					</div>
+				</div>
+			</div>
+			<div id="chatBottom" style="margin-bottom:80px;"></div>
+		</div>
+		<div class="p-3 py-2 position-absolute bottom-0 w-100 d-flex flex-column">
+			<div class="bg-white chatInput rounded-5 p-1 px-2" style="--bs-bg-opacity:0.2">
+				<input type="text" />
+				<a class="link-underline link-underline-opacity-0" href="a faire">send</a>
+			</div>
+			<div class="form-check form-switch mt-1 ms-auto">
+				<input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckDefault" checked>
+				<label class="form-check-label" for="flexSwitchCheckDefault">Show/hide chat</label>
+			</div>
+		</div>
+	</div>
+</div>
+{% else %}
+<div id="homeView" class="h-100 d-flex flex-column align-items-center justify-content-center position-absolute w-100 hided">
+	<div id="loginMessage" class="text-center">
+		<h1>Welcome to <span class="text-info">Transcendence</span></h1>
+		<h2>To play, you need to <a href="/login" data-link class="link-underline link-underline-opacity-0" >sign in...</a></h2>
+	</div>
+</div>
+{% endif %}
