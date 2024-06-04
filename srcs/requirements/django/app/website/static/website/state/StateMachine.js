@@ -27,7 +27,6 @@ export default class App {
 			if (e.target.matches("[data-api]")) {
 				e.preventDefault();
 				this.getApiResponse(e.target.dataset.api).then((response) => {
-					console.log(response);
 					let res = JSON.parse(response)
 					if (res.needUserUpdate)
 						this.updateUser();
@@ -163,10 +162,6 @@ export default class App {
 	}
 
 	//----------------------------------------------------------//
-	//                                               //
-	//----------------------------------------------------------//
-
-	//----------------------------------------------------------//
 	//                      VIEW UPDATE                         //
 	//----------------------------------------------------------//
 
@@ -198,6 +193,7 @@ export default class App {
 	}
 
 	getHomePage() {
+		let currentUser = this.user
 		this.getApiResponse("/api/view/home/").then((response) => {
 			let res = JSON.parse(response);
 			if (res.success) {
@@ -206,13 +202,6 @@ export default class App {
 				let chatBottom = document.getElementById("chatBottom")
 				if (chatBottom)
 					chatBottom.scrollIntoView()
-				let connectedUsers = document.getElementById("connectedUsers")
-				if (connectedUsers) {
-					console.log(res.users)
-					for (let i = 0; i < res.users.length; i++) {
-						connectedUsers.innerHTML += res.users[i].username + " <br />"
-					}
-				}
 				let homeView = document.getElementById("homeView");
 				homeView.classList.add("trXm100");
 				setTimeout(() => {
@@ -226,7 +215,17 @@ export default class App {
 
 				chatSocket.onmessage = function(e) {
 					const data = JSON.parse(e.data);
-					console.log(data);
+					if (data.need_update) {
+						let connectedUsers = document.getElementById("chatDocker")
+						if (connectedUsers) {
+							connectedUsers.innerHTML = '<div style="margin-top:auto"></div>'
+							for (let i = 0; i < data.users.length; i++) {
+								if (data.users[i].username != currentUser.username)
+									connectedUsers.innerHTML += '<div class="user bg-white rounded m-1"><div class="bg-info rounded-circle flex-shrink-0" style="width:60px; height:60px; margin-left:5px; margin-top:5px;"></div><center class="text-break roboto" style="font-size:0.7rem !important">' + data.users[i].username + '</center></div>'
+							}
+							connectedUsers.innerHTML += '<div style="margin-bottom:auto"></div>'
+						}
+					}
 				};
 			}
 		})

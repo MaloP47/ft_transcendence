@@ -15,12 +15,25 @@ body {
 	font-family: "Bebas Neue", sans-serif;
 }
 
+.user {
+	transition: 200ms;
+	--bs-bg-opacity:0.1;
+}
+
+.user:hover {
+	--bs-bg-opacity:0.2;
+}
+
 .roboto {
 	font-family: "Roboto", sans-serif;
 	font-size: 1rem !important;
 }
 
 .login {
+	backdrop-filter: blur(5px);
+}
+
+.bg-blur-5 {
 	backdrop-filter: blur(5px);
 }
 
