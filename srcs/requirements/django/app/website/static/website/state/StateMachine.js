@@ -6,7 +6,7 @@
 //   By: gbrunet <gbrunet@student.42.fr>            +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2024/05/31 15:09:07 by gbrunet           #+#    #+#             //
-//   Updated: 2024/05/31 16:16:27 by gbrunet          ###   ########.fr       //
+//   Updated: 2024/06/04 15:11:07 by gbrunet          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -155,10 +155,39 @@ export default class App {
 		});
 	}
 
-	
-
 	async getApiResponse(url, data) {
 		return await this.makeApiRequest(url, data);
+	}
+
+	makeApiRequestJson(url, json) {
+		let csrf = this.getCookie('csrftoken');
+		return new Promise(function (resolve, reject) {
+			let xhr = new XMLHttpRequest();
+			xhr.open("POST", url);
+			xhr.onload = function () {
+				if (this.status >= 200 && this.status < 300) {
+					resolve(xhr.response);
+				} else {
+					reject({
+						status: this.status,
+						statusText: xhr.statusText
+					});
+				}
+			};
+			xhr.onerror = function () {
+				reject({
+					status: this.status,
+					statusText: xhr.statusText
+				});
+			};
+			xhr.setRequestHeader("X-CSRFToken", csrf);
+			xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+			xhr.send("data=" + encodeURIComponent(JSON.stringify(json)));
+		});
+	}
+
+	async getApiResponseJson(url, json) {
+		return await this.makeApiRequestJson(url, json);
 	}
 
 	//----------------------------------------------------------//
@@ -193,7 +222,44 @@ export default class App {
 	}
 
 	getHomePage() {
-		let currentUser = this.user
+		if (!this.chatSocket) {
+			console.log("sdfs");
+			this.chatSocket = new WebSocket(
+				'wss://' + window.location.host + '/ws/chat/'
+			);
+	
+			this.chatSocket.onmessage = function(e) {
+				const data = JSON.parse(e.data);
+				if (data.need_update) {
+					this.getApiResponseJson("/api/view/chatUserView/", {connectedUsers: data.users}).then((response) => {
+						let res = JSON.parse(response);
+						if (res.success) {
+							let connectedUsers = document.getElementById("chatDocker");
+							if (connectedUsers) {
+								connectedUsers.innerHTML = res.html;
+							}
+							let chatContainer = document.getElementById("chatContainer");
+						}
+					});
+				} else if (data.message) {
+					this.getApiResponseJson("/api/view/chatMessageView/", {message: data.message, user:data.user}).then((response) => {
+						let res = JSON.parse(response);
+						if (res.success) {
+							let div = document.createElement('div');
+							div.innerHTML = res.html;
+								let chatBottom = document.getElementById("chatBottom");
+							if (chatBottom) {
+								let parent = chatBottom.parentNode;
+								parent.insertBefore(div, chatBottom);
+							}
+						}
+					});
+				}
+			}.bind(this);
+		}
+
+		let currentUser = this.user;
+		let sm = this;
 		this.getApiResponse("/api/view/home/").then((response) => {
 			let res = JSON.parse(response);
 			if (res.success) {
@@ -208,25 +274,18 @@ export default class App {
 					homeView.classList.remove("hided");
 					homeView.classList.remove("trXm100");
 				}, 15);
-
-				const chatSocket = new WebSocket(
-					'wss://' + window.location.host + '/ws/chat/'
-				);
-
-				chatSocket.onmessage = function(e) {
-					const data = JSON.parse(e.data);
-					if (data.need_update) {
-						let connectedUsers = document.getElementById("chatDocker")
-						if (connectedUsers) {
-							connectedUsers.innerHTML = '<div style="margin-top:auto"></div>'
-							for (let i = 0; i < data.users.length; i++) {
-								if (data.users[i].username != currentUser.username)
-									connectedUsers.innerHTML += '<div class="user bg-white rounded m-1"><div class="bg-info rounded-circle flex-shrink-0" style="width:60px; height:60px; margin-left:5px; margin-top:5px;"></div><center class="text-break roboto" style="font-size:0.7rem !important">' + data.users[i].username + '</center></div>'
-							}
-							connectedUsers.innerHTML += '<div style="margin-bottom:auto"></div>'
-						}
+				document.getElementById('chatSend').addEventListener("click", e => {
+					e.preventDefault();
+					const message = document.getElementById('chatMessage').value;
+					if (sm.chatSocket.readyState === WebSocket.OPEN) {
+						sm.chatSocket.send(JSON.stringify({
+							'message': message
+						}));
+						document.getElementById('chatMessage').value = '';
+					} else {
+						console.error('Chat socket is not open. Unable to send message.');
 					}
-				};
+				});
 			}
 		})
 	}
