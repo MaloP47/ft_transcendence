@@ -1,5 +1,6 @@
 import json
-import datetime
+import time
+from time import strftime, localtime
 from channels.generic.websocket import AsyncWebsocketConsumer
 from datetime import date
 from website.models import User
@@ -35,7 +36,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
 				'message': message,
 				'user': username,
 				'id': userId,
-				'timestamp': str(date.today())
+				'timestamp': strftime('%Y-%m-%d %H:%M', localtime(time.time()))
 			}
 		)
 
