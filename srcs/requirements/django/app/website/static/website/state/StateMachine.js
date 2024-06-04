@@ -6,7 +6,7 @@
 //   By: gbrunet <gbrunet@student.42.fr>            +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2024/05/31 15:09:07 by gbrunet           #+#    #+#             //
-//   Updated: 2024/06/04 15:11:07 by gbrunet          ###   ########.fr       //
+//   Updated: 2024/06/04 15:57:06 by gbrunet          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -152,7 +152,7 @@ export default class App {
 				xhr.send(data)
 			else
 				xhr.send();
-		});
+		}.bind(this));
 	}
 
 	async getApiResponse(url, data) {
@@ -183,7 +183,7 @@ export default class App {
 			xhr.setRequestHeader("X-CSRFToken", csrf);
 			xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
 			xhr.send("data=" + encodeURIComponent(JSON.stringify(json)));
-		});
+		}.bind(this));
 	}
 
 	async getApiResponseJson(url, json) {
@@ -222,44 +222,37 @@ export default class App {
 	}
 
 	getHomePage() {
-		if (!this.chatSocket) {
-			console.log("sdfs");
-			this.chatSocket = new WebSocket(
-				'wss://' + window.location.host + '/ws/chat/'
-			);
-	
-			this.chatSocket.onmessage = function(e) {
-				const data = JSON.parse(e.data);
-				if (data.need_update) {
-					this.getApiResponseJson("/api/view/chatUserView/", {connectedUsers: data.users}).then((response) => {
-						let res = JSON.parse(response);
-						if (res.success) {
-							let connectedUsers = document.getElementById("chatDocker");
-							if (connectedUsers) {
-								connectedUsers.innerHTML = res.html;
-							}
-							let chatContainer = document.getElementById("chatContainer");
-						}
-					});
-				} else if (data.message) {
-					this.getApiResponseJson("/api/view/chatMessageView/", {message: data.message, user:data.user}).then((response) => {
-						let res = JSON.parse(response);
-						if (res.success) {
-							let div = document.createElement('div');
-							div.innerHTML = res.html;
-								let chatBottom = document.getElementById("chatBottom");
-							if (chatBottom) {
-								let parent = chatBottom.parentNode;
-								parent.insertBefore(div, chatBottom);
-							}
-						}
-					});
-				}
-			}.bind(this);
-		}
+		if (this.chatSocket)
+			this.chatSocket.close();
+		this.chatSocket = new WebSocket(
+			'wss://' + window.location.host + '/ws/chat/'
+		);
 
-		let currentUser = this.user;
-		let sm = this;
+		this.chatSocket.onmessage = function(e) {
+			const data = JSON.parse(e.data);
+			if (data.need_update) {
+				this.updateConnectedUsers(data);
+			} else if (data.message) {
+				this.getApiResponseJson("/api/view/chatMessageView/", {message: data.message, user:data.user}).then((response) => {
+					let res = JSON.parse(response);
+					if (res.success) {
+						let div = document.createElement('div');
+						div.innerHTML = res.html;
+							let chatBottom = document.getElementById("chatBottom");
+						if (chatBottom) {
+							let parent = chatBottom.parentNode;
+							parent.insertBefore(div, chatBottom);
+							let messages = parent.getElementsByClassName("message")
+							setTimeout(() => {
+								messages[messages.length - 1].classList.remove("hided");
+								messages[messages.length - 1].classList.remove("height0");
+							}, 15);
+						}
+					}
+				});
+			}
+		}.bind(this);
+
 		this.getApiResponse("/api/view/home/").then((response) => {
 			let res = JSON.parse(response);
 			if (res.success) {
@@ -274,20 +267,35 @@ export default class App {
 					homeView.classList.remove("hided");
 					homeView.classList.remove("trXm100");
 				}, 15);
-				document.getElementById('chatSend').addEventListener("click", e => {
-					e.preventDefault();
-					const message = document.getElementById('chatMessage').value;
-					if (sm.chatSocket.readyState === WebSocket.OPEN) {
-						sm.chatSocket.send(JSON.stringify({
-							'message': message
-						}));
-						document.getElementById('chatMessage').value = '';
-					} else {
-						console.error('Chat socket is not open. Unable to send message.');
-					}
-				});
+				if (document.getElementById('chatSend')) {
+					document.getElementById('chatSend').addEventListener("click", e => {
+						e.preventDefault();
+						const message = document.getElementById('chatMessage').value;
+						if (this.chatSocket.readyState === WebSocket.OPEN) {
+							this.chatSocket.send(JSON.stringify({
+								'message': message
+							}));
+							document.getElementById('chatMessage').value = '';
+						} else {
+							console.error('Chat socket is not open. Unable to send message.');
+						}
+					});
+				}
 			}
 		})
+	}
+
+	updateConnectedUsers(data) {
+		this.getApiResponseJson("/api/view/chatUserView/", {connectedUsers: data.users}).then((response) => {
+			let res = JSON.parse(response);
+			if (res.success) {
+				let connectedUsers = document.getElementById("chatDocker");
+				if (connectedUsers) {
+					connectedUsers.innerHTML = res.html;
+				}
+				let chatContainer = document.getElementById("chatContainer");
+			}
+		});
 	}
 
 	hideLoginForm() {
