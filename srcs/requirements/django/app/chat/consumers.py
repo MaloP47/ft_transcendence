@@ -14,14 +14,26 @@ class ChatConsumer(AsyncWebsocketConsumer):
 			self.room_group_name,
 			self.channel_name
 		)
+		print("connection")
 
 		userId = self.scope['user'].id
 		results = await sync_to_async(User.objects.get, thread_sensitive=True)(id=userId)
 		results.online = True
 		await sync_to_async(results.save)()
 		await self.accept()
+		
+		await self.channel_layer.group_send(
+			self.room_group_name,
+			{
+				'type': 'chat_message',
+				'message': 'update',
+				'user': 'none',
+				'timestamp': str(date.today())
+			}
+		)
 
 	async def disconnect(self, close_code):
+		print("deconnection")
 		await self.channel_layer.group_discard(
 			self.room_group_name,
 			self.channel_name
@@ -31,6 +43,16 @@ class ChatConsumer(AsyncWebsocketConsumer):
 		results = await sync_to_async(User.objects.get, thread_sensitive=True)(id=userId)
 		results.online = False
 		await sync_to_async(results.save)()
+		
+		await self.channel_layer.group_send(
+			self.room_group_name,
+			{
+				'type': 'chat_message',
+				'message': 'update',
+				'user': 'none',
+				'timestamp': str(date.today())
+			}
+		)
 
 	async def receive(self, text_data):
 		text_data_json = json.loads(text_data)

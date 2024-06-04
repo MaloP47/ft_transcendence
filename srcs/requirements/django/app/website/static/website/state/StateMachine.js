@@ -206,12 +206,28 @@ export default class App {
 				let chatBottom = document.getElementById("chatBottom")
 				if (chatBottom)
 					chatBottom.scrollIntoView()
+				let connectedUsers = document.getElementById("connectedUsers")
+				if (connectedUsers) {
+					console.log(res.users)
+					for (let i = 0; i < res.users.length; i++) {
+						connectedUsers.innerHTML += res.users[i].username + " <br />"
+					}
+				}
 				let homeView = document.getElementById("homeView");
 				homeView.classList.add("trXm100");
 				setTimeout(() => {
 					homeView.classList.remove("hided");
 					homeView.classList.remove("trXm100");
 				}, 15);
+
+				const chatSocket = new WebSocket(
+					'wss://' + window.location.host + '/ws/chat/'
+				);
+
+				chatSocket.onmessage = function(e) {
+					const data = JSON.parse(e.data);
+					console.log(data);
+				};
 			}
 		})
 	}
