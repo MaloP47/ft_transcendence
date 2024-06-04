@@ -6,7 +6,7 @@
 //   By: gbrunet <gbrunet@student.42.fr>            +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2024/05/21 13:52:15 by gbrunet           #+#    #+#             //
-//   Updated: 2024/05/31 15:29:29 by gbrunet          ###   ########.fr       //
+//   Updated: 2024/06/04 16:56:58 by gbrunet          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -743,5 +743,5 @@ function router() {
 window.addEventListener('DOMContentLoaded', () => {
 	const test = App.get();
 //	APP = new Transcendence();
-//	APP = new Pong();
+	APP = new Pong();
 })

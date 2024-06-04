@@ -6,7 +6,7 @@
 //   By: gbrunet <gbrunet@student.42.fr>            +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2024/05/31 15:09:07 by gbrunet           #+#    #+#             //
-//   Updated: 2024/06/04 15:57:06 by gbrunet          ###   ########.fr       //
+//   Updated: 2024/06/04 17:36:58 by gbrunet          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -233,7 +233,7 @@ export default class App {
 			if (data.need_update) {
 				this.updateConnectedUsers(data);
 			} else if (data.message) {
-				this.getApiResponseJson("/api/view/chatMessageView/", {message: data.message, user:data.user}).then((response) => {
+				this.getApiResponseJson("/api/view/chatMessageView/", {message: data.message, user:data.user, timestamp: data.timestamp}).then((response) => {
 					let res = JSON.parse(response);
 					if (res.success) {
 						let div = document.createElement('div');
@@ -246,6 +246,7 @@ export default class App {
 							setTimeout(() => {
 								messages[messages.length - 1].classList.remove("hided");
 								messages[messages.length - 1].classList.remove("height0");
+								chatBottom.scrollIntoView()
 							}, 15);
 						}
 					}
@@ -268,7 +269,11 @@ export default class App {
 					homeView.classList.remove("trXm100");
 				}, 15);
 				if (document.getElementById('chatSend')) {
-					document.getElementById('chatSend').addEventListener("click", e => {
+					document.getElementById('chatSend').addEventListener("click", sendMessage.bind(this), false);
+					document.getElementById('chatMessage').addEventListener("keyup", sendMessage.bind(this), false);
+					function sendMessage(e) {
+						if (e.target.id == "chatMessage" && e.which != 13)
+							return ;
 						e.preventDefault();
 						const message = document.getElementById('chatMessage').value;
 						if (this.chatSocket.readyState === WebSocket.OPEN) {
@@ -279,7 +284,7 @@ export default class App {
 						} else {
 							console.error('Chat socket is not open. Unable to send message.');
 						}
-					});
+					}
 				}
 			}
 		})
@@ -359,6 +364,7 @@ export default class App {
 		}
 	}
 
+	// a faire
 	getRegisterForm() {
 		let registerForm = document.getElementById("registerForm");
 		this.getApiResponse("/api/view/register/").then((response) => {
@@ -372,23 +378,6 @@ export default class App {
 				document.getElementById("registerFormSubmitBtn").addEventListener("click", e => {
 					e.preventDefault();
 					let formData = new FormData(form);
-					/*this.getApiResponse("/api/user/signin/", formData).then((response) => {
-						let res = JSON.parse(response);
-						if (res.success) {
-							this.updateUser();
-						} else {
-							loginForm.classList.add("shake");
-							loginFormPassword.value = "";
-							let loginFormAlert = document.getElementById("loginFormAlert");
-							loginFormAlert.classList.remove("hided");
-							setTimeout(() => {
-								loginForm.classList.remove("shake");
-							}, 500);
-							setTimeout(() => {
-								loginFormAlert.classList.add("hided");
-							}, 5000);
-						}
-					})*/
 				});
 				setTimeout(() => {
 					loginForm.classList.remove("hided");
