@@ -6,7 +6,7 @@
 //   By: gbrunet <gbrunet@student.42.fr>            +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2024/05/31 15:09:07 by gbrunet           #+#    #+#             //
-//   Updated: 2024/06/04 17:36:58 by gbrunet          ###   ########.fr       //
+//   Updated: 2024/06/04 17:39:07 by gbrunet          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -221,6 +221,14 @@ export default class App {
 		}, 200);
 	}
 
+	displayNone(domId) {
+		setTimeout(() => {
+			let dom = document.getElementById(domId);
+			if (dom)
+				dom.classList.add("displayNone");
+		}, 200);
+	}
+
 	getHomePage() {
 		if (this.chatSocket)
 			this.chatSocket.close();
@@ -298,7 +306,31 @@ export default class App {
 				if (connectedUsers) {
 					connectedUsers.innerHTML = res.html;
 				}
-				let chatContainer = document.getElementById("chatContainer");
+				let usersDom = document.getElementsByClassName("user");
+				for (let i = 0; i < usersDom.length; i++) {
+					usersDom[i].addEventListener("click", (e) => {
+						let target = e.target;
+						if (!target.classList.contains("user"))
+							target = target.parentNode;
+						let userBtns = document.getElementsByClassName("user");
+						for (let i = 0; i < userBtns.length; i++) {
+							if (userBtns[i] != target)
+								userBtns[i].classList.remove("selected");
+						}
+						target.classList.toggle("selected");
+						if (target.classList.contains("selected")) {
+							let chat = document.getElementById("chatContainer");
+							chat.classList.remove("displayNone");
+							setTimeout(() => {
+								chat.classList.remove("hided");
+							}, 15)
+						} else {
+							let chat = document.getElementById("chatContainer");
+							chat.classList.add("hided");
+							this.displayNone("chatContainer")
+						}
+					})
+				}
 			}
 		});
 	}
