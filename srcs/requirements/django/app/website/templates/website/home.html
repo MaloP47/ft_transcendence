@@ -5,10 +5,13 @@
 	</div>
 	<div id="chatDocker" class="p-0 position-fixed end-0 bg-blur-5 rounded-start-3 d-flex flex-column border border-light overflow-y-auto overflow-x-hidden " style="--bs-border-opacity:0.1; width:80px; top:70px; bottom:70px">
 	</div>
-	<div id="chatContainer" class="p-0 position-fixed top-0 bottom-0" data-room="everybody" style="width:400px; right:80px;">
+	<div id="chatContainer" class="p-0 position-fixed" data-room="everybody">
 		<div class="h-100 overflow-y-auto d-flex flex-column">
-			<div style="margin-top:auto; padding-top:70px;"></div>
-			<div id="chatBottom" style="margin-bottom:70px;"></div>
+			<div style="margin-top:auto;"></div>
+			<div class="bg-blur-5 rounded-3 border border-light" style="--bs-border-opacity:0.1;">
+				<center class="mt-2">Room: Everybody</center>
+				<div id="chatBottom" style="margin-bottom:70px;"></div>
+			</div>
 		</div>
 		<div class="p-3 py-2 position-absolute bottom-0 w-100 d-flex flex-column">
 			<div class="bg-white chatInput rounded-5 p-1 px-2" style="--bs-bg-opacity:0.2">

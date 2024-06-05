@@ -3,7 +3,7 @@ import time
 from time import strftime, localtime
 from channels.generic.websocket import AsyncWebsocketConsumer
 from datetime import date
-from website.models import User
+from website.models import User, Message, Room
 from asgiref.sync import sync_to_async
 
 class ChatConsumer(AsyncWebsocketConsumer):
@@ -26,14 +26,23 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
 	async def receive(self, text_data):
 		text_data_json = json.loads(text_data)
-		message = text_data_json['message']
+		new_message = text_data_json['message']
 		username = self.scope['user'].username
 		userId = self.scope['user'].id
+		rooms = await sync_to_async(Room.objects.all, thread_sensitive=True)()
+		count = await sync_to_async(rooms.count)()
+		if (count == 0):
+			new_room = Room()
+			await sync_to_async(new_room.save)()
+		room = await sync_to_async(Room.objects.get, thread_sensitive=True)(id=0)
+		user = await sync_to_async(User.objects.get, thread_sensitive=True)(id=userId)
+		new = Message(message=new_message, room=room, user=user)
+		await sync_to_async(new.save)()
 		await self.channel_layer.group_send(
 			self.room_group_name,
 			{
 				'type': 'chat_message',
-				'message': message,
+				'message': new_message,
 				'user': username,
 				'id': userId,
 				'timestamp': strftime('%Y-%m-%d %H:%M', localtime(time.time()))

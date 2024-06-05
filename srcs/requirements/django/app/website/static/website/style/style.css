@@ -20,6 +20,10 @@ body {
 	--bs-bg-opacity:0.1;
 }
 
+.user.selected {
+	--bs-bg-opacity:0.5 !important;
+}
+
 .divider{
 	width: 80%;
 	height: 1px;
@@ -29,6 +33,7 @@ body {
 
 .user:hover {
 	--bs-bg-opacity:0.2;
+	cursor: pointer;
 }
 
 .roboto {
@@ -48,24 +53,40 @@ body {
 	transition: 200ms;
 }
 
-#loginForm {	
+#loginForm {
 	transition: 200ms;
 }
 
-#loginFormAlert {	
+#loginFormAlert {
 	transition: 200ms;
 }
 
-#registerForm {	
+#registerForm {
 	transition: 200ms;
 }
 
-#homeView {	
+#homeView {
 	transition: 200ms;
+}
+
+#chatContainer {
+	transition: 200ms;
+	width:400px;
+	right:90px;
+	top:70px;
+	bottom:70px;
+}
+
+.unread {
+	border: 2px rgba(255, 255, 255, 0.35) solid;
 }
 
 .hided {
-	opacity:0;
+	opacity: 0;
+}
+
+.displayNone {
+	display: none;
 }
 
 .height0 {
