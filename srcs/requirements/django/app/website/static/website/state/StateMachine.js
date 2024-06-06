@@ -6,7 +6,7 @@
 //   By: gbrunet <gbrunet@student.42.fr>            +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2024/05/31 15:09:07 by gbrunet           #+#    #+#             //
-//   Updated: 2024/06/04 17:39:07 by gbrunet          ###   ########.fr       //
+//   Updated: 2024/06/06 12:58:55 by gbrunet          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -267,33 +267,42 @@ export default class App {
 			if (res.success) {
 				let topContent = document.getElementById("topContent");
 				topContent.innerHTML = res.html;
-				let chatBottom = document.getElementById("chatBottom")
-				if (chatBottom)
-					chatBottom.scrollIntoView()
 				let homeView = document.getElementById("homeView");
+				let chatContainer = document.getElementById("chatContainer")
+				if (chatContainer) {
+					this.getApiResponse("/api/view/chatView/").then((response) => {
+						let res = JSON.parse(response);
+						if (res.success) {
+							chatContainer.innerHTML = res.html;
+							let chatBottom = document.getElementById("chatBottom")
+							if (chatBottom)
+								chatBottom.scrollIntoView()
+							if (document.getElementById('chatSend')) {
+								document.getElementById('chatSend').addEventListener("click", sendMessage.bind(this), false);
+								document.getElementById('chatMessage').addEventListener("keyup", sendMessage.bind(this), false);
+								function sendMessage(e) {
+									if (e.target.id == "chatMessage" && e.which != 13)
+										return ;
+									e.preventDefault();
+									const message = document.getElementById('chatMessage').value;
+									if (this.chatSocket.readyState === WebSocket.OPEN) {
+										this.chatSocket.send(JSON.stringify({
+											'message': message
+										}));
+										document.getElementById('chatMessage').value = '';
+									} else {
+										console.error('Chat socket is not open. Unable to send message.');
+									}
+								}
+							}
+						}
+					})
+				}
 				homeView.classList.add("trXm100");
 				setTimeout(() => {
 					homeView.classList.remove("hided");
 					homeView.classList.remove("trXm100");
 				}, 15);
-				if (document.getElementById('chatSend')) {
-					document.getElementById('chatSend').addEventListener("click", sendMessage.bind(this), false);
-					document.getElementById('chatMessage').addEventListener("keyup", sendMessage.bind(this), false);
-					function sendMessage(e) {
-						if (e.target.id == "chatMessage" && e.which != 13)
-							return ;
-						e.preventDefault();
-						const message = document.getElementById('chatMessage').value;
-						if (this.chatSocket.readyState === WebSocket.OPEN) {
-							this.chatSocket.send(JSON.stringify({
-								'message': message
-							}));
-							document.getElementById('chatMessage').value = '';
-						} else {
-							console.error('Chat socket is not open. Unable to send message.');
-						}
-					}
-				}
 			}
 		})
 	}
@@ -302,16 +311,19 @@ export default class App {
 		this.getApiResponseJson("/api/view/chatUserView/", {connectedUsers: data.users}).then((response) => {
 			let res = JSON.parse(response);
 			if (res.success) {
-				let connectedUsers = document.getElementById("chatDocker");
+				let connectedUsers = document.getElementById("chatConnectedUsers");
 				if (connectedUsers) {
 					connectedUsers.innerHTML = res.html;
 				}
 				let usersDom = document.getElementsByClassName("user");
 				for (let i = 0; i < usersDom.length; i++) {
 					usersDom[i].addEventListener("click", (e) => {
+						let menu = document.getElementById("menu");
+						if (menu) {
+							menu.style.top = (e.clientY + 5) + "px";
+							menu.style.right = (window.innerWidth - e.clientX + 5) + "px";
+						}
 						let target = e.target;
-						if (!target.classList.contains("user"))
-							target = target.parentNode;
 						let userBtns = document.getElementsByClassName("user");
 						for (let i = 0; i < userBtns.length; i++) {
 							if (userBtns[i] != target)
@@ -320,14 +332,22 @@ export default class App {
 						target.classList.toggle("selected");
 						if (target.classList.contains("selected")) {
 							let chat = document.getElementById("chatContainer");
+							let menu = document.getElementById("menu");
 							chat.classList.remove("displayNone");
+							menu.classList.remove("displayNone");
+							menu.style.pointerEvents = "all";
 							setTimeout(() => {
 								chat.classList.remove("hided");
+								menu.classList.remove("hided");
 							}, 15)
 						} else {
 							let chat = document.getElementById("chatContainer");
+							let menu = document.getElementById("menu");
 							chat.classList.add("hided");
+							menu.classList.add("hided");
+							menu.style.pointerEvents = ("none");
 							this.displayNone("chatContainer")
+							this.displayNone("menu")
 						}
 					})
 				}

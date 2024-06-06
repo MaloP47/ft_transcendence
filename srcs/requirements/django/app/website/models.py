@@ -8,6 +8,8 @@ class User(AbstractUser):
 
 class Room(models.Model):
 	id = models.AutoField(primary_key=True)
+	users = models.ForeignKey(User, on_delete=models.DO_NOTHING, blank=True, null=True)
+	publicRoom = models.BooleanField(default=False)
 
 class Message(models.Model):
 	message = models.TextField()
