@@ -4,7 +4,8 @@ from django.db import models
 class User(AbstractUser):
 	profilPicture = models.ImageField(verbose_name="Profil picture", upload_to="profilPicture", default="profilPicture/default.jpg")
 	online = models.BooleanField(default=True)
-	blocked = models.ForeignKey('self', on_delete=models.CASCADE, blank=True, null=True)
+	friends = models.ManyToManyField('self', blank=True)
+	blocked = models.ManyToManyField('self', blank=True)
 
 class Room(models.Model):
 	id = models.AutoField(primary_key=True)

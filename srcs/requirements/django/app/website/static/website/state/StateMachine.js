@@ -247,7 +247,7 @@ export default class App {
 		this.chatSocket.onmessage = function(e) {
 			const data = JSON.parse(e.data);
 			if (data.need_update) {
-				this.updateConnectedUsers(data);
+				this.updateConnectedUsers();
 			} else if (data.message) {
 				let roomsBtn = document.getElementsByClassName("room");
 				for (let i = 0; i < roomsBtn.length; i++) {
@@ -367,6 +367,21 @@ export default class App {
 				let searchResult = document.getElementById("searchResult");
 				if (searchResult)
 					searchResult.innerHTML = res.html;
+				let btns = searchResult.getElementsByClassName("btn");
+				for (let i = 0; i < btns.length; i++) {
+					btns[i].addEventListener("click", (e) => {
+						this.getApiResponseJson("/api/user/addfriend/", {id: btns[i].dataset.id}).then((response) => {
+							let res = JSON.parse(response);
+							if (res.success) {
+								this.updateConnectedUsers()
+								let menu = document.getElementById("addFriendMenu");
+								menu.classList.add("hided");
+								menu.style.pointerEvents = ("none");
+								this.displayNone("menu");
+							}
+						})
+					})
+				}
 			}
 		});
 	}
@@ -404,8 +419,8 @@ export default class App {
 		})
 	}
 
-	updateConnectedUsers(data) {
-		this.getApiResponseJson("/api/view/chatUserView/", {connectedUsers: data.users}).then((response) => {
+	updateConnectedUsers() {
+		this.getApiResponse("/api/view/chatUserView/").then((response) => {
 			let res = JSON.parse(response);
 			if (res.success) {
 				let connectedUsers = document.getElementById("chatConnectedUsers");
