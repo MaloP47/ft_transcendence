@@ -55,6 +55,16 @@ def signinUser(request):
 	})
 
 @csrf_exempt
+def searchUser(request):
+	if request.method == 'POST':
+		data = json.loads(request.POST["data"]);
+		users = User.objects.filter(username__icontains=data['search'])[:5]
+		return JsonResponse({
+			'success': True,
+			'html': render_to_string('website/searchUser.html', {"user": request.user, "users": users}),
+		});
+
+@csrf_exempt
 def profilMenu(request):
 	if request.method == 'POST':
 		return JsonResponse({
