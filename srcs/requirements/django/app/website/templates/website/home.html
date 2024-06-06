@@ -1,24 +1,36 @@
+<!-- *********************************************************************** -->
+<!--                                                                         -->
+<!--                                                      :::      ::::::::  -->
+<!-- home.html                                          :+:      :+:    :+:  -->
+<!--                                                  +:+ +:+         +:+    -->
+<!-- By: gbrunet <gbrunet@student.42.fr>            +#+  +:+       +#+       -->
+<!--                                              +#+#+#+#+#+   +#+          -->
+<!-- Created: 2024/06/06 12:56:26 by gbrunet           #+#    #+#            -->
+<!-- Updated: 2024/06/06 12:56:27 by gbrunet          ###   ########.fr      -->
+<!--                                                                         -->
+<!-- *********************************************************************** -->
+
 {% if user.is_authenticated %}
 <div id="homeView" class="h-100 w-100 position-fixed hided">
 	<div class="w-100">
 		configuration pour jouer
 	</div>
 	<div id="chatDocker" class="p-0 position-fixed end-0 bg-blur-5 rounded-start-3 d-flex flex-column border border-light overflow-y-auto overflow-x-hidden " style="--bs-border-opacity:0.1; width:80px; top:70px; bottom:70px">
+		<div style="margin-top:auto"></div>
+		<div id="chatConnectedUsers"></div>
+		<div class="divider"></div>
+		<div class="room bg-white rounded m-1 selected position-relative unread">
+			<div class="rounded-circle flex-shrink-0"  style=" background-color: #234565; width:60px; height:60px; margin-left:3px; margin-top:5px;"></div>
+			<center class="chatUserName text-break roboto" style="font-size:0.7rem !important">Everybody</center>
+		</div>
+		<div style="margin-bottom:auto"></div>
 	</div>
 	<div id="chatContainer" class="p-0 position-fixed" data-room="everybody">
-		<div class="h-100 overflow-y-auto d-flex flex-column">
-			<div style="margin-top:auto;"></div>
-			<div class="bg-blur-5 rounded-3 border border-light" style="--bs-border-opacity:0.1;">
-				<center class="mt-2">Room: Everybody</center>
-				<div id="chatBottom" style="margin-bottom:70px;"></div>
-			</div>
-		</div>
-		<div class="p-3 py-2 position-absolute bottom-0 w-100 d-flex flex-column">
-			<div class="bg-white chatInput rounded-5 p-1 px-2" style="--bs-bg-opacity:0.2">
-				<input id="chatMessage" type="text"/>
-				<a id="chatSend" class="link-underline link-underline-opacity-0" href="">send</a>
-			</div>
-		</div>
+	</div>
+	<div id="menu" class="position-absolute border border-light d-flex flex-column p-2 rounded bg-blur-15 hided displayNone" style="z-index: 200; --bs-border-opacity:0.1; pointer-events:none">
+		<button type="button" class="btn btn-light m-1">View profil</button>
+		<button type="button" class="btn btn-light m-1">Send invite</button>
+		<button type="button" class="btn btn-light m-1">Block user</button>
 	</div>
 </div>
 {% else %}

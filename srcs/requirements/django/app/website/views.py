@@ -1,10 +1,12 @@
+from datetime import timedelta
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.contrib.auth import login, logout, authenticate
 from django.template.loader import render_to_string
 from django.views.decorators.csrf import csrf_exempt
-from website.models import User
+from website.models import User, Message, Room
 import json
+from datetime import datetime
 
 @csrf_exempt
 def index(request):
@@ -82,6 +84,15 @@ def homeView(request):
 		return JsonResponse({
 			'success': True,
 			'html': render_to_string('website/home.html', {"user": request.user}),
+		});
+
+@csrf_exempt
+def chatView(request):
+	if request.method == 'POST':
+		messages = Message.objects.filter(room__publicRoom=True).filter(date__gte=datetime.now() - timedelta(hours=2)).order_by("date")
+		return JsonResponse({
+			'success': True,
+			'html': render_to_string('website/chatView.html', {"user": request.user, "messages": messages}),
 		});
 
 @csrf_exempt

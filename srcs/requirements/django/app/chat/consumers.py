@@ -32,9 +32,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
 		rooms = await sync_to_async(Room.objects.all, thread_sensitive=True)()
 		count = await sync_to_async(rooms.count)()
 		if (count == 0):
-			new_room = Room()
+			new_room = Room(publicRoom=True)
 			await sync_to_async(new_room.save)()
-		room = await sync_to_async(Room.objects.get, thread_sensitive=True)(id=0)
+		room = await sync_to_async(Room.objects.get, thread_sensitive=True)(publicRoom=True)
 		user = await sync_to_async(User.objects.get, thread_sensitive=True)(id=userId)
 		new = Message(message=new_message, room=room, user=user)
 		await sync_to_async(new.save)()
@@ -45,7 +45,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
 				'message': new_message,
 				'user': username,
 				'id': userId,
-				'timestamp': strftime('%Y-%m-%d %H:%M', localtime(time.time()))
+				'timestamp': new.date.strftime('%Y-%m-%d %I:%M %p'),
 			}
 		)
 
