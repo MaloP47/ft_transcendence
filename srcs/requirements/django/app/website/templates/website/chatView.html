@@ -1,7 +1,7 @@
 <div class="h-100 overflow-y-auto d-flex flex-column">
 	<div style="margin-top:auto;"></div>
 	<div class="bg-blur-5 rounded-3 border border-light" style="--bs-border-opacity:0.1;">
-		<center class="mt-2">Room: Everybody</center>
+		<center class="mt-2">Room: Public</center>
 		{% for message in messages%}
 			{% if message.user.id != user.id %}
 			<div class="message mt-2">
@@ -37,7 +37,7 @@
 	</div>
 </div>
 <div class="p-3 py-2 position-absolute bottom-0 w-100 d-flex flex-column">
-	<div class="bg-white chatInput rounded-5 p-1 px-2" style="--bs-bg-opacity:0.2">
+	<div class="bg-white chatInput rounded-5 p-1 px-2 mb-2" style="--bs-bg-opacity:0.2" data-room="Public">
 		<input id="chatMessage" type="text"/>
 		<a id="chatSend" class="link-underline link-underline-opacity-0" href="">send</a>
 	</div>

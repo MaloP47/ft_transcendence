@@ -1,0 +1,5 @@
+{% for u in users%}
+	{% if u.id != user.id %}
+<button type="button" class="btn btn-light mt-2 w-100">{{ u.username }}</button>
+	{% endif %}
+{% endfor %}
