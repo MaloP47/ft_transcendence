@@ -62,12 +62,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
 		}))
 
 	async def need_update(self, event):
-		users = []
-		async for user in User.objects.filter(online=True).order_by('username'):
-			users.append({"username": user.username, "id": user.id, "profilPictureUrl": user.profilPicture.url})
 		await self.send(text_data=json.dumps({
 			'need_update': True,
-			'users': users,
 		}))
 
 	async def updateOnline(self, online):
