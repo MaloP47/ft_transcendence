@@ -6,7 +6,7 @@
 //   By: gbrunet <gbrunet@student.42.fr>            +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2024/05/31 15:09:07 by gbrunet           #+#    #+#             //
-//   Updated: 2024/06/07 12:55:19 by gbrunet          ###   ########.fr       //
+//   Updated: 2024/06/07 14:42:42 by gbrunet          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -52,6 +52,7 @@ export default class App {
 		this.user = {
 			authenticated: false,
 			username: "",
+			id: undefined,
 		};
 	}
 	
@@ -60,6 +61,7 @@ export default class App {
 		if (this.getCookie('csrftoken') == null) {
 			this.user.authenticated = false;
 			this.user.username = "";
+			this.user.id = undefined;
 			return ;
 		}
 		this.getApiResponse("/api/user/").then((response) => {
@@ -67,10 +69,12 @@ export default class App {
 			if (user.authenticated) {
 				this.user.authenticated = true;
 				this.user.username = user.username;
+				this.user.id = user.id;
 			}
 			else {
 				this.user.authenticated = false;
 				this.user.username = "";
+				this.user.id = undefined;
 			}
 			if (prev != this.user.authenticated)
 				this.toggleProfilMenu();
@@ -275,6 +279,30 @@ export default class App {
 						}
 					}
 				});
+			} else if (data.friendRequest) {
+				console.log(data.friendRequest)
+				if (this.user.id == data.friendRequest) {
+					console.log("cest moi")
+					console.log(data.from)
+					this.getApiResponseJson("/api/view/friendRequestView/", {from: data.from}).then((response) => {
+						let res = JSON.parse(response);
+						if (res.success) {
+							let notificationCenter = document.getElementById("notif")
+							console.log(notificationCenter)
+							if (notificationCenter) {
+								notificationCenter.innerHTML += res.html;
+								let notif = notificationCenter.getElementsByClassName("notification")
+								for (let i=0; i < notif.length; i++) {
+									if (notif[i].classList.contains("hided")) {
+										setTimeout(() => {
+											notif[i].classList.remove("hided")
+										}, 15)
+									}
+								}
+							}
+						}
+					});
+				}
 			}
 		}.bind(this);
 
@@ -284,6 +312,14 @@ export default class App {
 				let topContent = document.getElementById("topContent");
 				topContent.innerHTML = res.html;
 				let homeView = document.getElementById("homeView");
+				let notif = document.getElementsByClassName("notification")
+				for (let i=0; i < notif.length; i++) {
+					if (notif[i].classList.contains("hided")) {
+						setTimeout(() => {
+						notif[i].classList.remove("hided")
+						}, 15)
+					}
+				}
 				let addFriend = document.getElementById("addFriend");
 				if (addFriend) {
 					document.getElementById("addFriendInput").addEventListener("keyup", (e) => {
@@ -380,8 +416,11 @@ export default class App {
 									let val = document.getElementById("addFriendInput").value;
 									if (val != "")
 										this.searchUser(val);
+									this.chatSocket.send(JSON.stringify({
+										'friendRequest': btns[i].dataset.id
+									}));
 								}
-							})
+							});
 						} else {
 							this.getApiResponseJson("/api/user/acceptfriend/", {id: btns[i].dataset.id}).then((response) => {
 								let res = JSON.parse(response);

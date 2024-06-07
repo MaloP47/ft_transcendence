@@ -6,7 +6,7 @@
 #    By: gbrunet <gbrunet@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/06/07 10:56:12 by gbrunet           #+#    #+#              #
-#    Updated: 2024/06/07 12:31:20 by gbrunet          ###   ########.fr        #
+#    Updated: 2024/06/07 14:44:38 by gbrunet          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -34,6 +34,7 @@ def getUser(request):
 				'username': request.user.username,
 				'email': request.user.email,
 				'last_login': request.user.last_login,
+				'id': request.user.id,
 			})
 		else:
 			return JsonResponse({
@@ -132,9 +133,10 @@ def registerForm(request):
 @csrf_exempt
 def homeView(request):
 	if request.method == 'POST':
+		friendRequest = FriendRequest.objects.filter(userTo=request.user).exclude(accepted=True)
 		return JsonResponse({
 			'success': True,
-			'html': render_to_string('website/home.html', {"user": request.user}),
+			'html': render_to_string('website/home.html', {"user": request.user, "friendRequest": friendRequest}),
 		});
 
 @csrf_exempt
@@ -161,4 +163,14 @@ def chatMessageView(request):
 		return JsonResponse({
 			'success': True,
 			'html': render_to_string('website/chatMessageView.html', {"data": data, "user": request.user}),
+		});
+
+@csrf_exempt
+def friendRequestView(request):
+	if request.method == 'POST':
+		data = json.loads(request.POST["data"]);
+		friend = User.objects.get(id=data['from'])
+		return JsonResponse({
+			'success': True,
+			'html': render_to_string('website/friendRequestView.html', {"friend": friend, "user": request.user}),
 		});
