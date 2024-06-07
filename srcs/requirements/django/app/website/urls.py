@@ -8,6 +8,7 @@ urlpatterns = [
 	path('api/user/search/', views.searchUser, name="searchUser"),
 	path('api/user/addfriend/', views.addFriend, name="addFriend"),
 	path('api/user/acceptfriend/', views.acceptFriend, name="acceptFriend"),
+	path('api/user/deleterequest/', views.deleteRequest, name="deleteRequest"),
 	path('api/user/', views.getUser, name="getUser"),
 	path('api/view/profilMenu/', views.profilMenu, name="profilMenu"),
 	path('api/view/login/', views.loginForm, name="loginForm"),

@@ -5,8 +5,8 @@
 //                                                    +:+ +:+         +:+     //
 //   By: gbrunet <gbrunet@student.42.fr>            +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
-//   Created: 2024/05/31 15:09:07 by gbrunet           #+#    #+#             //
-//   Updated: 2024/06/07 14:42:42 by gbrunet          ###   ########.fr       //
+//   Created: 2024/06/07 16:16:11 by gbrunet           #+#    #+#             //
+//   Updated: 2024/06/07 17:04:12 by gbrunet          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -242,69 +242,23 @@ export default class App {
 	}
 
 	getHomePage() {
-		if (this.chatSocket)
-			this.chatSocket.close();
-		this.chatSocket = new WebSocket(
-			'wss://' + window.location.host + '/ws/chat/'
-		);
+		if (this.user.authenticated) {
+			if (this.chatSocket)
+				this.chatSocket.close();
+			this.chatSocket = new WebSocket(
+				'wss://' + window.location.host + '/ws/chat/'
+			);
 
-		this.chatSocket.onmessage = function(e) {
-			const data = JSON.parse(e.data);
-			if (data.need_update) {
-				this.updateConnectedUsers();
-			} else if (data.message) {
-				let roomsBtn = document.getElementsByClassName("room");
-				for (let i = 0; i < roomsBtn.length; i++) {
-					// if room == message.room (ou truc du genre)
-					if (roomsBtn[i].dataset.room == "Public") {
-						if (!roomsBtn[i].classList.contains("selected"))
-							roomsBtn[i].getElementsByClassName("newMess")[0].classList.remove("hided");
-					}
-				}
-				this.getApiResponseJson("/api/view/chatMessageView/", {message: data.message, user:data.user, timestamp: data.timestamp}).then((response) => {
-					let res = JSON.parse(response);
-					if (res.success) {
-						let div = document.createElement('div');
-						div.innerHTML = res.html;
-							let chatBottom = document.getElementById("chatBottom");
-						if (chatBottom) {
-							let parent = chatBottom.parentNode;
-							parent.insertBefore(div, chatBottom);
-							let messages = parent.getElementsByClassName("message")
-							setTimeout(() => {
-								messages[messages.length - 1].classList.remove("hided");
-								messages[messages.length - 1].classList.remove("height0");
-								chatBottom.scrollIntoView()
-							}, 15);
-						}
-					}
-				});
-			} else if (data.friendRequest) {
-				console.log(data.friendRequest)
-				if (this.user.id == data.friendRequest) {
-					console.log("cest moi")
-					console.log(data.from)
-					this.getApiResponseJson("/api/view/friendRequestView/", {from: data.from}).then((response) => {
-						let res = JSON.parse(response);
-						if (res.success) {
-							let notificationCenter = document.getElementById("notif")
-							console.log(notificationCenter)
-							if (notificationCenter) {
-								notificationCenter.innerHTML += res.html;
-								let notif = notificationCenter.getElementsByClassName("notification")
-								for (let i=0; i < notif.length; i++) {
-									if (notif[i].classList.contains("hided")) {
-										setTimeout(() => {
-											notif[i].classList.remove("hided")
-										}, 15)
-									}
-								}
-							}
-						}
-					});
-				}
-			}
-		}.bind(this);
+			this.chatSocket.onmessage = function(e) {
+				const data = JSON.parse(e.data);
+				if (data.need_update)
+					this.updateConnectedUsers();
+				else if (data.message)
+					this.handleNewMessage(data);
+				else if (data.friendRequest)
+					this.handleFriendRequestMessage(data);
+			}.bind(this);
+		}
 
 		this.getApiResponse("/api/view/home/").then((response) => {
 			let res = JSON.parse(response);
@@ -312,89 +266,176 @@ export default class App {
 				let topContent = document.getElementById("topContent");
 				topContent.innerHTML = res.html;
 				let homeView = document.getElementById("homeView");
-				let notif = document.getElementsByClassName("notification")
-				for (let i=0; i < notif.length; i++) {
-					if (notif[i].classList.contains("hided")) {
-						setTimeout(() => {
-						notif[i].classList.remove("hided")
-						}, 15)
-					}
-				}
-				let addFriend = document.getElementById("addFriend");
-				if (addFriend) {
-					document.getElementById("addFriendInput").addEventListener("keyup", (e) => {
-						let val = document.getElementById("addFriendInput").value;
-						if (val != "")
-							this.searchUser(val);
-						else {
-							let searchResult = document.getElementById("searchResult");
-							if (searchResult)
-								searchResult.innerHTML = res.html;
-						}
-					})
-					addFriend.addEventListener("click", (e) => {
-						let menu = document.getElementById("addFriendMenu");
-						if (menu) {
-							menu.style.top = (e.clientY + 5) + "px";
-							menu.style.right = (window.innerWidth - e.clientX + 5) + "px";
-						}
-						let target = e.target;
-						target.classList.toggle("selected");
-						if (target.classList.contains("selected")) {
-							let menu = document.getElementById("addFriendMenu");
-							menu.classList.remove("displayNone");
-							menu.style.pointerEvents = "all";
-							setTimeout(() => {
-								menu.classList.remove("hided");
-								document.getElementById("addFriendInput").focus();
-							}, 15)
-						} else {
-							let menu = document.getElementById("addFriendMenu");
-							menu.classList.add("hided");
-							menu.style.pointerEvents = ("none");
-							this.displayNone("menu")
-							document.getElementById("addFriendInput").value = ""
-							document.getElementById("searchResult").innerHTML = "";
-						}
-					})
-				}
-				
-				let chatDocker = document.getElementById("chatDocker")
-				if (chatDocker) {	
-					let roomsDom = document.getElementsByClassName("room");
-					for (let i = 0; i < roomsDom.length; i++) {
-						roomsDom[i].addEventListener("click", (e) => {
-							let target = e.target;
-							target.getElementsByClassName("newMess")[0].classList.add("hided")
-							for (let j = 0; j < roomsDom.length; j++) {
-								if (roomsDom[j] != target)
-									roomsDom[j].classList.remove("selected");
-							}
-							target.classList.toggle("selected");
-							if (target.classList.contains("selected")) {
-								this.displayChat()
-								let chat = document.getElementById("chatContainer");
-								chat.classList.remove("displayNone");
-								setTimeout(() => {
-									chat.classList.remove("hided");
-								}, 15)
-							} else {
-								let chat = document.getElementById("chatContainer");
-								chat.classList.add("hided");
-								this.empty("chatContainer")
-							}
-						})
-					}	
-				}
+				this.addNotificationEvents();
+				this.initAddFriendBtn();
+				this.initChatDocker();
 				let chatContainer = document.getElementById("chatContainer")
 				if (chatContainer) {
 					this.displayChat();
 				}
-				homeView.classList.add("trXm100");
 				setTimeout(() => {
 					homeView.classList.remove("hided");
-					homeView.classList.remove("trXm100");
 				}, 15);
+			}
+		})
+	}
+
+	initChatDocker() {
+		let chatDocker = document.getElementById("chatDocker")
+		if (!chatDocker)
+			return ;
+		let roomsDom = document.getElementsByClassName("room");
+		for (let i = 0; i < roomsDom.length; i++) {
+			roomsDom[i].addEventListener("click", (e) => {
+				let target = e.target;
+				target.getElementsByClassName("newMess")[0].classList.add("hided")
+				for (let j = 0; j < roomsDom.length; j++) {
+					if (roomsDom[j] != target)
+						roomsDom[j].classList.remove("selected");
+				}
+				target.classList.toggle("selected");
+				if (target.classList.contains("selected")) {
+					this.displayChat()
+					let chat = document.getElementById("chatContainer");
+					chat.classList.remove("displayNone");
+					setTimeout(() => {
+						chat.classList.remove("hided");
+					}, 15)
+				} else {
+					let chat = document.getElementById("chatContainer");
+					chat.classList.add("hided");
+					this.empty("chatContainer")
+				}
+			})
+		}	
+	}
+
+	initAddFriendBtn() {
+		let addFriend = document.getElementById("addFriend");
+		if (!addFriend)
+			return ;
+		document.getElementById("addFriendInput").addEventListener("keyup", (e) => {
+			let val = document.getElementById("addFriendInput").value;
+			if (val != "")
+				this.searchUser(val);
+			else {
+				let searchResult = document.getElementById("searchResult");
+				if (searchResult)
+					searchResult.innerHTML = "";
+			}
+		})
+		addFriend.addEventListener("click", (e) => {
+			let menu = document.getElementById("addFriendMenu");
+			if (menu) {
+				menu.style.top = (e.clientY + 5) + "px";
+				menu.style.right = (window.innerWidth - e.clientX + 5) + "px";
+			}
+			let target = e.target;
+			target.classList.toggle("selected");
+			if (target.classList.contains("selected")) {
+				let menu = document.getElementById("addFriendMenu");
+				menu.classList.remove("displayNone");
+				menu.style.pointerEvents = "all";
+				setTimeout(() => {
+					menu.classList.remove("hided");
+					document.getElementById("addFriendInput").focus();
+				}, 15)
+			} else {
+				let menu = document.getElementById("addFriendMenu");
+				menu.classList.add("hided");
+				menu.style.pointerEvents = ("none");
+				this.displayNone("menu")
+				document.getElementById("addFriendInput").value = ""
+				document.getElementById("searchResult").innerHTML = "";
+			}
+		})
+	}
+
+	handleNewMessage(data) {
+		let roomsBtn = document.getElementsByClassName("room");
+		for (let i = 0; i < roomsBtn.length; i++) {
+			// if room == message.room (ou truc du genre)
+			if (roomsBtn[i].dataset.room == "Public") {
+				if (!roomsBtn[i].classList.contains("selected"))
+					roomsBtn[i].getElementsByClassName("newMess")[0].classList.remove("hided");
+			}
+		}
+		this.getApiResponseJson("/api/view/chatMessageView/", {message: data.message, user:data.user, timestamp: data.timestamp}).then((response) => {
+			let res = JSON.parse(response);
+			if (res.success) {
+				let div = document.createElement('div');
+				div.innerHTML = res.html;
+					let chatBottom = document.getElementById("chatBottom");
+				if (chatBottom) {
+					let parent = chatBottom.parentNode;
+					parent.insertBefore(div, chatBottom);
+					let messages = parent.getElementsByClassName("message")
+					setTimeout(() => {
+						messages[messages.length - 1].classList.remove("hided");
+						messages[messages.length - 1].classList.remove("height0");
+						chatBottom.scrollIntoView()
+					}, 15);
+				}
+			}
+		});
+	}
+
+	handleFriendRequestMessage(data) {
+		if (this.user.id != data.friendRequest)
+			return ;
+		this.getApiResponseJson("/api/view/friendRequestView/", {from: data.from}).then((response) => {
+			let res = JSON.parse(response);
+			if (res.success) {
+				let notificationCenter = document.getElementById("notif")
+				if (notificationCenter) {
+					notificationCenter.innerHTML += res.html;
+					this.addNotificationEvents();
+				}
+			}
+		});
+	}
+
+	addNotificationEvents() {
+		let notificationCenter = document.getElementById("notif")
+		let notif = notificationCenter.getElementsByClassName("notification")
+		for (let i=0; i < notif.length; i++) {
+			if (notif[i].classList.contains("hided")) {
+				setTimeout(() => {
+					notif[i].classList.remove("hided")
+				}, 15)
+				let acceptBtn = notif[i].childNodes[1].childNodes[1];
+				acceptBtn.addEventListener("click", this.acceptFriendRequest.bind(this), false);
+				let deleteBtn = notif[i].childNodes[1].childNodes[2];
+				deleteBtn.addEventListener("click", this.deleteFriendRequest.bind(this), false);
+			}
+		}
+	}
+
+	acceptFriendRequest(e) {
+		console.log('test');
+		this.getApiResponseJson("/api/user/acceptfriend/", {id: e.target.dataset.from}).then((response) => {
+			let res = JSON.parse(response);
+			if (res.success) {
+				console.log("need to create the private room for this users.")
+				this.updateConnectedUsers()
+				let notif = e.target.parentNode.parentNode;
+				notif.classList.add("hided");
+				setTimeout(() => {
+					notif.remove();
+				}, 200)
+			}
+		})
+	}
+
+	deleteFriendRequest(e) {
+		this.getApiResponseJson("/api/user/deleterequest/", {from: e.target.dataset.from}).then((response) => {
+			let res = JSON.parse(response);
+			if (res.success) {
+				let notif = e.target.parentNode.parentNode;
+				notif.classList.add("hided");
+				setTimeout(() => {
+					notif.remove();
+				}, 200)
 			}
 		})
 	}
