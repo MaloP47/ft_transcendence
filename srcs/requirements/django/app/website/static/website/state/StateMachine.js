@@ -6,7 +6,7 @@
 //   By: gbrunet <gbrunet@student.42.fr>            +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2024/05/31 15:09:07 by gbrunet           #+#    #+#             //
-//   Updated: 2024/06/07 12:29:33 by gbrunet          ###   ########.fr       //
+//   Updated: 2024/06/07 12:55:19 by gbrunet          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -373,9 +373,7 @@ export default class App {
 				let btns = searchResult.getElementsByClassName("btn");
 				for (let i = 0; i < btns.length; i++) {
 					btns[i].addEventListener("click", (e) => {
-						console.log(e.target.dataset.type)
 						if (e.target.dataset.type == "send") {
-							console.log('sdfsdfsdfsdfsdf')
 							this.getApiResponseJson("/api/user/addfriend/", {id: btns[i].dataset.id}).then((response) => {
 								let res = JSON.parse(response);
 								if (res.success) {
@@ -388,6 +386,7 @@ export default class App {
 							this.getApiResponseJson("/api/user/acceptfriend/", {id: btns[i].dataset.id}).then((response) => {
 								let res = JSON.parse(response);
 								if (res.success) {
+									console.log("need to create the private room for this users.")
 									this.updateConnectedUsers()
 									let val = document.getElementById("addFriendInput").value;
 									if (val != "")
