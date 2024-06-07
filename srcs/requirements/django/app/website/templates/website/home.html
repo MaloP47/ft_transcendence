@@ -6,7 +6,7 @@
 <!-- By: gbrunet <gbrunet@student.42.fr>            +#+  +:+       +#+       -->
 <!--                                              +#+#+#+#+#+   +#+          -->
 <!-- Created: 2024/06/06 12:56:26 by gbrunet           #+#    #+#            -->
-<!-- Updated: 2024/06/06 15:55:41 by gbrunet          ###   ########.fr      -->
+<!-- Updated: 2024/06/07 12:53:03 by gbrunet          ###   ########.fr      -->
 <!--                                                                         -->
 <!-- *********************************************************************** -->
 
@@ -39,6 +39,9 @@
 	<div id="addFriendMenu" class="position-absolute border border-light d-flex flex-column p-2 rounded bg-blur-15 hided displayNone" style="z-index: 200; --bs-border-opacity:0.1; pointer-events:none">
 		<input id="addFriendInput" class="form-control roboto" placeholder="Search" />
 		<div id="searchResult" style="width:250px;"></div>
+	</div>
+	<div id="notif" class="w-100">
+		<div class="position-absolute bg-blur-15 p-3 rounded border border-light" style="top:70px; margin-left:10px; --bs-border-opacity:0.1"><span>Gui send you a friend request</span><button class="btn btn-primary mx-3" style="--bs-btn-padding-y: .1rem;">accepte</button><button class="btn btn-danger" style="--bs-btn-padding-y: .1rem;">delete</button></div>
 	</div>
 </div>
 {% else %}
