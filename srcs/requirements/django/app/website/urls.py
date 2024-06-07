@@ -16,6 +16,7 @@ urlpatterns = [
 	path('api/view/chatView/', views.chatView, name="chatView"),
 	path('api/view/chatUserView/', views.chatUserView, name="chatUserView"),
 	path('api/view/chatMessageView/', views.chatMessageView, name="chatMessageView"),
+	path('api/view/friendRequestView/', views.friendRequestView, name="friendRequestView"),
 	path('', views.index, name="index"),
 #	re_path(r'^', views.index, name="index"),
 ]

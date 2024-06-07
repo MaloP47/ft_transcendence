@@ -26,28 +26,44 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
 	async def receive(self, text_data):
 		text_data_json = json.loads(text_data)
-		new_message = text_data_json['message']
-		username = self.scope['user'].username
-		userId = self.scope['user'].id
-		rooms = await sync_to_async(Room.objects.all, thread_sensitive=True)()
-		count = await sync_to_async(rooms.count)()
-		if (count == 0):
-			new_room = Room(publicRoom=True)
-			await sync_to_async(new_room.save)()
-		room = await sync_to_async(Room.objects.get, thread_sensitive=True)(publicRoom=True)
-		user = await sync_to_async(User.objects.get, thread_sensitive=True)(id=userId)
-		new = Message(message=new_message, room=room, user=user)
-		await sync_to_async(new.save)()
-		await self.channel_layer.group_send(
-			self.room_group_name,
-			{
-				'type': 'chat_message',
-				'message': new_message,
-				'user': username,
-				'id': userId,
-				'timestamp': new.date.strftime('%Y-%m-%d %I:%M %p'),
-			}
-		)
+		try:
+			friendRequest = text_data_json['friendRequest']
+			await self.channel_layer.group_send(
+				self.room_group_name,
+				{
+					'type': 'friend_request',
+					'id': friendRequest,
+					'from': self.scope['user'].id,
+				}
+			)
+			print(friendRequest);
+		except:
+			pass
+		try:
+			new_message = text_data_json['message']
+			username = self.scope['user'].username
+			userId = self.scope['user'].id
+			rooms = await sync_to_async(Room.objects.all, thread_sensitive=True)()
+			count = await sync_to_async(rooms.count)()
+			if (count == 0):
+				new_room = Room(publicRoom=True)
+				await sync_to_async(new_room.save)()
+			room = await sync_to_async(Room.objects.get, thread_sensitive=True)(publicRoom=True)
+			user = await sync_to_async(User.objects.get, thread_sensitive=True)(id=userId)
+			new = Message(message=new_message, room=room, user=user)
+			await sync_to_async(new.save)()
+			await self.channel_layer.group_send(
+				self.room_group_name,
+				{
+					'type': 'chat_message',
+					'message': new_message,
+					'user': username,
+					'id': userId,
+					'timestamp': new.date.strftime('%Y-%m-%d %I:%M %p'),
+				}
+			)
+		except:
+			pass
 
 	async def chat_message(self, event):
 		message = event['message']
@@ -64,6 +80,12 @@ class ChatConsumer(AsyncWebsocketConsumer):
 	async def need_update(self, event):
 		await self.send(text_data=json.dumps({
 			'need_update': True,
+		}))
+
+	async def friend_request(self, event):
+		await self.send(text_data=json.dumps({
+			'friendRequest': event['id'],
+			'from': event['from'],
 		}))
 
 	async def updateOnline(self, online):

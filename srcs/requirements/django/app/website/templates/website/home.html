@@ -6,7 +6,7 @@
 <!-- By: gbrunet <gbrunet@student.42.fr>            +#+  +:+       +#+       -->
 <!--                                              +#+#+#+#+#+   +#+          -->
 <!-- Created: 2024/06/06 12:56:26 by gbrunet           #+#    #+#            -->
-<!-- Updated: 2024/06/07 13:03:31 by gbrunet          ###   ########.fr      -->
+<!-- Updated: 2024/06/07 14:43:34 by gbrunet          ###   ########.fr      -->
 <!--                                                                         -->
 <!-- *********************************************************************** -->
 
@@ -40,9 +40,10 @@
 		<input id="addFriendInput" class="form-control roboto" placeholder="Search" />
 		<div id="searchResult" style="width:250px;"></div>
 	</div>
-	<div id="notif position-fixed" style="margin-top:65px">
-		<div class="bg-blur-15 p-3 rounded border border-light mb-2" style="width:355px; margin-left:7px; --bs-border-opacity:0.1"><span>Gui send you a friend request</span><button class="btn btn-primary mx-3" style="--bs-btn-padding-y: .1rem;">accepte</button><button class="btn btn-danger" style="--bs-btn-padding-y: .1rem;">delete</button></div>
-		<div class="bg-blur-15 p-3 rounded border border-light mb-2" style="width:355px; margin-left:7px; --bs-border-opacity:0.1"><span>Gui send you a friend request</span><button class="btn btn-primary mx-3" style="--bs-btn-padding-y: .1rem;">accepte</button><button class="btn btn-danger" style="--bs-btn-padding-y: .1rem;">delete</button></div>
+	<div id="notif" style="margin-top:65px">
+		{% for request in friendRequest %}
+			{% include 'website/friendRequestView.html' with friend=request.userFrom %}
+		{% endfor %}
 	</div>
 </div>
 {% else %}
