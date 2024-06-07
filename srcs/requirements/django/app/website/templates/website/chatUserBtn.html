@@ -1,6 +1,6 @@
 {% for friend in user.friends.all %}
 	<div class="user bg-white rounded m-1 position-relative" style="padding-top:5px;">
-		<div class="chatUserPicture bg-white rounded-circle flex-shrink-0"  style="background-image: url('{{friend.profilPicture.url}}'); background-size: cover; width:60px; height:60px; margin-left:5px; pointer-events:none"></div>
+		<div class="chatUserPicture bg-white rounded-circle flex-shrink-0" style="background-image: url('{{friend.profilPicture.url}}'); background-size: cover; width:60px; height:60px; margin-left:5px; pointer-events:none"></div>
 		<center class="chatUserName text-break roboto" style="font-size:0.7rem !important; pointer-events: none">{{friend.username}}</center>
 	</div>
 {% endfor %}

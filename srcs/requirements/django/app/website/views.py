@@ -1,10 +1,23 @@
+# **************************************************************************** #
+#                                                                              #
+#                                                         :::      ::::::::    #
+#    views.py                                           :+:      :+:    :+:    #
+#                                                     +:+ +:+         +:+      #
+#    By: gbrunet <gbrunet@student.42.fr>            +#+  +:+       +#+         #
+#                                                 +#+#+#+#+#+   +#+            #
+#    Created: 2024/06/07 10:56:12 by gbrunet           #+#    #+#              #
+#    Updated: 2024/06/07 12:31:20 by gbrunet          ###   ########.fr        #
+#                                                                              #
+# **************************************************************************** #
+
 from datetime import timedelta
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.contrib.auth import login, logout, authenticate
 from django.template.loader import render_to_string
 from django.views.decorators.csrf import csrf_exempt
-from website.models import User, Message, Room
+from django.db.models import Exists, F, Subquery, OuterRef
+from website.models import User, Message, Room, FriendRequest
 import json
 from datetime import datetime
 
@@ -58,7 +71,11 @@ def signinUser(request):
 def searchUser(request):
 	if request.method == 'POST':
 		data = json.loads(request.POST["data"]);
-		users = User.objects.filter(username__icontains=data['search']).exclude(id__in=request.user.friends.all())[:5]
+		users = User.objects.annotate(
+			pending=Subquery(Exists(FriendRequest.objects.exclude(accepted=True).filter(userFrom=request.user).filter(userTo_id=OuterRef("id"))))
+		).annotate(
+			ask=Subquery(Exists(FriendRequest.objects.filter(userTo=request.user).filter(userFrom_id=OuterRef("id"))))
+		).filter(username__icontains=data['search']).exclude(id__in=request.user.friends.all())[:8]
 		return JsonResponse({
 			'success': True,
 			'html': render_to_string('website/searchUser.html', {"user": request.user, "users": users}),
@@ -69,7 +86,21 @@ def addFriend(request):
 	if request.method == 'POST':
 		data = json.loads(request.POST["data"]);
 		user = User.objects.get(id=data['id'])
+		friendRequest = FriendRequest(userFrom=request.user, userTo=user, accepted=False)
+		friendRequest.save()
+		return JsonResponse({
+			'success': True,
+		});
+
+@csrf_exempt
+def acceptFriend(request):
+	if request.method == 'POST':
+		data = json.loads(request.POST["data"]);
+		user = User.objects.get(id=data['id'])
 		request.user.friends.add(user)
+		request = FriendRequest.objects.get(userFrom_id=data['id'], userTo_id=request.user.id)
+		request.accepted=True
+		request.save()
 		return JsonResponse({
 			'success': True,
 		});

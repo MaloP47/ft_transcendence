@@ -6,7 +6,7 @@
 //   By: gbrunet <gbrunet@student.42.fr>            +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2024/05/31 15:09:07 by gbrunet           #+#    #+#             //
-//   Updated: 2024/06/06 15:55:40 by gbrunet          ###   ########.fr       //
+//   Updated: 2024/06/07 12:29:33 by gbrunet          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -310,12 +310,15 @@ export default class App {
 							menu.style.pointerEvents = "all";
 							setTimeout(() => {
 								menu.classList.remove("hided");
+								document.getElementById("addFriendInput").focus();
 							}, 15)
 						} else {
 							let menu = document.getElementById("addFriendMenu");
 							menu.classList.add("hided");
 							menu.style.pointerEvents = ("none");
 							this.displayNone("menu")
+							document.getElementById("addFriendInput").value = ""
+							document.getElementById("searchResult").innerHTML = "";
 						}
 					})
 				}
@@ -370,16 +373,28 @@ export default class App {
 				let btns = searchResult.getElementsByClassName("btn");
 				for (let i = 0; i < btns.length; i++) {
 					btns[i].addEventListener("click", (e) => {
-						this.getApiResponseJson("/api/user/addfriend/", {id: btns[i].dataset.id}).then((response) => {
-							let res = JSON.parse(response);
-							if (res.success) {
-								this.updateConnectedUsers()
-								let menu = document.getElementById("addFriendMenu");
-								menu.classList.add("hided");
-								menu.style.pointerEvents = ("none");
-								this.displayNone("menu");
-							}
-						})
+						console.log(e.target.dataset.type)
+						if (e.target.dataset.type == "send") {
+							console.log('sdfsdfsdfsdfsdf')
+							this.getApiResponseJson("/api/user/addfriend/", {id: btns[i].dataset.id}).then((response) => {
+								let res = JSON.parse(response);
+								if (res.success) {
+									let val = document.getElementById("addFriendInput").value;
+									if (val != "")
+										this.searchUser(val);
+								}
+							})
+						} else {
+							this.getApiResponseJson("/api/user/acceptfriend/", {id: btns[i].dataset.id}).then((response) => {
+								let res = JSON.parse(response);
+								if (res.success) {
+									this.updateConnectedUsers()
+									let val = document.getElementById("addFriendInput").value;
+									if (val != "")
+										this.searchUser(val);
+								}
+							})
+						}
 					})
 				}
 			}

@@ -17,3 +17,8 @@ class Message(models.Model):
 	date = models.DateTimeField(auto_now_add=True)
 	room = models.ForeignKey(Room, on_delete=models.CASCADE)
 	user = models.ForeignKey(User, on_delete=models.CASCADE)
+
+class FriendRequest(models.Model):
+    userFrom = models.ForeignKey(User, related_name="user_from", on_delete=models.DO_NOTHING)
+    userTo = models.ForeignKey(User, related_name="user_to",  on_delete=models.DO_NOTHING)
+    accepted = models.BooleanField(default=False)
