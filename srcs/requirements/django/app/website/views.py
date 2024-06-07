@@ -6,7 +6,7 @@
 #    By: gbrunet <gbrunet@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/06/07 10:56:12 by gbrunet           #+#    #+#              #
-#    Updated: 2024/06/07 14:44:38 by gbrunet          ###   ########.fr        #
+#    Updated: 2024/06/07 16:22:27 by gbrunet          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -80,6 +80,16 @@ def searchUser(request):
 		return JsonResponse({
 			'success': True,
 			'html': render_to_string('website/searchUser.html', {"user": request.user, "users": users}),
+		});
+
+@csrf_exempt
+def deleteRequest(request):
+	if request.method == 'POST':
+		data = json.loads(request.POST["data"]);
+		request = FriendRequest.objects.get(userFrom_id=data['from'], userTo=request.user)
+		request.delete()
+		return JsonResponse({
+			'success': True,
 		});
 
 @csrf_exempt
