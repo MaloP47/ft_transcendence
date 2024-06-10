@@ -6,7 +6,7 @@
 //   By: gbrunet <gbrunet@student.42.fr>            +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2024/06/07 16:16:11 by gbrunet           #+#    #+#             //
-//   Updated: 2024/06/10 18:36:00 by gbrunet          ###   ########.fr       //
+//   Updated: 2024/06/10 19:43:24 by gbrunet          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -354,7 +354,30 @@ export default class App {
 		this.getApiResponseJson("/api/view/chatView/", {room: roomId}).then((response) => {
 			let res = JSON.parse(response);
 			if (res.success) {
+				let chatContainer = document.getElementById("chatContainer")
 				chatContainer.innerHTML = res.html;
+				let messages = chatContainer.getElementsByClassName("message__avatar")
+				for (let i = 0; i < messages.length; i++) {
+					messages[i].addEventListener("click", (e) => {
+						console.log(messages[i])
+						let chatMenu = document.getElementById("chatMenu")
+						if (!chatMenu)
+							return ;
+						chatMenu.style.top = (e.clientY + 5) + "px";
+						chatMenu.style.right = (window.innerWidth - e.clientX + 5) + "px";
+						if (chatMenu.classList.contains("hided")) {
+							chatMenu.classList.remove("displayNone");
+							chatMenu.style.pointerEvents = "all";
+							setTimeout(() => {
+								chatMenu.classList.remove("hided");
+							}, 15)
+						} else {
+							chatMenu.classList.add("hided");
+							chatMenu.style.pointerEvents = ("none");
+							this.displayNone("menu")
+						}
+					})
+				}
 				let chatBottom = document.getElementById("chatBottom")
 				if (chatBottom)
 					chatBottom.scrollIntoView()
