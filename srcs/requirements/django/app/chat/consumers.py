@@ -1,6 +1,5 @@
 import json
-import time
-from time import strftime, localtime
+from datetime import datetime
 from channels.generic.websocket import AsyncWebsocketConsumer
 from datetime import date
 from website.models import User, Message, Room
@@ -102,5 +101,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
 		userId = self.scope['user'].id
 		results = await sync_to_async(User.objects.get, thread_sensitive=True)(id=userId)
 		results.online = online
+		results.last_login = datetime.now()
 		await sync_to_async(results.save)()
 		await self.channel_layer.group_send(self.room_group_name, {'type': 'need_update'})
