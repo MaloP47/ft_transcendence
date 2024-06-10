@@ -36,19 +36,27 @@ class ChatConsumer(AsyncWebsocketConsumer):
 					'from': self.scope['user'].id,
 				}
 			)
-			print(friendRequest);
+		except:
+			pass
+		try:
+			updateFriends = text_data_json['updateFriends']
+			await self.channel_layer.group_send(self.room_group_name, {'type': 'need_update'})
 		except:
 			pass
 		try:
 			new_message = text_data_json['message']
 			username = self.scope['user'].username
 			userId = self.scope['user'].id
+			roomId = text_data_json['room']
 			rooms = await sync_to_async(Room.objects.all, thread_sensitive=True)()
 			count = await sync_to_async(rooms.count)()
 			if (count == 0):
 				new_room = Room(publicRoom=True)
 				await sync_to_async(new_room.save)()
-			room = await sync_to_async(Room.objects.get, thread_sensitive=True)(publicRoom=True)
+			if roomId == "Public":
+				room = await sync_to_async(Room.objects.get, thread_sensitive=True)(publicRoom=True)
+			else:
+				room = await sync_to_async(Room.objects.get, thread_sensitive=True)(id=roomId)
 			user = await sync_to_async(User.objects.get, thread_sensitive=True)(id=userId)
 			new = Message(message=new_message, room=room, user=user)
 			await sync_to_async(new.save)()
@@ -59,6 +67,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
 					'message': new_message,
 					'user': username,
 					'id': userId,
+					'roomId': roomId,
 					'timestamp': new.date.strftime('%Y-%m-%d %I:%M %p'),
 				}
 			)
@@ -74,6 +83,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
 		await self.send(text_data=json.dumps({
 			'message': message,
 			'user': {'username': username, 'id': id},
+			'roomId': event['roomId'],
 			'timestamp': timestamp,
 		}))
 

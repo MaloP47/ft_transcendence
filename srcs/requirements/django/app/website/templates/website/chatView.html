@@ -1,44 +1,46 @@
-<div class="h-100 overflow-y-auto d-flex flex-column">
-	<div style="margin-top:auto;"></div>
-	<div class="bg-blur-5 rounded-3 border border-light" style="--bs-border-opacity:0.1;">
-		<center class="mt-2">Room: Public</center>
-		{% for message in messages%}
-			{% if message.user.id != user.id %}
-			<div class="message mt-2">
-				<div class="message__outer">
-					<div class="message__avatar rounded-circle bg-success mx-2 border border-white" style="background-image: url('{{user.profilPicture.url}}'); background-size: cover; --bs-border-opacity:0.2;"></div>
-					<div class="message__inner">
-						<div class="message__spacer"></div>
-						<div style="margin-bottom: -5px;">
-							<div class="message__bubble bg-white text-dark rounded-4 rounded-bottom-left-1 p-1 px-2 pe-2" style="--bs-bg-opacity:0.75">{{message.message}}</div>
-							<div class="roboto" style="font-size:0.75rem !important; color:#bbb"><b>{{message.user.username}} - <span style="font-size: 0.65rem !important">{{message.date|date:"Y-m-d g:i"}}</span></b></div>
+<div class="chatRoom position-absolute bottom-0 top-0 w-100" data-room="{{roomId}}" data-user="{{friendId}}">
+	<div class="h-100 overflow-y-auto d-flex flex-column">
+		<div style="margin-top:auto;"></div>
+		<div class="bg-blur-5 rounded-3 border border-light" style="--bs-border-opacity:0.1;">
+			<center class="mt-2">{{roomName}}</center>
+			{% for message in messages%}
+				{% if message.user.id != user.id %}
+				<div class="message mt-2">
+					<div class="message__outer">
+						<div class="message__avatar rounded-circle bg-success mx-2 border border-white" style="background-image: url('{{user.profilPicture.url}}'); background-size: cover; --bs-border-opacity:0.2;"></div>
+						<div class="message__inner">
+							<div class="message__spacer"></div>
+							<div style="margin-bottom: -5px;">
+								<div class="message__bubble bg-white text-dark rounded-4 rounded-bottom-left-1 p-1 px-2 pe-2" style="--bs-bg-opacity:0.75">{{message.message}}</div>
+								<div class="roboto" style="font-size:0.75rem !important; color:#bbb"><b>{{message.user.username}} - <span style="font-size: 0.65rem !important">{{message.date|date:"Y-m-d g:i"}}</span></b></div>
+							</div>
 						</div>
 					</div>
 				</div>
-			</div>
-			{% else %}
-			<div class="message mt-2">
-				<div class="message__outer">
-					<div class="message__inner">
-						<div style="margin-bottom: -5px;">
-							<div class="message__bubble bg-primary rounded-4 rounded-bottom-right-1 p-1 px-2 pe-2" style="--bs-bg-opacity:0.75">{{message.message}}</div>
-							<div class="roboto" style="font-size:0.75rem !important; color:#bbb"><b>{{message.user.username}} - <span style="font-size: 0.65rem !important">{{message.date|date:"Y-m-d g:i A"}}</span></b></div>
+				{% else %}
+				<div class="message mt-2">
+					<div class="message__outer">
+						<div class="message__inner">
+							<div style="margin-bottom: -5px;">
+								<div class="message__bubble bg-primary rounded-4 rounded-bottom-right-1 p-1 px-2 pe-2" style="--bs-bg-opacity:0.75">{{message.message}}</div>
+								<div class="roboto" style="font-size:0.75rem !important; color:#bbb"><b>{{message.user.username}} - <span style="font-size: 0.65rem !important">{{message.date|date:"Y-m-d g:i A"}}</span></b></div>
+							</div>
+							<div class="message__spacer"></div>
 						</div>
-						<div class="message__spacer"></div>
+						<div class="message__avatar rounded-circle bg-success mx-2 border border-white" style="background-image: url('{{user.profilPicture.url}}'); background-size: cover; --bs-border-opacity:0.2;"></div>
 					</div>
-					<div class="message__avatar rounded-circle bg-success mx-2 border border-white" style="background-image: url('{{user.profilPicture.url}}'); background-size: cover; --bs-border-opacity:0.2;"></div>
 				</div>
-			</div>
-			{% endif  %}
-		{% endfor %}
-		<div id="chatBottom" style="margin-bottom:70px;"></div>
+				{% endif  %}
+			{% endfor %}
+			<div id="chatBottom" style="margin-bottom:70px;"></div>
+		</div>
+		<div id=>
+		</div>
 	</div>
-	<div id=>
-	</div>
-</div>
-<div class="p-3 py-2 position-absolute bottom-0 w-100 d-flex flex-column">
-	<div class="bg-white chatInput rounded-5 p-1 px-2 mb-2" style="--bs-bg-opacity:0.2" data-room="Public">
-		<input id="chatMessage" type="text"/>
-		<a id="chatSend" class="link-underline link-underline-opacity-0" href="">send</a>
+	<div class="p-3 py-2 position-absolute bottom-0 w-100 d-flex flex-column">
+		<div class="bg-white chatInput rounded-5 p-1 px-2 mb-2" style="--bs-bg-opacity:0.2" data-room="Public">
+			<input id="chatMessage" type="text"/>
+			<a id="chatSend" class="link-underline link-underline-opacity-0" href="">send</a>
+		</div>
 	</div>
 </div>

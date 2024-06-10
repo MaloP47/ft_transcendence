@@ -6,7 +6,7 @@
 //   By: gbrunet <gbrunet@student.42.fr>            +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2024/06/07 16:16:11 by gbrunet           #+#    #+#             //
-//   Updated: 2024/06/07 17:04:12 by gbrunet          ###   ########.fr       //
+//   Updated: 2024/06/10 16:22:58 by gbrunet          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -251,8 +251,10 @@ export default class App {
 
 			this.chatSocket.onmessage = function(e) {
 				const data = JSON.parse(e.data);
-				if (data.need_update)
+				if (data.need_update) {
 					this.updateConnectedUsers();
+					this.updateRooms();
+				}
 				else if (data.message)
 					this.handleNewMessage(data);
 				else if (data.friendRequest)
@@ -268,11 +270,8 @@ export default class App {
 				let homeView = document.getElementById("homeView");
 				this.addNotificationEvents();
 				this.initAddFriendBtn();
-				this.initChatDocker();
-				let chatContainer = document.getElementById("chatContainer")
-				if (chatContainer) {
-					this.displayChat();
-				}
+				this.initDeleteFriendBtn();
+				this.updateRooms();
 				setTimeout(() => {
 					homeView.classList.remove("hided");
 				}, 15);
@@ -280,34 +279,94 @@ export default class App {
 		})
 	}
 
+	updateRooms() {
+		this.getApiResponse("/api/view/chatRoomsView/").then((response) => {
+			let res = JSON.parse(response);
+			if (res.success) {
+				let chatRooms = document.getElementById("chatRooms");
+				if (chatRooms) {
+					chatRooms.innerHTML = res.html;
+					this.initChatDocker();
+				}
+			}
+		});
+	}
+
 	initChatDocker() {
+		let chat = document.getElementById("chatContainer");
+		let visibleChat = document.getElementById("chatContainer").firstChild;
+		let vChat = 0
+		if (visibleChat)
+			vChat = visibleChat.dataset.room
 		let chatDocker = document.getElementById("chatDocker")
 		if (!chatDocker)
 			return ;
 		let roomsDom = document.getElementsByClassName("room");
+		let isThere = false;
 		for (let i = 0; i < roomsDom.length; i++) {
+			if (roomsDom[i].dataset.room == vChat) {
+				isThere = true;
+			}
 			roomsDom[i].addEventListener("click", (e) => {
 				let target = e.target;
 				target.getElementsByClassName("newMess")[0].classList.add("hided")
+				let chatRooms = chat.getElementsByClassName("chatRoom")
 				for (let j = 0; j < roomsDom.length; j++) {
-					if (roomsDom[j] != target)
+					if (roomsDom[j] != target && roomsDom[j].classList.contains("selected")) {
 						roomsDom[j].classList.remove("selected");
+						for (let k = 0; k < chatRooms.length; k++)
+							if (chatRooms[k].dataset.room == roomsDom[j].dataset.room)
+								chatRooms[k].remove();
+					}
 				}
 				target.classList.toggle("selected");
 				if (target.classList.contains("selected")) {
-					this.displayChat()
-					let chat = document.getElementById("chatContainer");
-					chat.classList.remove("displayNone");
-					setTimeout(() => {
-						chat.classList.remove("hided");
-					}, 15)
+					this.displayChat(target.dataset.room)
 				} else {
-					let chat = document.getElementById("chatContainer");
-					chat.classList.add("hided");
-					this.empty("chatContainer")
+					let chatRooms = chat.getElementsByClassName("chatRoom")
+					for (let j = 0; j < chatRooms.length; j++) {
+						if (chatRooms[j].dataset.room == target.dataset.room)
+							chatRooms[j].remove();
+					}
 				}
 			})
-		}	
+		}
+		if (!isThere && visibleChat) {
+			visibleChat.remove();
+		}
+	}
+
+	displayChat(roomId) {
+		this.getApiResponseJson("/api/view/chatView/", {room: roomId}).then((response) => {
+			let res = JSON.parse(response);
+			if (res.success) {
+				chatContainer.innerHTML = res.html;
+				let chatBottom = document.getElementById("chatBottom")
+				if (chatBottom)
+					chatBottom.scrollIntoView()
+				if (document.getElementById('chatSend')) {
+					document.getElementById('chatSend').addEventListener("click", sendMessage.bind(this), false);
+					document.getElementById('chatMessage').addEventListener("keyup", sendMessage.bind(this), false);
+					function sendMessage(e) {
+						if (e.target.id == "chatMessage" && e.which != 13)
+							return ;
+						e.preventDefault();
+						const message = document.getElementById('chatMessage').value;
+						if (message == "")
+							return ;
+						if (this.chatSocket.readyState === WebSocket.OPEN) {
+							this.chatSocket.send(JSON.stringify({
+								'message': message,
+								'room': roomId
+							}));
+							document.getElementById('chatMessage').value = '';
+						} else {
+							console.error('Chat socket is not open. Unable to send message.');
+						}
+					}
+				}
+			}
+		})
 	}
 
 	initAddFriendBtn() {
@@ -351,15 +410,44 @@ export default class App {
 		})
 	}
 
+	initDeleteFriendBtn() {
+		let delFriend = document.getElementById("deleteFriend");
+		if (!delFriend)
+			return ;
+		delFriend.addEventListener("click", (e) => {
+			this.getApiResponseJson("/api/user/deletefriend/", {id: e.target.dataset.id}).then((response) => {
+				let res = JSON.parse(response);
+				if (res.success) {
+					this.updateConnectedUsers()
+					this.updateRooms()
+					let menu = document.getElementById("menu");
+					if (!menu)
+						return ;
+					menu.classList.add("hided");
+					menu.style.pointerEvents = ("none");
+					this.displayNone("menu")
+					let chat = document.getElementById("chatContainer").firstChild;
+					if (chat.dataset.user == e.target.dataset.id)
+						chat.remove();
+					this.chatSocket.send(JSON.stringify({
+						'updateFriends': true
+					}));
+				}
+			});
+		})
+	}
+
 	handleNewMessage(data) {
 		let roomsBtn = document.getElementsByClassName("room");
 		for (let i = 0; i < roomsBtn.length; i++) {
-			// if room == message.room (ou truc du genre)
-			if (roomsBtn[i].dataset.room == "Public") {
+			if (roomsBtn[i].dataset.room == data.roomId) {
 				if (!roomsBtn[i].classList.contains("selected"))
 					roomsBtn[i].getElementsByClassName("newMess")[0].classList.remove("hided");
 			}
 		}
+		let visibleRoom = document.getElementsByClassName("chatRoom")[0];
+		if (!visibleRoom || visibleRoom.dataset.room != data.roomId)
+			return ;
 		this.getApiResponseJson("/api/view/chatMessageView/", {message: data.message, user:data.user, timestamp: data.timestamp}).then((response) => {
 			let res = JSON.parse(response);
 			if (res.success) {
@@ -397,6 +485,8 @@ export default class App {
 
 	addNotificationEvents() {
 		let notificationCenter = document.getElementById("notif")
+		if (!notificationCenter)
+			return ;
 		let notif = notificationCenter.getElementsByClassName("notification")
 		for (let i=0; i < notif.length; i++) {
 			if (notif[i].classList.contains("hided")) {
@@ -412,12 +502,12 @@ export default class App {
 	}
 
 	acceptFriendRequest(e) {
-		console.log('test');
 		this.getApiResponseJson("/api/user/acceptfriend/", {id: e.target.dataset.from}).then((response) => {
 			let res = JSON.parse(response);
 			if (res.success) {
-				console.log("need to create the private room for this users.")
-				this.updateConnectedUsers()
+				this.chatSocket.send(JSON.stringify({
+					'updateFriends': true
+				}));
 				let notif = e.target.parentNode.parentNode;
 				notif.classList.add("hided");
 				setTimeout(() => {
@@ -466,7 +556,6 @@ export default class App {
 							this.getApiResponseJson("/api/user/acceptfriend/", {id: btns[i].dataset.id}).then((response) => {
 								let res = JSON.parse(response);
 								if (res.success) {
-									console.log("need to create the private room for this users.")
 									this.updateConnectedUsers()
 									let val = document.getElementById("addFriendInput").value;
 									if (val != "")
@@ -478,39 +567,6 @@ export default class App {
 				}
 			}
 		});
-	}
-
-	displayChat() {
-		this.getApiResponse("/api/view/chatView/").then((response) => {
-			let res = JSON.parse(response);
-			if (res.success) {
-				chatContainer.innerHTML = res.html;
-				let chatBottom = document.getElementById("chatBottom")
-				if (chatBottom)
-					chatBottom.scrollIntoView()
-				if (document.getElementById('chatSend')) {
-					document.getElementById('chatSend').addEventListener("click", sendMessage.bind(this), false);
-					document.getElementById('chatMessage').addEventListener("keyup", sendMessage.bind(this), false);
-					function sendMessage(e) {
-						if (e.target.id == "chatMessage" && e.which != 13)
-							return ;
-						e.preventDefault();
-						const message = document.getElementById('chatMessage').value;
-						if (message == "")
-							return ;
-						if (this.chatSocket.readyState === WebSocket.OPEN) {
-							console.log(e.target.parentNode.dataset.room)
-							this.chatSocket.send(JSON.stringify({
-								'message': message
-							}));
-							document.getElementById('chatMessage').value = '';
-						} else {
-							console.error('Chat socket is not open. Unable to send message.');
-						}
-					}
-				}
-			}
-		})
 	}
 
 	updateConnectedUsers() {
@@ -542,6 +598,8 @@ export default class App {
 							setTimeout(() => {
 								menu.classList.remove("hided");
 							}, 15)
+							let delFriendBtn = document.getElementById("deleteFriend");
+							delFriendBtn.dataset.id = e.target.dataset.id
 						} else {
 							let menu = document.getElementById("menu");
 							menu.classList.add("hided");
