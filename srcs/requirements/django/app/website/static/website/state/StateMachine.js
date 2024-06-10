@@ -6,7 +6,7 @@
 //   By: gbrunet <gbrunet@student.42.fr>            +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2024/06/07 16:16:11 by gbrunet           #+#    #+#             //
-//   Updated: 2024/06/10 16:22:58 by gbrunet          ###   ########.fr       //
+//   Updated: 2024/06/10 17:06:30 by gbrunet          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -268,6 +268,7 @@ export default class App {
 				let topContent = document.getElementById("topContent");
 				topContent.innerHTML = res.html;
 				let homeView = document.getElementById("homeView");
+				this.displayChat("Public");
 				this.addNotificationEvents();
 				this.initAddFriendBtn();
 				this.initDeleteFriendBtn();
@@ -296,7 +297,7 @@ export default class App {
 		let chat = document.getElementById("chatContainer");
 		let visibleChat = document.getElementById("chatContainer").firstChild;
 		let vChat = 0
-		if (visibleChat)
+		if (visibleChat && visibleChat.dataset)
 			vChat = visibleChat.dataset.room
 		let chatDocker = document.getElementById("chatDocker")
 		if (!chatDocker)
@@ -306,10 +307,19 @@ export default class App {
 		for (let i = 0; i < roomsDom.length; i++) {
 			if (roomsDom[i].dataset.room == vChat) {
 				isThere = true;
+				roomsDom[i].classList.add("selected");
 			}
 			roomsDom[i].addEventListener("click", (e) => {
 				let target = e.target;
 				target.getElementsByClassName("newMess")[0].classList.add("hided")
+				// here i need to update all messages from the other user to read=True.
+				if (target.dataset.room != "Public") {
+					this.getApiResponseJson("/api/messages/setRead/", {room: target.dataset.room, user: target.dataset.user}).then((response) => {
+						let res = JSON.parse(response);
+						if (res.success)
+							console.log("messages updated correctly")
+					});
+				}
 				let chatRooms = chat.getElementsByClassName("chatRoom")
 				for (let j = 0; j < roomsDom.length; j++) {
 					if (roomsDom[j] != target && roomsDom[j].classList.contains("selected")) {
