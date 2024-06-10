@@ -200,7 +200,7 @@ def chatUserView(request):
 @csrf_exempt
 def chatRoomsView(request):
 	if request.method == 'POST':
-		rooms = Room.objects.filter(users=request.user)
+		rooms = Room.objects.filter(users=request.user).annotate(unread=Subquery(Exists(Message.objects.filter(room_id=OuterRef("id")).exclude(user=request.user).exclude(read=True))))
 		return JsonResponse({
 			'success': True,
 			'html': render_to_string('website/chatRooms.html', {"user": request.user, "rooms": rooms}),
@@ -223,4 +223,16 @@ def friendRequestView(request):
 		return JsonResponse({
 			'success': True,
 			'html': render_to_string('website/friendRequestView.html', {"friend": friend, "user": request.user}),
+		});
+
+@csrf_exempt
+def messageSetRead(request):
+	if request.method == 'POST':
+		data = json.loads(request.POST["data"]);
+		room = data['room']
+		user = data['user']
+		if (room != "Public"):
+			Message.objects.filter(room_id=room).filter(user_id=user).exclude(read=True).update(read=True)
+		return JsonResponse({
+			'success': True,
 		});

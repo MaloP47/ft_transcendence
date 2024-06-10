@@ -11,6 +11,7 @@ urlpatterns = [
 	path('api/user/acceptfriend/', views.acceptFriend, name="acceptFriend"),
 	path('api/user/deleterequest/', views.deleteRequest, name="deleteRequest"),
 	path('api/user/', views.getUser, name="getUser"),
+	path('api/messages/setRead/', views.messageSetRead, name="messageSetRead"),
 	path('api/view/profilMenu/', views.profilMenu, name="profilMenu"),
 	path('api/view/login/', views.loginForm, name="loginForm"),
 	path('api/view/register/', views.registerForm, name="registerForm"),
