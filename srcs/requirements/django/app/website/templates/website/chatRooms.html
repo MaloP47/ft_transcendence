@@ -1,0 +1,20 @@
+<div class="room bg-white rounded m-1 position-relative p-1 m-2" data-room="Public">
+	<center class="chatUserName text-break roboto" style="font-size:0.7rem !important; pointer-events:none">Public</center>
+	<span class="newMess position-absolute top-0 start-0 translate-middle p-1 bg-danger border border-light rounded-circle hided" style="pointer-events:none;">
+		<span class="visually-hidden">New messages</span>
+	</span>
+</div>
+{% for room in rooms %}
+<div class="room bg-white rounded m-1 position-relative p-1 m-2" data-room="{{room.id}}" data-user="{% for u in room.users.all%}{% if u != user%}{{u.id}}{% endif %}{% endfor %}">
+	<center class="chatUserName text-break roboto" style="font-size:0.7rem !important; pointer-events:none">
+	{% for u in room.users.all%}
+		{% if u != user%}
+			{{u.username}}
+		{% endif %}
+	{% endfor %}
+	</center>
+	<span class="newMess position-absolute top-0 start-0 translate-middle p-1 bg-danger border border-light rounded-circle hided" style="pointer-events:none;">
+		<span class="visually-hidden">New messages</span>
+	</span>
+</div>
+{% endfor %}

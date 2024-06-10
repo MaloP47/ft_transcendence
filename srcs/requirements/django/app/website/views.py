@@ -1,13 +1,13 @@
 # **************************************************************************** #
-#                                                                              #
-#                                                         :::      ::::::::    #
-#    views.py                                           :+:      :+:    :+:    #
-#                                                     +:+ +:+         +:+      #
-#    By: gbrunet <gbrunet@student.42.fr>            +#+  +:+       +#+         #
-#                                                 +#+#+#+#+#+   +#+            #
-#    Created: 2024/06/07 10:56:12 by gbrunet           #+#    #+#              #
-#    Updated: 2024/06/07 16:22:27 by gbrunet          ###   ########.fr        #
-#                                                                              #
+#																			   #
+#														  :::	   ::::::::    #
+#	 views.py											:+:		 :+:	:+:    #
+#													  +:+ +:+		  +:+	   #
+#	 By: gbrunet <gbrunet@student.42.fr>			+#+  +:+	   +#+		   #
+#												  +#+#+#+#+#+	+#+			   #
+#	 Created: 2024/06/07 10:56:12 by gbrunet		   #+#	  #+#			   #
+#	 Updated: 2024/06/07 16:22:27 by gbrunet		  ###	########.fr		   #
+#																			   #
 # **************************************************************************** #
 
 from datetime import timedelta
@@ -104,14 +104,29 @@ def addFriend(request):
 		});
 
 @csrf_exempt
+def deleteFriend(request):
+	if request.method == 'POST':
+		data = json.loads(request.POST["data"]);
+		user = User.objects.get(id=data['id'])
+		request.user.friends.remove(user)
+		room = Room.objects.filter(users=user).filter(users=request.user)
+		room.delete();
+		return JsonResponse({
+			'success': True,
+		});
+
+@csrf_exempt
 def acceptFriend(request):
 	if request.method == 'POST':
 		data = json.loads(request.POST["data"]);
 		user = User.objects.get(id=data['id'])
 		request.user.friends.add(user)
-		request = FriendRequest.objects.get(userFrom_id=data['id'], userTo_id=request.user.id)
-		request.accepted=True
-		request.save()
+		friendRequest = FriendRequest.objects.get(userFrom_id=data['id'], userTo_id=request.user.id)
+		friendRequest.delete()
+		new_room = Room(publicRoom=False)
+		new_room.save()
+		new_room.users.add(user)
+		new_room.users.add(request.user)
 		return JsonResponse({
 			'success': True,
 		});
@@ -143,7 +158,10 @@ def registerForm(request):
 @csrf_exempt
 def homeView(request):
 	if request.method == 'POST':
-		friendRequest = FriendRequest.objects.filter(userTo=request.user).exclude(accepted=True)
+		if request.user.is_authenticated:
+			friendRequest = FriendRequest.objects.filter(userTo=request.user).exclude(accepted=True)
+		else:
+			friendRequest = []
 		return JsonResponse({
 			'success': True,
 			'html': render_to_string('website/home.html', {"user": request.user, "friendRequest": friendRequest}),
@@ -152,10 +170,23 @@ def homeView(request):
 @csrf_exempt
 def chatView(request):
 	if request.method == 'POST':
-		messages = Message.objects.filter(room__publicRoom=True).filter(date__gte=datetime.now() - timedelta(hours=2)).order_by("date")
+		data = json.loads(request.POST["data"]);
+		roomName = data['room']
+		roomId = "Public"
+		friendId = 0
+		if (data['room'] == "Public"):
+			messages = Message.objects.filter(room__publicRoom=True).filter(date__gte=datetime.now() - timedelta(hours=2)).order_by("date")
+		else: 
+			messages = Message.objects.filter(room__id=data['room']).order_by("date")
+			room = Room.objects.get(id=data['room'])
+			roomId = room.id
+			for u in room.users.all():
+				if u != request.user:
+					roomName = u.username
+					friendId = u.id
 		return JsonResponse({
 			'success': True,
-			'html': render_to_string('website/chatView.html', {"user": request.user, "messages": messages}),
+			'html': render_to_string('website/chatView.html', {"user": request.user, "messages": messages, "roomName": roomName, "roomId": roomId, "friendId": friendId}),
 		});
 
 @csrf_exempt
@@ -164,6 +195,15 @@ def chatUserView(request):
 		return JsonResponse({
 			'success': True,
 			'html': render_to_string('website/chatUserBtn.html', {"user": request.user}),
+		});
+
+@csrf_exempt
+def chatRoomsView(request):
+	if request.method == 'POST':
+		rooms = Room.objects.filter(users=request.user)
+		return JsonResponse({
+			'success': True,
+			'html': render_to_string('website/chatRooms.html', {"user": request.user, "rooms": rooms}),
 		});
 
 @csrf_exempt
