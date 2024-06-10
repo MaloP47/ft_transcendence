@@ -1,16 +1,3 @@
-# **************************************************************************** #
-#																			   #
-#														  :::	   ::::::::    #
-#	 views.py											:+:		 :+:	:+:    #
-#													  +:+ +:+		  +:+	   #
-#	 By: gbrunet <gbrunet@student.42.fr>			+#+  +:+	   +#+		   #
-#												  +#+#+#+#+#+	+#+			   #
-#	 Created: 2024/06/07 10:56:12 by gbrunet		   #+#	  #+#			   #
-#	 Updated: 2024/06/07 16:22:27 by gbrunet		  ###	########.fr		   #
-#																			   #
-# **************************************************************************** #
-
-from datetime import timedelta
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.contrib.auth import login, logout, authenticate
@@ -19,7 +6,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Exists, F, Subquery, OuterRef
 from website.models import User, Message, Room, FriendRequest
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 
 @csrf_exempt
 def index(request):
@@ -213,9 +200,10 @@ def chatRoomsView(request):
 def chatMessageView(request):
 	if request.method == 'POST':
 		data = json.loads(request.POST["data"]);
+		friend = User.objects.get(id=data['user']['id'])
 		return JsonResponse({
 			'success': True,
-			'html': render_to_string('website/chatMessageView.html', {"data": data, "user": request.user}),
+			'html': render_to_string('website/chatMessageView.html', {"data": data, "user": request.user, "friend": friend}),
 		});
 
 @csrf_exempt
