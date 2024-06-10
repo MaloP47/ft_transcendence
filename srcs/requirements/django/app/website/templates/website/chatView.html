@@ -7,7 +7,7 @@
 				{% if message.user.id != user.id %}
 				<div class="message mt-2">
 					<div class="message__outer">
-						<div class="message__avatar rounded-circle bg-success mx-2 border border-white" style="background-image: url('{{user.profilPicture.url}}'); background-size: cover; --bs-border-opacity:0.2;"></div>
+						<div class="message__avatar rounded-circle bg-success mx-2 border border-white" data-user="{{message.user.id}}" style="background-image: url('{{message.user.profilPicture.url}}'); background-size: cover; --bs-border-opacity:0.2; cursor:pointer"></div>
 						<div class="message__inner">
 							<div class="message__spacer"></div>
 							<div style="margin-bottom: -5px;">
@@ -27,7 +27,7 @@
 							</div>
 							<div class="message__spacer"></div>
 						</div>
-						<div class="message__avatar rounded-circle bg-success mx-2 border border-white" style="background-image: url('{{user.profilPicture.url}}'); background-size: cover; --bs-border-opacity:0.2;"></div>
+						<div class="message__avatar rounded-circle bg-success mx-2 border border-white" data-user="{{user.id}}" style="background-image: url('{{user.profilPicture.url}}'); background-size: cover; --bs-border-opacity:0.2; cursor:pointer"></div>
 					</div>
 				</div>
 				{% endif  %}
