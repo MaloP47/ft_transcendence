@@ -45,6 +45,8 @@ def getUser(request):
 def logoutUser(request):
 	if request.method == 'POST':
 		if request.user.is_authenticated:
+			request.user.online = False;
+			request.user.save()
 			logout(request);
 			return JsonResponse({
 				'success': True,
@@ -192,9 +194,10 @@ def chatView(request):
 @csrf_exempt
 def chatUserView(request):
 	if request.method == 'POST':
+		friends = User.objects.filter(id__in=request.user.friends.all()).annotate(connected=Subquery(Exists(User.objects.filter(id=OuterRef("id")).filter(last_login__gt=datetime.now() - timedelta(minutes=15))))).annotate(live=Subquery(Exists(User.objects.filter(id=OuterRef("id")).filter(online=True))))
 		return JsonResponse({
 			'success': True,
-			'html': render_to_string('website/chatUserBtn.html', {"user": request.user}),
+			'html': render_to_string('website/chatUserBtn.html', {"user": request.user, "friends": friends}),
 		});
 
 @csrf_exempt

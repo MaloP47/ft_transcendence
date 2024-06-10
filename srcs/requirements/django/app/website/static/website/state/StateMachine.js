@@ -6,7 +6,7 @@
 //   By: gbrunet <gbrunet@student.42.fr>            +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2024/06/07 16:16:11 by gbrunet           #+#    #+#             //
-//   Updated: 2024/06/10 17:06:30 by gbrunet          ###   ########.fr       //
+//   Updated: 2024/06/10 18:36:00 by gbrunet          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -28,8 +28,12 @@ export default class App {
 				e.preventDefault();
 				this.getApiResponse(e.target.dataset.api).then((response) => {
 					let res = JSON.parse(response)
-					if (res.needUserUpdate)
+					if (res.needUserUpdate) {
 						this.updateUser();
+						this.chatSocket.send(JSON.stringify({
+							'updateFriends': true
+						}));
+					}
 				});
 			}
 			else if (e.target.matches("[data-link]")) {
