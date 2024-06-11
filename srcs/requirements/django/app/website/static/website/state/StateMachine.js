@@ -6,7 +6,7 @@
 //   By: gbrunet <gbrunet@student.42.fr>            +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2024/06/07 16:16:11 by gbrunet           #+#    #+#             //
-//   Updated: 2024/06/11 10:23:57 by gbrunet          ###   ########.fr       //
+//   Updated: 2024/06/11 11:06:18 by gbrunet          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -287,6 +287,8 @@ export default class App {
 
 	initHideMenusOnBgClick() {
 		let menuBack = document.getElementById("menuBack");
+		if (!menuBack)
+			return ;
 		menuBack.addEventListener("click", (e) => {
 			let menu = document.getElementById("menu");
 			if (!menu.classList.contains("hided")) {
@@ -314,10 +316,12 @@ export default class App {
 	}
 
 	updateRooms() {
+		let chatRooms = document.getElementById("chatRooms");
+		if (!chatRooms)
+			return ;
 		this.getApiResponse("/api/view/chatRoomsView/").then((response) => {
 			let res = JSON.parse(response);
 			if (res.success) {
-				let chatRooms = document.getElementById("chatRooms");
 				if (chatRooms) {
 					chatRooms.innerHTML = res.html;
 					this.initChatDocker();
@@ -384,9 +388,13 @@ export default class App {
 			let res = JSON.parse(response);
 			if (res.success) {
 				let chatContainer = document.getElementById("chatContainer")
+				if (!chatContainer)
+					return ;
 				chatContainer.innerHTML = res.html;
 				let messages = chatContainer.getElementsByClassName("message__avatar")
 				for (let i = 0; i < messages.length; i++) {
+					if (messages[i].dataset.user == this.user.id)
+						continue ;
 					messages[i].addEventListener("click", (e) => {
 						this.getApiResponseJson("/api/view/chatMenu/", {id: e.target.dataset.user}).then((response) => {
 							let res = JSON.parse(response);
@@ -400,7 +408,7 @@ export default class App {
 								let sendPlay = document.getElementById("chatSendPlay")
 								this.chatMenuDeleteFriend();
 								this.chatMenuAddFriend();
-								let blockUser = document.getElementById("chatBlockUser")
+								this.chatMenuBlockUser();
 								let menuBack = document.getElementById("menuBack")
 								menuBack.classList.remove("pe-none");
 								chatMenu.classList.remove("displayNone");
@@ -438,6 +446,37 @@ export default class App {
 				}
 			}
 		})
+	}
+
+	chatMenuBlockUser() {
+		let blockUser = document.getElementById("chatBlockUser")
+		if (!blockUser)
+			return ;
+		blockUser.addEventListener("click", (e) => {
+			this.getApiResponseJson("/api/user/block/", {id: e.target.dataset.id}).then((response) => {
+				let res = JSON.parse(response);
+				if (res.success) {
+					let chat = document.getElementById("chatContainer").firstChild;
+					console.log(chat);
+					if (chat && chat.dataset.user == e.target.dataset.id)
+						chat.remove();
+					else if (chat && chat.dataset.room == "Public")
+						this.displayChat("Public");
+					this.chatSocket.send(JSON.stringify({
+						'updateFriends': true
+					}));
+					let menu = document.getElementById("chatMenu");
+					if (!menu)
+						return ;
+					menu.classList.add("hided");
+					menu.style.pointerEvents = ("none");
+					this.displayNone("chatMenu")
+					let menuBack = document.getElementById("menuBack");
+					menuBack.classList.add("hided");
+					menuBack.classList.add("pe-none");
+				}
+			});
+		});
 	}
 
 	chatMenuAddFriend() {
@@ -691,10 +730,12 @@ export default class App {
 	}
 
 	updateConnectedUsers() {
+		let connectedUsers = document.getElementById("chatConnectedUsers");
+		if (!connectedUsers)
+			return ;
 		this.getApiResponse("/api/view/chatUserView/").then((response) => {
 			let res = JSON.parse(response);
 			if (res.success) {
-				let connectedUsers = document.getElementById("chatConnectedUsers");
 				if (connectedUsers) {
 					connectedUsers.innerHTML = res.html;
 				}

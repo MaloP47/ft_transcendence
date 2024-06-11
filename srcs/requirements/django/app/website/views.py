@@ -107,6 +107,17 @@ def deleteFriend(request):
 		});
 
 @csrf_exempt
+def blockUser(request):
+	if request.method == 'POST':
+		data = json.loads(request.POST["data"]);
+		user = User.objects.get(id=data['id'])
+		request.user.blocked.add(user)
+		request.user.friends.remove(user)
+		return JsonResponse({
+			'success': True,
+		});
+
+@csrf_exempt
 def acceptFriend(request):
 	if request.method == 'POST':
 		data = json.loads(request.POST["data"]);
@@ -160,13 +171,13 @@ def homeView(request):
 
 @csrf_exempt
 def chatView(request):
-	if request.method == 'POST':
+	if request.method == 'POST' and request.user.is_authenticated:
 		data = json.loads(request.POST["data"]);
 		roomName = data['room']
 		roomId = "Public"
 		friendId = 0
 		if (data['room'] == "Public"):
-			messages = Message.objects.filter(room__publicRoom=True).filter(date__gte=datetime.now() - timedelta(hours=2)).order_by("date")
+			messages = Message.objects.filter(room__publicRoom=True).filter(date__gte=datetime.now() - timedelta(hours=2)).order_by("date").annotate(block=Subquery(Exists(request.user.blocked.filter(id=OuterRef("user_id")))))
 		else: 
 			messages = Message.objects.filter(room__id=data['room']).order_by("date")
 			room = Room.objects.get(id=data['room'])
@@ -179,6 +190,10 @@ def chatView(request):
 			'success': True,
 			'html': render_to_string('website/chatView.html', {"user": request.user, "messages": messages, "roomName": roomName, "roomId": roomId, "friendId": friendId}),
 		});
+	else:
+		return JsonResponse({
+			'success': False,
+		});
 
 @csrf_exempt
 def chatMenu(request):
@@ -187,7 +202,6 @@ def chatMenu(request):
 		user = User.objects.get(id=data['id']);
 		isFriend = request.user.friends.filter(id=data['id']).exists()
 		isBlocked = request.user.blocked.filter(id=data['id']).exists()
-		print(isFriend)
 		return JsonResponse({
 			'success': True,
 			'html': render_to_string('website/chatMenu.html', {"user": request.user, "isFriend": isFriend, "isBlocked": isBlocked, "for": user}),
@@ -195,20 +209,28 @@ def chatMenu(request):
 
 @csrf_exempt
 def chatUserView(request):
-	if request.method == 'POST':
+	if request.method == 'POST' and request.user.is_authenticated:
 		friends = User.objects.filter(id__in=request.user.friends.all()).annotate(connected=Subquery(Exists(User.objects.filter(id=OuterRef("id")).filter(last_login__gt=datetime.now() - timedelta(minutes=15))))).annotate(live=Subquery(Exists(User.objects.filter(id=OuterRef("id")).filter(online=True).filter(last_login__gt=datetime.now() - timedelta(hours=1)))))
 		return JsonResponse({
 			'success': True,
 			'html': render_to_string('website/chatUserBtn.html', {"user": request.user, "friends": friends}),
 		});
+	else:
+		return JsonResponse({
+			'success': False,
+		});
 
 @csrf_exempt
 def chatRoomsView(request):
-	if request.method == 'POST':
+	if request.method == 'POST' and request.user.is_authenticated:
 		rooms = Room.objects.filter(users=request.user).annotate(unread=Subquery(Exists(Message.objects.filter(room_id=OuterRef("id")).exclude(user=request.user).exclude(read=True))))
 		return JsonResponse({
 			'success': True,
 			'html': render_to_string('website/chatRooms.html', {"user": request.user, "rooms": rooms}),
+		});
+	else:
+		return JsonResponse({
+			'success': False,
 		});
 
 @csrf_exempt
