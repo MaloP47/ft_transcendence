@@ -6,7 +6,7 @@
 /*   By: gbrunet <gbrunet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/07 09:37:34 by gbrunet           #+#    #+#             */
-/*   Updated: 2024/06/07 14:32:00 by gbrunet          ###   ########.fr       */
+/*   Updated: 2024/06/11 08:42:06 by gbrunet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,10 @@
 
 body {
 	font-family: "Bebas Neue", sans-serif;
+}
+
+#chatMenu {
+	transition: 200ms;
 }
 
 #addFriendMenu {
