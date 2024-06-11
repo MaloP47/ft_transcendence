@@ -6,7 +6,7 @@
 //   By: gbrunet <gbrunet@student.42.fr>            +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2024/06/07 16:16:11 by gbrunet           #+#    #+#             //
-//   Updated: 2024/06/11 08:55:50 by gbrunet          ###   ########.fr       //
+//   Updated: 2024/06/11 09:52:31 by gbrunet          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -300,6 +300,8 @@ export default class App {
 			if (!addFriendMenu.classList.contains("hided")) {
 				let friendBtn = document.getElementById("addFriend")
 				friendBtn.classList.remove("selected");
+				document.getElementById("addFriendInput").value = ""
+				document.getElementById("searchResult").innerHTML = ""
 			}
 			addFriendMenu.classList.add("hided");
 			addFriendMenu.style.pointerEvents = "none";
@@ -386,18 +388,28 @@ export default class App {
 				let messages = chatContainer.getElementsByClassName("message__avatar")
 				for (let i = 0; i < messages.length; i++) {
 					messages[i].addEventListener("click", (e) => {
-						let chatMenu = document.getElementById("chatMenu")
-						if (!chatMenu)
-							return ;
-						chatMenu.style.top = (e.clientY + 5) + "px";
-						chatMenu.style.right = (window.innerWidth - e.clientX + 5) + "px";
-						let menuBack = document.getElementById("menuBack")
-						menuBack.classList.remove("pe-none");
-						chatMenu.classList.remove("displayNone");
-						chatMenu.style.pointerEvents = "all";
-						setTimeout(() => {
-							chatMenu.classList.remove("hided");
-						}, 15)
+						this.getApiResponseJson("/api/view/chatMenu/", {id: e.target.dataset.user}).then((response) => {
+							let res = JSON.parse(response);
+							if (res.success) {
+								let chatMenu = document.getElementById("chatMenu")
+								if (!chatMenu)
+									return ;
+								chatMenu.style.top = (e.clientY + 5) + "px";
+								chatMenu.style.right = (window.innerWidth - e.clientX + 5) + "px";
+								chatMenu.innerHTML = res.html;
+								let sendPlay = document.getElementById("chatSendPlay")
+								this.chatMenuDeleteFriend();
+								let addFriend = document.getElementById("chatAddFriend")
+								let blockUser = document.getElementById("chatBlockUser")
+								let menuBack = document.getElementById("menuBack")
+								menuBack.classList.remove("pe-none");
+								chatMenu.classList.remove("displayNone");
+								chatMenu.style.pointerEvents = "all";
+								setTimeout(() => {
+									chatMenu.classList.remove("hided");
+								}, 15)
+							}
+						});
 					})
 				}
 				let chatBottom = document.getElementById("chatBottom")
@@ -425,6 +437,36 @@ export default class App {
 					}
 				}
 			}
+		})
+	}
+
+	chatMenuDeleteFriend() {
+		let deleteFriend = document.getElementById("chatDeleteFriend")
+		if (!deleteFriend)
+			return ;
+		deleteFriend.addEventListener("click", (e) => {
+			this.getApiResponseJson("/api/user/deletefriend/", {id: e.target.dataset.id}).then((response) => {
+				let res = JSON.parse(response);
+				if (res.success) {
+					this.updateConnectedUsers()
+					this.updateRooms()
+					let menu = document.getElementById("chatMenu");
+					if (!menu)
+						return ;
+					menu.classList.add("hided");
+					menu.style.pointerEvents = ("none");
+					this.displayNone("chatMenu")
+					let menuBack = document.getElementById("menuBack");
+					menuBack.classList.add("hided");
+					menuBack.classList.add("pe-none");
+					let chat = document.getElementById("chatContainer").firstChild;
+					if (chat.dataset.user == e.target.dataset.id)
+						chat.remove();
+					this.chatSocket.send(JSON.stringify({
+						'updateFriends': true
+					}));
+				}
+			});
 		})
 	}
 
@@ -477,6 +519,9 @@ export default class App {
 					menu.classList.add("hided");
 					menu.style.pointerEvents = ("none");
 					this.displayNone("menu")
+					let menuBack = document.getElementById("menuBack");
+					menuBack.classList.add("hided");
+					menuBack.classList.add("pe-none");
 					let chat = document.getElementById("chatContainer").firstChild;
 					if (chat.dataset.user == e.target.dataset.id)
 						chat.remove();

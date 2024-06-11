@@ -5,11 +5,13 @@
 	<div class="d-flex flex-column w-100 ms-2">
 		<div>{{ u.username }}</div>
 		{% if u.pending %}
-		<button type="button" style="--bs-btn-padding-y: .15rem; --bs-btn-padding-x: .25rem"; class="btn btn-light w-100" data-id="{{u.id}}" disabled>Friend request pending</button>
+		<button type="button" style="--bs-btn-padding-y: .15rem; --bs-btn-padding-x: .25rem" class="btn btn-light w-100" data-id="{{u.id}}" disabled>Friend request pending</button>
 		{% elif u.ask %}
-		<button type="button" style="--bs-btn-padding-y: .15rem; --bs-btn-padding-x: .25rem"; class="btn btn-primary w-100" data-id="{{u.id}}" data-type="accept">Accept friend request</button>
+		<button type="button" style="--bs-btn-padding-y: .15rem; --bs-btn-padding-x: .25rem" class="btn btn-primary w-100" data-id="{{u.id}}" data-type="accept">Accept friend request</button>
+		{% elif u.block %}
+		<button type="button" style="--bs-btn-padding-y: .15rem; --bs-btn-padding-x: .25rem" class="btn btn-light w-100" data-id="{{u.id}}" data-type="accept">Unblock user</button>
 		{% else %}
-		<button type="button" style="--bs-btn-padding-y: .15rem; --bs-btn-padding-x: .25rem"; class="btn btn-light w-100" data-id="{{u.id}}" data-type="send">Send friend request</button>
+		<button type="button" style="--bs-btn-padding-y: .15rem; --bs-btn-padding-x: .25rem" class="btn btn-light w-100" data-id="{{u.id}}" data-type="send">Send friend request</button>
 		{% endif %}
 	</div>
 </div>
