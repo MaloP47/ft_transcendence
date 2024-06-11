@@ -65,6 +65,8 @@ def searchUser(request):
 			pending=Subquery(Exists(FriendRequest.objects.exclude(accepted=True).filter(userFrom=request.user).filter(userTo_id=OuterRef("id"))))
 		).annotate(
 			ask=Subquery(Exists(FriendRequest.objects.filter(userTo=request.user).filter(userFrom_id=OuterRef("id"))))
+		).filter(username__icontains=data['search']).annotate(
+			block=Subquery(Exists(request.user.blocked.filter(id=OuterRef("id"))))
 		).filter(username__icontains=data['search']).exclude(id__in=request.user.friends.all())[:8]
 		return JsonResponse({
 			'success': True,
@@ -176,6 +178,19 @@ def chatView(request):
 		return JsonResponse({
 			'success': True,
 			'html': render_to_string('website/chatView.html', {"user": request.user, "messages": messages, "roomName": roomName, "roomId": roomId, "friendId": friendId}),
+		});
+
+@csrf_exempt
+def chatMenu(request):
+	if request.method == 'POST':
+		data = json.loads(request.POST["data"]);
+		user = User.objects.get(id=data['id']);
+		isFriend = request.user.friends.filter(id=data['id']).exists()
+		isBlocked = request.user.blocked.filter(id=data['id']).exists()
+		print(isFriend)
+		return JsonResponse({
+			'success': True,
+			'html': render_to_string('website/chatMenu.html', {"user": request.user, "isFriend": isFriend, "isBlocked": isBlocked, "for": user}),
 		});
 
 @csrf_exempt

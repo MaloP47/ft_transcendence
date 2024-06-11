@@ -12,6 +12,7 @@ urlpatterns = [
 	path('api/user/deleterequest/', views.deleteRequest, name="deleteRequest"),
 	path('api/user/', views.getUser, name="getUser"),
 	path('api/messages/setRead/', views.messageSetRead, name="messageSetRead"),
+	path('api/view/chatMenu/', views.chatMenu, name="chatMenu"),
 	path('api/view/profilMenu/', views.profilMenu, name="profilMenu"),
 	path('api/view/login/', views.loginForm, name="loginForm"),
 	path('api/view/register/', views.registerForm, name="registerForm"),

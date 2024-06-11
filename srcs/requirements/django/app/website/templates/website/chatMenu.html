@@ -1,0 +1,7 @@
+<button type="button" id="chatSendPlay" class="btn btn-light m-1" data-id="{{for.id}}">Send play invitation</button>
+{% if isFriend %}
+	<button type="button" id="chatDeleteFriend" class="btn btn-light m-1" data-id="{{for.id}}">Delete friend</button>
+{% else %}
+	<button type="button" id="chatAddFriend" class="btn btn-light m-1" data-id="{{for.id}}">Send friend request</button>
+{% endif %}
+<button id="chatBlockUser" id="chatBlockUser" type="button" class="btn btn-light m-1" data-id="{{for.id}}">Block user</button>
