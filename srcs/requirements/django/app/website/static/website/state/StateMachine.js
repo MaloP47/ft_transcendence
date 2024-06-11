@@ -6,7 +6,7 @@
 //   By: gbrunet <gbrunet@student.42.fr>            +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2024/06/07 16:16:11 by gbrunet           #+#    #+#             //
-//   Updated: 2024/06/11 09:52:31 by gbrunet          ###   ########.fr       //
+//   Updated: 2024/06/11 10:23:57 by gbrunet          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -399,7 +399,7 @@ export default class App {
 								chatMenu.innerHTML = res.html;
 								let sendPlay = document.getElementById("chatSendPlay")
 								this.chatMenuDeleteFriend();
-								let addFriend = document.getElementById("chatAddFriend")
+								this.chatMenuAddFriend();
 								let blockUser = document.getElementById("chatBlockUser")
 								let menuBack = document.getElementById("menuBack")
 								menuBack.classList.remove("pe-none");
@@ -438,6 +438,31 @@ export default class App {
 				}
 			}
 		})
+	}
+
+	chatMenuAddFriend() {
+		let addFriend = document.getElementById("chatAddFriend");
+		if (!addFriend)
+			return ;
+		addFriend.addEventListener("click", (e) => {
+			this.getApiResponseJson("/api/user/addfriend/", {id: e.target.dataset.id}).then((response) => {
+				let res = JSON.parse(response);
+				if (res.success) {
+					this.chatSocket.send(JSON.stringify({
+						'friendRequest': e.target.dataset.id
+					}));
+					let menu = document.getElementById("chatMenu");
+					if (!menu)
+						return ;
+					menu.classList.add("hided");
+					menu.style.pointerEvents = ("none");
+					this.displayNone("chatMenu")
+					let menuBack = document.getElementById("menuBack");
+					menuBack.classList.add("hided");
+					menuBack.classList.add("pe-none");
+				}
+			});
+		});
 	}
 
 	chatMenuDeleteFriend() {
