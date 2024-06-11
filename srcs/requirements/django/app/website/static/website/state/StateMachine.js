@@ -6,7 +6,7 @@
 //   By: gbrunet <gbrunet@student.42.fr>            +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2024/06/07 16:16:11 by gbrunet           #+#    #+#             //
-//   Updated: 2024/06/11 08:50:53 by gbrunet          ###   ########.fr       //
+//   Updated: 2024/06/11 08:55:50 by gbrunet          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -271,41 +271,44 @@ export default class App {
 			if (res.success) {
 				let topContent = document.getElementById("topContent");
 				topContent.innerHTML = res.html;
-				let homeView = document.getElementById("homeView");
-				let menuBack = document.getElementById("menuBack");
-				menuBack.addEventListener("click", (e) => {
-					let menu = document.getElementById("menu");
-					if (!menu.classList.contains("hided")) {
-						let userBtn = document.getElementsByClassName("user")
-						for (let i = 0; i < userBtn.length; i++) {
-							userBtn[i].classList.remove("selected");
-						}
-					}
-					menu.classList.add("hided");
-					menu.style.pointerEvents = "none";
-					let addFriendMenu = document.getElementById("addFriendMenu");
-					if (!addFriendMenu.classList.contains("hided")) {
-						let friendBtn = document.getElementById("addFriend")
-						friendBtn.classList.remove("selected");
-					}
-					addFriendMenu.classList.add("hided");
-					addFriendMenu.style.pointerEvents = "none";
-					let chatMenu = document.getElementById("chatMenu");
-					chatMenu.classList.add("hided");
-					chatMenu.style.pointerEvents = "none";
-					menuBack.classList.add("hided");
-					menuBack.classList.add("pe-none");
-				});
+				this.initHideMenusOnBgClick();
 				this.displayChat("Public");
 				this.addNotificationEvents();
 				this.initAddFriendBtn();
 				this.initDeleteFriendBtn();
 				this.updateRooms();
+				let homeView = document.getElementById("homeView");
 				setTimeout(() => {
 					homeView.classList.remove("hided");
 				}, 15);
 			}
 		})
+	}
+
+	initHideMenusOnBgClick() {
+		let menuBack = document.getElementById("menuBack");
+		menuBack.addEventListener("click", (e) => {
+			let menu = document.getElementById("menu");
+			if (!menu.classList.contains("hided")) {
+				let userBtn = document.getElementsByClassName("user")
+				for (let i = 0; i < userBtn.length; i++)
+					userBtn[i].classList.remove("selected");
+			}
+			menu.classList.add("hided");
+			menu.style.pointerEvents = "none";
+			let addFriendMenu = document.getElementById("addFriendMenu");
+			if (!addFriendMenu.classList.contains("hided")) {
+				let friendBtn = document.getElementById("addFriend")
+				friendBtn.classList.remove("selected");
+			}
+			addFriendMenu.classList.add("hided");
+			addFriendMenu.style.pointerEvents = "none";
+			let chatMenu = document.getElementById("chatMenu");
+			chatMenu.classList.add("hided");
+			chatMenu.style.pointerEvents = "none";
+			menuBack.classList.add("hided");
+			menuBack.classList.add("pe-none");
+		});	
 	}
 
 	updateRooms() {
@@ -389,19 +392,12 @@ export default class App {
 						chatMenu.style.top = (e.clientY + 5) + "px";
 						chatMenu.style.right = (window.innerWidth - e.clientX + 5) + "px";
 						let menuBack = document.getElementById("menuBack")
-//						if (chatMenu.classList.contains("hided")) {
-							menuBack.classList.remove("pe-none");
-							chatMenu.classList.remove("displayNone");
-							chatMenu.style.pointerEvents = "all";
-							setTimeout(() => {
-								chatMenu.classList.remove("hided");
-							}, 15)
-//						} else {
-//							menuBack.classList.add("pe-none");
-//							chatMenu.classList.add("hided");
-//							chatMenu.style.pointerEvents = ("none");
-//							this.displayNone("menu")
-//						}
+						menuBack.classList.remove("pe-none");
+						chatMenu.classList.remove("displayNone");
+						chatMenu.style.pointerEvents = "all";
+						setTimeout(() => {
+							chatMenu.classList.remove("hided");
+						}, 15)
 					})
 				}
 				let chatBottom = document.getElementById("chatBottom")
@@ -455,24 +451,13 @@ export default class App {
 			let target = e.target;
 			target.classList.toggle("selected");
 			let menuBack = document.getElementById("menuBack")
-			if (target.classList.contains("selected")) {
-				let menu = document.getElementById("addFriendMenu");
-				menuBack.classList.remove("pe-none");
-				menu.classList.remove("displayNone");
-				menu.style.pointerEvents = "all";
-				setTimeout(() => {
-					menu.classList.remove("hided");
-					document.getElementById("addFriendInput").focus();
-				}, 15)
-			} else {
-				menuBack.classList.add("pe-none");
-				let menu = document.getElementById("addFriendMenu");
-				menu.classList.add("hided");
-				menu.style.pointerEvents = ("none");
-				this.displayNone("menu")
-				document.getElementById("addFriendInput").value = ""
-				document.getElementById("searchResult").innerHTML = "";
-			}
+			menuBack.classList.remove("pe-none");
+			menu.classList.remove("displayNone");
+			menu.style.pointerEvents = "all";
+			setTimeout(() => {
+				menu.classList.remove("hided");
+				document.getElementById("addFriendInput").focus();
+			}, 15)
 		})
 	}
 
@@ -658,23 +643,14 @@ export default class App {
 						}
 						target.classList.toggle("selected");
 						let menuBack = document.getElementById("menuBack")
-						if (target.classList.contains("selected")) {
-							menuBack.classList.remove("pe-none");
-							let menu = document.getElementById("menu");
-							menu.classList.remove("displayNone");
-							menu.style.pointerEvents = "all";
-							setTimeout(() => {
-								menu.classList.remove("hided");
-							}, 15)
-							let delFriendBtn = document.getElementById("deleteFriend");
-							delFriendBtn.dataset.id = e.target.dataset.id
-						} else {
-							menuBack.classList.add("pe-none");
-							let menu = document.getElementById("menu");
-							menu.classList.add("hided");
-							menu.style.pointerEvents = ("none");
-							this.displayNone("menu")
-						}
+						menuBack.classList.remove("pe-none");
+						menu.classList.remove("displayNone");
+						menu.style.pointerEvents = "all";
+						setTimeout(() => {
+							menu.classList.remove("hided");
+						}, 15)
+						let delFriendBtn = document.getElementById("deleteFriend");
+						delFriendBtn.dataset.id = e.target.dataset.id
 					})
 				}
 			}
