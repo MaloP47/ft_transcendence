@@ -15,6 +15,7 @@ urlpatterns = [
 	path('api/user/', views.getUser, name="getUser"),
 	path('api/messages/setRead/', views.messageSetRead, name="messageSetRead"),
 	path('api/view/chatMenu/', views.chatMenu, name="chatMenu"),
+	path('api/view/createGame/', views.createGame, name="createGame"),
 	path('api/view/profilMenu/', views.profilMenu, name="profilMenu"),
 	path('api/view/login/', views.loginForm, name="loginForm"),
 	path('api/view/register/', views.registerForm, name="registerForm"),
@@ -24,6 +25,11 @@ urlpatterns = [
 	path('api/view/chatRoomsView/', views.chatRoomsView, name="chatRoomsView"),
 	path('api/view/chatMessageView/', views.chatMessageView, name="chatMessageView"),
 	path('api/view/friendRequestView/', views.friendRequestView, name="friendRequestView"),
+
+
+
 	path('', views.index, name="index"),
-#	re_path(r'^', views.index, name="index"),
+	path('login', views.index, name="index"),
+	path('register', views.index, name="index"),
+	path('play1vsAI', views.index, name="index"),
 ]
