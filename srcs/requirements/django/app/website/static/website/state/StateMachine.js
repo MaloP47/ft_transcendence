@@ -49,6 +49,7 @@ export default class App {
 			"/": {title: "Transcendence", state: "Home"},
 			"/login": {title: "Transcendence - Login", state: "Login"},
 			"/register": {title: "Transcendence - Register", state: "Register"},
+			"/play1vsAI": {title: "Transcendence - 1 VS A.I.", state: "Play1vsAI"},
 		}
 	}
 
@@ -96,7 +97,7 @@ export default class App {
 						this.hideRegisterForm();
 					if (document.getElementById("loginForm"))
 						this.hideLoginForm();
-					this.getHomePage();
+					this.getHomePage("home");
 					break;
 				case "Login":
 					if (document.getElementById("registerForm"))
@@ -107,6 +108,15 @@ export default class App {
 					if (document.getElementById("loginForm"))
 						this.hideLoginForm();
 					this.getRegisterForm();
+					break;
+				case "Play1vsAI":
+					if (document.getElementById("registerForm"))
+						this.hideRegisterForm();
+					if (document.getElementById("loginForm"))
+						this.hideLoginForm();
+					if (document.getElementById("createGame"))
+						this.hideCreateGame();
+					this.getHomePage("1vsAI");
 					break;
 			}
 		} else {
@@ -245,7 +255,7 @@ export default class App {
 		}, 200);
 	}
 
-	getHomePage() {
+	getHomePage(state) {
 		if (this.user.authenticated) {
 			if (this.chatSocket)
 				this.chatSocket.close();
@@ -266,23 +276,49 @@ export default class App {
 			}.bind(this);
 		}
 
-		this.getApiResponse("/api/view/home/").then((response) => {
+		if (!document.getElementById("homeView")) {
+			this.getApiResponse("/api/view/home/").then((response) => {
+				let res = JSON.parse(response);
+				if (res.success) {
+					let topContent = document.getElementById("topContent");
+					topContent.innerHTML = res.html;
+					this.initHideMenusOnBgClick();
+					this.displayChat("Public");
+					this.addNotificationEvents();
+					this.initAddFriendBtn();
+					this.initDeleteFriendBtn();
+					this.updateRooms();
+					if (state == "home")
+						this.getCreateGame();
+					if (state == "1vsAI")
+						console.log("1 vs ai");
+					let homeView = document.getElementById("homeView");
+					setTimeout(() => {
+						homeView.classList.remove("hided");
+					}, 15);
+				}
+			})
+		} else {
+			// need to clean current home view and add what the user want...
+			if (state == "home")
+				this.getCreateGame();
+			if (state == "1vsAI")
+				console.log("1 vs ai");
+		}
+	}
+
+	getCreateGame() {
+		let homeContent = document.getElementById("homeContent");
+		this.getApiResponse("/api/view/createGame/").then((response) => {
 			let res = JSON.parse(response);
 			if (res.success) {
-				let topContent = document.getElementById("topContent");
-				topContent.innerHTML = res.html;
-				this.initHideMenusOnBgClick();
-				this.displayChat("Public");
-				this.addNotificationEvents();
-				this.initAddFriendBtn();
-				this.initDeleteFriendBtn();
-				this.updateRooms();
-				let homeView = document.getElementById("homeView");
+				homeContent.innerHTML = res.html;
+				let gameBtns = document.getElementById("createGame");	
 				setTimeout(() => {
-					homeView.classList.remove("hided");
+					gameBtns.classList.remove("hided");
 				}, 15);
 			}
-		})
+		});
 	}
 
 	initHideMenusOnBgClick() {
@@ -353,8 +389,6 @@ export default class App {
 				if (target.dataset.room != "Public") {
 					this.getApiResponseJson("/api/messages/setRead/", {room: target.dataset.room, user: target.dataset.user}).then((response) => {
 						let res = JSON.parse(response);
-						if (res.success)
-							console.log("messages updated correctly")
 					});
 				}
 				let chatRooms = chat.getElementsByClassName("chatRoom")
@@ -715,7 +749,6 @@ export default class App {
 							this.getApiResponseJson("/api/user/unblock/", {id: btns[i].dataset.id}).then((response) => {
 								let res = JSON.parse(response);
 								if (res.success) {
-									console.log("bravo")
 									this.searchUser(val);
 									let chat = document.getElementById("chatContainer").firstChild;
 									if (chat && chat.dataset.room == "Public")
@@ -776,6 +809,14 @@ export default class App {
 				}
 			}
 		});
+	}
+
+	hideCreateGame() {
+		let createGame = document.getElementById("createGame");
+		if (createGame) {
+			createGame.classList.add("hided");
+			this.remove("createGame")
+		}
 	}
 
 	hideLoginForm() {

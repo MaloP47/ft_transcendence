@@ -136,6 +136,10 @@ body {
 	transition: 200ms;
 }
 
+#createGame {
+	transition: 200ms;
+}
+
 #homeView {
 	transition: 200ms;
 }
