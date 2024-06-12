@@ -1,7 +1,11 @@
 {% if user.is_authenticated %}
 <div id="homeView" class="h-100 w-100 position-fixed hided">
-	<div class="w-100 position-fixed">
-		configuration pour jouer
+	<div class="h-100 d-flex flex-column justify-content-center position-absolute">
+		<div id="1v1" class="text-center">
+			<h2 class="playBtn px-3 py-1 rounded bg-white bg-blur-5 border border-light m-3">Local 1 VS A.I.</h2>
+			<h2 class="playBtn px-3 py-1 rounded bg-white bg-blur-5 border border-light m-3">Local 1 VS 1</h2>
+			<h2 class="playBtn px-3 py-1 rounded bg-white bg-blur-5 border border-light m-3">Remote 1 VS 1</h2>
+		</div>
 	</div>
 	<div id="chatDocker" class="p-0 position-fixed end-0 bg-blur-5 rounded-start-3 d-flex flex-column border border-light overflow-y-auto overflow-x-hidden " style="--bs-border-opacity:0.1; width:80px; top:70px; bottom:70px">
 		<div id="addFriend" class="bg-white rounded m-1 position-relative p-1 m-2" data-room="Public">
