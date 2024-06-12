@@ -6,7 +6,7 @@
 //   By: gbrunet <gbrunet@student.42.fr>            +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2024/06/07 16:16:11 by gbrunet           #+#    #+#             //
-//   Updated: 2024/06/11 11:06:18 by gbrunet          ###   ########.fr       //
+//   Updated: 2024/06/12 15:04:48 by gbrunet          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -457,7 +457,6 @@ export default class App {
 				let res = JSON.parse(response);
 				if (res.success) {
 					let chat = document.getElementById("chatContainer").firstChild;
-					console.log(chat);
 					if (chat && chat.dataset.user == e.target.dataset.id)
 						chat.remove();
 					else if (chat && chat.dataset.room == "Public")
@@ -710,6 +709,17 @@ export default class App {
 									this.chatSocket.send(JSON.stringify({
 										'friendRequest': btns[i].dataset.id
 									}));
+								}
+							});
+						} else if (e.target.dataset.type == "unblock") {
+							this.getApiResponseJson("/api/user/unblock/", {id: btns[i].dataset.id}).then((response) => {
+								let res = JSON.parse(response);
+								if (res.success) {
+									console.log("bravo")
+									this.searchUser(val);
+									let chat = document.getElementById("chatContainer").firstChild;
+									if (chat && chat.dataset.room == "Public")
+										this.displayChat("Public");
 								}
 							});
 						} else {
