@@ -53,6 +53,17 @@ body {
 	cursor: pointer;
 }
 
+.playBtn {
+	--bs-bg-opacity: 0.1;
+	--bs-border-opacity: 0.25;
+	cursor: pointer;
+	transition: 200ms;
+}
+
+.playBtn:hover {
+	--bs-bg-opacity: 0.2;
+}
+
 .room {
 	transition: 200ms;
 	--bs-bg-opacity:0.1;

@@ -1,13 +1,13 @@
 # **************************************************************************** #
-#                                                                              #
-#                                                         :::      ::::::::    #
-#    views.py                                           :+:      :+:    :+:    #
-#                                                     +:+ +:+         +:+      #
-#    By: gbrunet <gbrunet@student.42.fr>            +#+  +:+       +#+         #
-#                                                 +#+#+#+#+#+   +#+            #
-#    Created: 2024/06/12 14:48:57 by gbrunet           #+#    #+#              #
-#    Updated: 2024/06/12 14:59:45 by gbrunet          ###   ########.fr        #
-#                                                                              #
+#																			   #
+#														  :::	   ::::::::    #
+#	 views.py											:+:		 :+:	:+:    #
+#													  +:+ +:+		  +:+	   #
+#	 By: gbrunet <gbrunet@student.42.fr>			+#+  +:+	   +#+		   #
+#												  +#+#+#+#+#+	+#+			   #
+#	 Created: 2024/06/12 14:48:57 by gbrunet		   #+#	  #+#			   #
+#	 Updated: 2024/06/12 14:59:45 by gbrunet		  ###	########.fr		   #
+#																			   #
 # **************************************************************************** #
 
 from django.http import JsonResponse
@@ -264,9 +264,29 @@ def chatMessageView(request):
 	if request.method == 'POST':
 		data = json.loads(request.POST["data"]);
 		friend = User.objects.get(id=data['user']['id'])
+		blocked = BlockedUser.objects.filter(userFrom=request.user, userBlocked__id=data['user']['id']).exists();
 		return JsonResponse({
 			'success': True,
-			'html': render_to_string('website/chatMessageView.html', {"data": data, "user": request.user, "friend": friend}),
+			'html': render_to_string('website/chatMessageView.html', {"data": data, "user": request.user, "friend": friend, "blocked": blocked}),
+		});
+
+		data = json.loads(request.POST["data"]);
+		roomName = data['room']
+		roomId = "Public"
+		friendId = 0
+		if (data['room'] == "Public"):
+			messages = Message.objects.filter(room__publicRoom=True).filter(date__gte=datetime.now() - timedelta(hours=2)).order_by("date").annotate(block=Subquery(Exists(BlockedUser.objects.filter(userFrom=request.user, userBlocked__id=OuterRef("user_id")))))
+		else: 
+			messages = Message.objects.filter(room__id=data['room']).order_by("date")
+			room = Room.objects.get(id=data['room'])
+			roomId = room.id
+			for u in room.users.all():
+				if u != request.user:
+					roomName = u.username
+					friendId = u.id
+		return JsonResponse({
+			'success': True,
+			'html': render_to_string('website/chatView.html', {"user": request.user, "messages": messages, "roomName": roomName, "roomId": roomId, "friendId": friendId}),
 		});
 
 @csrf_exempt
