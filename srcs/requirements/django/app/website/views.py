@@ -1,10 +1,22 @@
+# **************************************************************************** #
+#                                                                              #
+#                                                         :::      ::::::::    #
+#    views.py                                           :+:      :+:    :+:    #
+#                                                     +:+ +:+         +:+      #
+#    By: gbrunet <gbrunet@student.42.fr>            +#+  +:+       +#+         #
+#                                                 +#+#+#+#+#+   +#+            #
+#    Created: 2024/06/12 14:48:57 by gbrunet           #+#    #+#              #
+#    Updated: 2024/06/12 14:59:45 by gbrunet          ###   ########.fr        #
+#                                                                              #
+# **************************************************************************** #
+
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.contrib.auth import login, logout, authenticate
 from django.template.loader import render_to_string
 from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Exists, F, Subquery, OuterRef
-from website.models import User, Message, Room, FriendRequest
+from website.models import BlockedUser, User, Message, Room, FriendRequest
 import json
 from datetime import datetime, timedelta
 
@@ -66,7 +78,7 @@ def searchUser(request):
 		).annotate(
 			ask=Subquery(Exists(FriendRequest.objects.filter(userTo=request.user).filter(userFrom_id=OuterRef("id"))))
 		).filter(username__icontains=data['search']).annotate(
-			block=Subquery(Exists(request.user.blocked.filter(id=OuterRef("id"))))
+			block=Subquery(Exists(BlockedUser.objects.filter(userFrom=request.user, userBlocked__id=OuterRef("id"))))
 		).filter(username__icontains=data['search']).exclude(id__in=request.user.friends.all())[:8]
 		return JsonResponse({
 			'success': True,
@@ -107,12 +119,26 @@ def deleteFriend(request):
 		});
 
 @csrf_exempt
+def unblockUser(request):
+	if request.method == 'POST':
+		data = json.loads(request.POST["data"]);
+		user = User.objects.get(id=data['id'])
+		blockedUser = BlockedUser.objects.get(userFrom=request.user, userBlocked=user)
+		blockedUser.delete()
+		return JsonResponse({
+			'success': True,
+		});
+
+@csrf_exempt
 def blockUser(request):
 	if request.method == 'POST':
 		data = json.loads(request.POST["data"]);
 		user = User.objects.get(id=data['id'])
-		request.user.blocked.add(user)
+		blockedUser = BlockedUser(userFrom=request.user, userBlocked=user)
+		blockedUser.save()
 		request.user.friends.remove(user)
+		room = Room.objects.filter(users=user).filter(users=request.user)
+		room.delete();
 		return JsonResponse({
 			'success': True,
 		});
@@ -177,7 +203,7 @@ def chatView(request):
 		roomId = "Public"
 		friendId = 0
 		if (data['room'] == "Public"):
-			messages = Message.objects.filter(room__publicRoom=True).filter(date__gte=datetime.now() - timedelta(hours=2)).order_by("date").annotate(block=Subquery(Exists(request.user.blocked.filter(id=OuterRef("user_id")))))
+			messages = Message.objects.filter(room__publicRoom=True).filter(date__gte=datetime.now() - timedelta(hours=2)).order_by("date").annotate(block=Subquery(Exists(BlockedUser.objects.filter(userFrom=request.user, userBlocked__id=OuterRef("user_id")))))
 		else: 
 			messages = Message.objects.filter(room__id=data['room']).order_by("date")
 			room = Room.objects.get(id=data['room'])
@@ -201,7 +227,7 @@ def chatMenu(request):
 		data = json.loads(request.POST["data"]);
 		user = User.objects.get(id=data['id']);
 		isFriend = request.user.friends.filter(id=data['id']).exists()
-		isBlocked = request.user.blocked.filter(id=data['id']).exists()
+		isBlocked = BlockedUser.objects.filter(userFrom=request.user, userBlocked__id=data['id']).exists()
 		return JsonResponse({
 			'success': True,
 			'html': render_to_string('website/chatMenu.html', {"user": request.user, "isFriend": isFriend, "isBlocked": isBlocked, "for": user}),

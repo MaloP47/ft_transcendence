@@ -5,7 +5,11 @@ class User(AbstractUser):
 	profilPicture = models.ImageField(verbose_name="Profil picture", upload_to="profilPicture", default="profilPicture/default.jpg")
 	online = models.BooleanField(default=True)
 	friends = models.ManyToManyField('self', blank=True)
-	blocked = models.ManyToManyField('self', blank=True)
+
+class BlockedUser(models.Model):
+	id = models.AutoField(primary_key=True)
+	userFrom = models.ForeignKey(User, on_delete=models.DO_NOTHING, related_name="userFrom", blank=True, null=True)
+	userBlocked = models.ForeignKey(User, on_delete=models.DO_NOTHING, related_name="userBlocked", blank=True, null=True)
 
 class Room(models.Model):
 	id = models.AutoField(primary_key=True)

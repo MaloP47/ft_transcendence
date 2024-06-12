@@ -9,7 +9,7 @@
 		{% elif u.ask %}
 		<button type="button" style="--bs-btn-padding-y: .15rem; --bs-btn-padding-x: .25rem" class="btn btn-primary w-100" data-id="{{u.id}}" data-type="accept">Accept friend request</button>
 		{% elif u.block %}
-		<button type="button" style="--bs-btn-padding-y: .15rem; --bs-btn-padding-x: .25rem" class="btn btn-light w-100" data-id="{{u.id}}" data-type="accept">Unblock user</button>
+		<button type="button" style="--bs-btn-padding-y: .15rem; --bs-btn-padding-x: .25rem" class="btn btn-light w-100" data-id="{{u.id}}" data-type="unblock">Unblock user</button>
 		{% else %}
 		<button type="button" style="--bs-btn-padding-y: .15rem; --bs-btn-padding-x: .25rem" class="btn btn-light w-100" data-id="{{u.id}}" data-type="send">Send friend request</button>
 		{% endif %}
