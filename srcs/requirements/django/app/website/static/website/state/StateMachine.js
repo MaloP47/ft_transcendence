@@ -27,6 +27,8 @@ export default class App {
 			if (e.target.matches("[data-api]")) {
 				e.preventDefault();
 				this.getApiResponse(e.target.dataset.api).then((response) => {
+					console.log('ok')
+					history.pushState("", "", e.target.href);
 					let res = JSON.parse(response)
 					if (res.needUserUpdate) {
 						this.updateUser();
