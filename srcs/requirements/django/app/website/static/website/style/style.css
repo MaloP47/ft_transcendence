@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   style.css                                          :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: gbrunet <gbrunet@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/06/07 09:37:34 by gbrunet           #+#    #+#             */
+/*   Updated: 2024/06/11 10:45:04 by gbrunet          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 @font-face {
 	font-family: "Bebas Neue";
 	src:
@@ -15,13 +27,80 @@ body {
 	font-family: "Bebas Neue", sans-serif;
 }
 
+#menu {
+	transition: opacity 200ms;
+}
+
+#chatMenu {
+	transition: opacity 200ms;
+}
+
+#addFriendMenu {
+	transition: opacity 200ms;
+}
+
+#addFriend {
+	transition: 200ms;
+	--bs-bg-opacity:0.1;
+}
+
+#addFriend.selected {
+	--bs-bg-opacity:0.5 !important;
+}
+
+#addFriend:hover {
+	--bs-bg-opacity:0.2;
+	cursor: pointer;
+}
+
+#aiConfig {
+	transition: 200ms;
+}
+
+.playBtn {
+	--bs-bg-opacity: 0.1;
+	--bs-border-opacity: 0.25;
+	cursor: pointer;
+	transition: 200ms;
+}
+
+.playBtn:hover {
+	--bs-bg-opacity: 0.2;
+}
+
+.room {
+	transition: 200ms;
+	--bs-bg-opacity:0.1;
+}
+
+.room.selected {
+	--bs-bg-opacity:0.5 !important;
+}
+
+.room:hover {
+	--bs-bg-opacity:0.2;
+	cursor: pointer;
+}
+
 .user {
 	transition: 200ms;
 	--bs-bg-opacity:0.1;
 }
 
+.user.selected {
+	--bs-bg-opacity:0.5 !important;
+}
+
+.divider{
+	width: 80%;
+	height: 1px;
+	margin: 5px auto;
+	background-color: rgba(255,255,255, 0.3)
+}
+
 .user:hover {
 	--bs-bg-opacity:0.2;
+	cursor: pointer;
 }
 
 .roboto {
@@ -37,28 +116,61 @@ body {
 	backdrop-filter: blur(5px);
 }
 
+.bg-blur-15 {
+	backdrop-filter: blur(15px);
+}
+
+.notification {
+	transition: 200ms;
+}
+
 #profilMenu {
 	transition: 200ms;
 }
 
-#loginForm {	
+#loginForm {
 	transition: 200ms;
 }
 
-#loginFormAlert {	
+#loginFormAlert {
 	transition: 200ms;
 }
 
-#registerForm {	
+#registerForm {
 	transition: 200ms;
 }
 
-#homeView {	
+#createGame {
 	transition: 200ms;
+}
+
+#homeView {
+	transition: 200ms;
+}
+
+#chatContainer {
+	transition: 200ms;
+	width:400px;
+	right:90px;
+	top:70px;
+	bottom:70px;
+}
+
+.unread {
+	border: 2px rgba(255, 255, 255, 0.35) solid;
 }
 
 .hided {
-	opacity:0;
+	opacity: 0;
+}
+
+.displayNone {
+	display: none;
+}
+
+.height0 {
+	height: 0;
+	margin: 0 !important;
 }
 
 .trXm100 {
@@ -95,6 +207,10 @@ body {
 
 ::-webkit-scrollbar-thumb:hover {
 	background: rgba(255, 255, 255, 0.75);
+}
+
+.message {
+	transition: 300ms;
 }
 
 .message__outer {

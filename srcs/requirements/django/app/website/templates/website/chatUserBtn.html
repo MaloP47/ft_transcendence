@@ -1,0 +1,9 @@
+{% for friend in friends %}
+	<div class="user bg-white rounded m-1 position-relative" style="padding-top:5px;" data-id="{{friend.id}}">
+	<div class="position-absolute p-1  {% if friend.live %}bg-success{% elif friend.connected %}bg-dark-subtle{% else %}bg-danger{% endif %} border border-light rounded-circle" style="top:5px; right:5px; width:16px; height:16px;"></div>
+	<div class="chatUserPicture bg-white rounded-circle flex-shrink-0" style="background-image: url('{{friend.profilPicture.url}}'); background-size: cover; width:60px; height:60px; margin-left:5px; pointer-events:none"></div>
+		<center class="chatUserName text-break roboto" style="font-size:0.7rem !important; pointer-events: none">
+			{{friend.username}}
+		</center>
+	</div>
+{% endfor %}

@@ -6,7 +6,7 @@
 //   By: gbrunet <gbrunet@student.42.fr>            +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2024/05/21 13:52:15 by gbrunet           #+#    #+#             //
-//   Updated: 2024/05/31 15:29:29 by gbrunet          ###   ########.fr       //
+//   Updated: 2024/06/04 17:39:19 by gbrunet          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -56,7 +56,7 @@ function sub(val, sub, max) {
 	return (Math.max(val - sub, -max));
 }
 
-class Pong {
+export default class Pong {
 	constructor() {
 		this.InitThreeJs();
 		this.InitKeys();
@@ -66,6 +66,7 @@ class Pong {
 		this.InitGameVariable();
 		this.InitStates();
 		this.Animate();
+	//	this.ToState(this.states.ready)
 	}
 
 	InitThreeJs() {
@@ -73,17 +74,8 @@ class Pong {
 			antialias: true,
 		});
 		this.threejs.setSize(WIDTH, HEIGHT);
+		this.threejs.setPixelRatio(window.devicePixelRatio * 0.50)
 		this.canvas = document.getElementById('canvas').appendChild(this.threejs.domElement);
-//		this.scores = document.getElementById('scoresContainer');
-//		this.scoresText = document.getElementById('scores');
-//		this.p1score = document.getElementById('p1score');
-//		this.p2score = document.getElementById('p2score');
-//		this.loginForm = document.getElementById('loginForm');
-//		this.loginForm.style.display = "none";
-//		this.loginBtn = document.getElementById('loginBtn');
-//		this.topBar = document.getElementById('topBar');
-//		this.scores.style.opacity = "0";
-//		this.SetStyle();
 		this.camera = new THREE.PerspectiveCamera(58, WIDTH / HEIGHT, 0.1, 1000);
 		this.camera.position.set(0, 0, 27);
 		this.camera.lookAt(new THREE.Vector3(0, 0, 0));
@@ -125,10 +117,6 @@ class Pong {
 			fragmentShader: vignetteFragmentShader,
 		}));
 		this.composer.addPass(this.vignette);
-	}
-
-	SetStyle() {
-
 	}
 
 	InitKeys() {
@@ -226,16 +214,7 @@ class Pong {
 			this.threejs.setSize(WIDTH, HEIGHT);
 			this.composer.setSize(WIDTH, HEIGHT);
 			this.vignette.uniforms['lines'].value = HEIGHT / 4;
-			this.SetStyle();
 		});
-/*		this.loginBtn.addEventListener("click", () => {
-			this.loginForm.classList.add("hided");
-			setTimeout(() => {
-				this.loginForm.style.display = "none";
-			}, "500")
-			this.loginForm.style.display = "block";
-			this.ToState(this.states.ready);
-		});*/
 	}
 
 	InitGameVariable() {
@@ -266,11 +245,9 @@ class Pong {
 				},
 				run(pong) {
 					pong.ToState(pong.states.login);
-//					pong.loginForm.style.display = "block";
 				},
 				fadeOut(pong) {
 					this.status = "in";
-//					pong.topBar.classList.remove("hided");
 				}
 			},
 			login: {
@@ -286,8 +263,6 @@ class Pong {
 					pong.camera.position.set(Math.cos(pong.totalTime / 3000) * 18, Math.sin(pong.totalTime / 2000) * 18, Math.sin(pong.totalTime / 2500) * 7 + 18 + (1 - progress) * 100);
 					pong.camera.lookAt(new THREE.Vector3(0, 0, 0));
 					pong.camera.rotation.z = pong.totalTime / 2000 + 3.1415 / 2 - (1 - progress) * 3;
-//					if (progress >= .75)
-//						pong.loginForm.classList.remove("hided");
 					if (this.time > this.inTime) {
 						this.status = "active";
 						pong.p1.startAI();
@@ -357,14 +332,12 @@ class Pong {
 					}
 					pong.fade.uniforms['amount'].value = Math.min(progress, 0.75) / 0.75;
 					pong.dot.uniforms['amount'].value = 1 - Math.max(progress - 0.25, 0) / 0.75;
-					pong.scores.style.opacity = Math.max(0, progress - 0.75) / 0.25;
 					if (this.time > this.inTime) {
 						this.status = "active";
 						this.time = 0;
 					}
 				},
 				run(pong) {
-					console.log(pong.elapsedTime);
 					if (HEIGHT < 800) {
 						pong.camera.position.set(0, -11, 17 + (800 - HEIGHT) / 70);
 						pong.camera.lookAt(new THREE.Vector3(0, 1 - (HEIGHT / 800) * 3, 0));
@@ -739,9 +712,3 @@ function router() {
 		}
 	}
 }
-
-window.addEventListener('DOMContentLoaded', () => {
-	const test = App.get();
-//	APP = new Transcendence();
-//	APP = new Pong();
-})

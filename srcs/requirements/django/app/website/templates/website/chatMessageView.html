@@ -1,0 +1,31 @@
+{% if data.user.id != user.id %}
+	{% if blocked %}
+<div class="roboto text-secondary px-2 pt-1" style="font-size:0.75rem !important">{{data.user.username}} (blocked) sent a message</div>
+	{% else %}
+<div class="message mt-2 height0 hided">
+	<div class="message__outer">
+		<div class="message__avatar rounded-circle bg-success mx-2 border border-white" data-user="{{data.user.id}}" style="background-image: url('{{friend.profilPicture.url}}'); background-size: cover; --bs-border-opacity:0.2; cursor:pointer"></div>
+		<div class="message__inner">
+			<div class="message__spacer"></div>
+			<div style="margin-bottom: -5px;">
+				<div class="message__bubble bg-white text-dark rounded-4 rounded-bottom-left-1 p-1 px-2 pe-2" style="--bs-bg-opacity:0.75">{{data.message}}</div>
+				<div class="roboto" style="font-size:0.75rem !important; color:#bbb"><b>{{data.user.username}} - <span style="font-size: 0.65rem !important">{{data.timestamp}}</span></b></div>
+			</div>
+		</div>
+	</div>
+</div>
+	{% endif %}
+{% else %}
+<div class="message mt-2 height0 hided">
+	<div class="message__outer">
+		<div class="message__inner">
+			<div style="margin-bottom: -5px;">
+				<div class="message__bubble bg-primary rounded-4 rounded-bottom-right-1 p-1 px-2 pe-2" style="--bs-bg-opacity:0.75">{{data.message}}</div>
+				<div class="roboto" style="font-size:0.75rem !important; color:#bbb"><b>{{data.user.username}} - <span style="font-size: 0.65rem !important">{{data.timestamp}}</span></b></div>
+			</div>
+			<div class="message__spacer"></div>
+		</div>
+		<div class="message__avatar rounded-circle bg-success mx-2 border border-white" data-user="{{user.id}}" style="background-image: url('{{user.profilPicture.url}}'); background-size: cover; --bs-border-opacity:0.2; cursor:pointer"></div>
+	</div>
+</div>
+{% endif  %}

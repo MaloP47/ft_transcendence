@@ -4,6 +4,8 @@ FROM python:3.11-alpine3.20
 # RUN apt install redis-server -y
 
 RUN apk update
+RUN apk add build-base
+RUN apk add -u libffi-dev
 RUN apk add redis
 
 ENV PIP_DISABLE_PIP_VERSION_CHECK 1
