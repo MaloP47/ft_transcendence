@@ -1,4 +1,4 @@
 *.log
 srcs/requirements/django/app/debug.log
 
-.env
+.env.env
