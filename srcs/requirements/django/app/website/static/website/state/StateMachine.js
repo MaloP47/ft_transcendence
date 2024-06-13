@@ -276,7 +276,7 @@ export default class App {
 			}.bind(this);
 		}
 
-		if (!document.getElementById("homeView")) {
+		if (!document.getElementById("homeView") || !this.user.authenticated) {
 			this.getApiResponse("/api/view/home/").then((response) => {
 				let res = JSON.parse(response);
 				if (res.success) {
@@ -309,11 +309,13 @@ export default class App {
 
 	getCreateGame() {
 		let homeContent = document.getElementById("homeContent");
+		if (!homeContent)
+			return ;
 		this.getApiResponse("/api/view/createGame/").then((response) => {
 			let res = JSON.parse(response);
 			if (res.success) {
 				homeContent.innerHTML = res.html;
-				let gameBtns = document.getElementById("createGame");	
+				let gameBtns = document.getElementById("createGame");
 				setTimeout(() => {
 					gameBtns.classList.remove("hided");
 				}, 15);
