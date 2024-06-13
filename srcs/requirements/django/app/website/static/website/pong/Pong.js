@@ -1,12 +1,12 @@
 // ************************************************************************** //
 //                                                                            //
 //                                                        :::      ::::::::   //
-//   main.js                                            :+:      :+:    :+:   //
+//   Pong.js                                            :+:      :+:    :+:   //
 //                                                    +:+ +:+         +:+     //
 //   By: gbrunet <gbrunet@student.42.fr>            +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2024/05/21 13:52:15 by gbrunet           #+#    #+#             //
-//   Updated: 2024/06/04 17:39:19 by gbrunet          ###   ########.fr       //
+//   Updated: 2024/06/13 16:02:10 by gbrunet          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -361,9 +361,29 @@ export default class Pong {
 				},
 				fadeOut(pong) {
 					this.time += pong.elapsedTime;
+					var progress = pong.easeInCubic(Math.min(this.time / this.outTime, 1));
+					pong.fade.uniforms['amount'].value = 1 - progress;
+					if (HEIGHT < 800) {
+						pong.camera.position.set(0, (progress) * -20 - 11, 17 + (800 - HEIGHT) / 70);
+						pong.camera.lookAt(new THREE.Vector3(0, progress * ((HEIGHT / 800) * 3), 0));
+					} else {
+						pong.camera.position.set(0, (progress) * -20 - 11, 17 + (progress) * 10);
+						pong.camera.lookAt(new THREE.Vector3(0, (1 - progress) * -2, 0));	
+					}
 					if (this.time > this.outTime) {
 						this.status = "in";
 						this.time = 0;
+						pong.p1.reset();
+						pong.p2.reset();
+						pong.camera.position.set(0, 0, 27);
+						pong.camera.lookAt(new THREE.Vector3(0, 0, 0));
+						pong.bonus.reset();
+						pong.bonusParticles.reset();
+						pong.ball.reset();
+						pong.ballFire.reset();
+						pong.impactParticles.reset();
+						pong.ballParticles.reset();
+						pong.dot.uniforms['amount'].value = 1;
 					}
 				}
 			}

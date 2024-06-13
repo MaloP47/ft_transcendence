@@ -6,7 +6,7 @@
 //   By: gbrunet <gbrunet@student.42.fr>            +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2024/06/13 11:54:22 by gbrunet           #+#    #+#             //
-//   Updated: 2024/06/13 12:11:26 by gbrunet          ###   ########.fr       //
+//   Updated: 2024/06/13 16:24:13 by gbrunet          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -90,7 +90,13 @@ export default class App {
 	}
 
 	router(back) {
-		let view = this.routes[location.pathname];
+		let path = String(location.pathname)
+		let id = -1
+		if (path.indexOf("/play1vsAI/") == 0) {
+			id = path.substring(11)
+			path = "/play1vsAI"
+		}
+		let view = this.routes[path];
 		if (view) {
 			document.title = view.title;
 			switch(view.state) {
@@ -100,16 +106,22 @@ export default class App {
 					if (document.getElementById("loginForm"))
 						this.hideLoginForm();
 					this.getHomePage("home");
+					if (this.pong)
+						this.pong.ToState(this.pong.states.login)
 					break;
 				case "Login":
 					if (document.getElementById("registerForm"))
 						this.hideRegisterForm();
 					this.getLoginForm();
+					if (this.pong)
+						this.pong.ToState(this.pong.states.login)
 					break;
 				case "Register":
 					if (document.getElementById("loginForm"))
 						this.hideLoginForm();
 					this.getRegisterForm();
+					if (this.pong)
+						this.pong.ToState(this.pong.states.login)
 					break;
 				case "Play1vsAI":
 					if (document.getElementById("registerForm"))
@@ -118,7 +130,9 @@ export default class App {
 						this.hideLoginForm();
 					if (document.getElementById("createGame"))
 						this.hideCreateGame();
-					this.getHomePage("1vsAI");
+					if (id == -1 && this.pong)
+						this.pong.ToState(this.pong.states.login)
+					this.getHomePage("1vsAI", id);
 					break;
 			}
 		} else {
@@ -257,7 +271,7 @@ export default class App {
 		}, 200);
 	}
 
-	getHomePage(state) {
+	getHomePage(state, game_id) {
 		if (this.user.authenticated) {
 			if (this.chatSocket)
 				this.chatSocket.close();
@@ -292,8 +306,10 @@ export default class App {
 					this.updateRooms();
 					if (state == "home")
 						this.getCreateGame();
-					if (state == "1vsAI")
+					else if (state == "1vsAI" && game_id == -1)
 						this.getLocalAiConfigPage();
+					else if (state == "1vsAI" && game_id != -1)
+						this.getLocalAiGame(game_id);
 					let homeView = document.getElementById("homeView");
 					setTimeout(() => {
 						homeView.classList.remove("hided");
@@ -304,9 +320,46 @@ export default class App {
 			// need to clean current home view and add what the user want...
 			if (state == "home")
 				this.getCreateGame();
-			if (state == "1vsAI")
+			else if (state == "1vsAI" && game_id == -1) {
+				this.hideLocalAiGame();
 				this.getLocalAiConfigPage();
+			} else if (state == "1vsAI" && game_id != -1) {
+				this.hideLocalAiConfigPage();
+				this.getLocalAiGame(game_id);
+			}
 		}
+	}
+
+	hideLocalAiGame() {
+		let gameOverlay = document.getElementById("gameOverlay");
+		if (!gameOverlay)
+			return ;
+		gameOverlay.classList.add("hided")
+		this.remove("gameOverlay")
+	}
+
+	getLocalAiGame(id) {
+		console.log(id)
+		this.getApiResponseJson("/api/game/get/", {id: id}).then((response) => {
+			let res = JSON.parse(response);
+			if (res.success) {
+				let homeContent = document.getElementById("homeContent");
+				homeContent.innerHTML += res.html;
+				let gameOverlay = document.getElementById("gameOverlay")
+				if (gameOverlay.dataset.loaded != "true") {
+					gameOverlay.dataset.loaded = "true";
+					this.pong.ToState(this.pong.states.ready)
+				}
+			}
+		});
+	}
+	
+	hideLocalAiConfigPage() {
+		let configView = document.getElementById("aiConfig");
+		if (!configView)
+			return ;
+		configView.classList.add("hided")
+		this.remove("aiConfig")
 	}
 
 	getLocalAiConfigPage() {
@@ -319,6 +372,8 @@ export default class App {
 				homeContent.innerHTML += res.html;
 				setTimeout(() => {
 					let configView = document.getElementById("aiConfig");
+					if (!configView)
+						return ;
 					configView.classList.remove("hided");
 					this.setAiConfigInteraction();
 				}, 200);
@@ -327,44 +382,75 @@ export default class App {
 	}
 
 	setAiConfigInteraction() {
-		let winScore = document.getElementById("winScore");
-		let winScoreText = document.getElementById("winScoreText");
-		winScore.addEventListener('input', (e) => {
-			winScoreText.innerHTML = winScore.value;
-		});
-		let startSpeed = document.getElementById("startSpeed");
-		let startSpeedText = document.getElementById("startSpeedText");
-		startSpeed.addEventListener('input', (e) => {
-			startSpeedText.innerHTML = startSpeed.value;
-		});
-		if (document.querySelector('input[name="bonuses"]')) {
-			document.querySelectorAll('input[name="bonuses"]').forEach((elem) => {
-				elem.addEventListener("change", function(event) {
-					console.log(event.target.value);
+		let config = {
+			winScore: 10,
+			startSpeed: 8,
+			bonuses: true,
+			ai: 1,
+			leftKey: 65,
+			rightKey: 68,
+		}
+		let configView = document.getElementById("aiConfig");
+		if (configView.dataset.events != "done") {
+			configView.dataset.events = "done";
+			let winScore = document.getElementById("winScore");
+			let winScoreText = document.getElementById("winScoreText");
+			winScore.addEventListener('input', (e) => {
+				winScoreText.innerHTML = winScore.value;
+				config.winScore = winScore.value;
+			});
+			let startSpeed = document.getElementById("startSpeed");
+			let startSpeedText = document.getElementById("startSpeedText");
+			startSpeed.addEventListener('input', (e) => {
+				startSpeedText.innerHTML = startSpeed.value;
+				config.startSpeed = startSpeed.value;
+			});
+			if (document.querySelector('input[name="bonuses"]')) {
+				document.querySelectorAll('input[name="bonuses"]').forEach((elem) => {
+					elem.addEventListener("change", function(event) {
+						if (event.target.value == 'on')
+							config.bonuses = true;
+						else
+							config.bonuses = false;
+					});
+				});
+			}
+			if (document.querySelector('input[name="aiLevel"]')) {
+				document.querySelectorAll('input[name="aiLevel"]').forEach((elem) => {
+					elem.addEventListener("change", function(event) {
+						if (event.target.value == 'normal')
+							config.ai = 1;
+						else
+							config.ai = 2;
+					});
+				});
+			}
+			let leftKey = document.getElementById("leftKey");
+			leftKey.addEventListener("click", async (e) => {
+				leftKey.innerHTML = "_";
+				await this.waitKeypress("leftKey");
+				config.leftKey = leftKey.dataset.code;
+			})
+			let rightKey = document.getElementById("rightKey");
+			rightKey.addEventListener("click", async (e) => {
+				rightKey.innerHTML = "_";
+				await this.waitKeypress("rightKey");
+				config.rightKey = rightKey.dataset.code;
+			})
+			let playBtn = document.getElementById("playBtn")
+			playBtn.addEventListener("click", (e) => {
+				this.getApiResponseJson("/api/game/new/1vsAI/", config).then((response) => {
+				let res = JSON.parse(response);
+				if (res.success) {
+						let aiConfig = document.getElementById("aiConfig");
+						aiConfig.classList.add("hided")
+						this.remove("aiConfig")
+						history.pushState("", "", "/play1vsAI/" + res.id);
+						this.router();
+					}
 				});
 			});
 		}
-		if (document.querySelector('input[name="aiLevel"]')) {
-			document.querySelectorAll('input[name="aiLevel"]').forEach((elem) => {
-				elem.addEventListener("change", function(event) {
-					console.log(event.target.value);
-				});
-			});
-		}
-		let leftKey = document.getElementById("leftKey");
-		leftKey.addEventListener("click", async (e) => {
-			leftKey.innerHTML = "_";
-			await this.waitKeypress("leftKey");
-		})
-		let rightKey = document.getElementById("rightKey");
-		rightKey.addEventListener("click", async (e) => {
-			rightKey.innerHTML = "_";
-			await this.waitKeypress("rightKey");
-		})
-		let playBtn = document.getElementById("playBtn")
-		playBtn.addEventListener("click", (e) => {
-			console.log("PLAY CLICKED DUDE !");
-		});
 	}
 
 	waitKeypress(id) {
@@ -383,6 +469,7 @@ export default class App {
 						btn.innerHTML = "→";
 					else if (e.keyCode == 40)
 						btn.innerHTML = "↓";
+					btn.dataset.code = e.keyCode;
 					document.removeEventListener('keydown', onKeyHandler);
 					resolve();
 				}
