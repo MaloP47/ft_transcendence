@@ -216,6 +216,13 @@ def chatMenu(request):
 			'html': render_to_string('website/chatMenu.html', {"user": request.user, "isFriend": isFriend, "isBlocked": isBlocked, "for": user}),
 		})
 
+def localAiConfig(request):
+	if request.method == 'POST':
+		return JsonResponse({
+			'success': True,
+			'html': render_to_string('website/localAiConfig.html'),
+		})
+
 def createGame(request):
 	if request.method == 'POST':
 		return JsonResponse({
