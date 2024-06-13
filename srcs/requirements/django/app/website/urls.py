@@ -16,6 +16,7 @@ urlpatterns = [
 	path('api/messages/setRead/', views.messageSetRead, name="messageSetRead"),
 	path('api/view/chatMenu/', views.chatMenu, name="chatMenu"),
 	path('api/view/createGame/', views.createGame, name="createGame"),
+	path('api/view/localAiConfig/', views.localAiConfig, name="localAiConfig"),
 	path('api/view/profilMenu/', views.profilMenu, name="profilMenu"),
 	path('api/view/login/', views.loginForm, name="loginForm"),
 	path('api/view/register/', views.registerForm, name="registerForm"),

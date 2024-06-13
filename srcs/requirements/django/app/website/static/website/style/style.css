@@ -53,6 +53,10 @@ body {
 	cursor: pointer;
 }
 
+#aiConfig {
+	transition: 200ms;
+}
+
 .playBtn {
 	--bs-bg-opacity: 0.1;
 	--bs-border-opacity: 0.25;

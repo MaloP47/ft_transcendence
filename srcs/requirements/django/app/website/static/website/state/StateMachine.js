@@ -293,7 +293,7 @@ export default class App {
 					if (state == "home")
 						this.getCreateGame();
 					if (state == "1vsAI")
-						console.log("1 vs ai");
+						this.getLocalAiConfigPage();
 					let homeView = document.getElementById("homeView");
 					setTimeout(() => {
 						homeView.classList.remove("hided");
@@ -305,8 +305,24 @@ export default class App {
 			if (state == "home")
 				this.getCreateGame();
 			if (state == "1vsAI")
-				console.log("1 vs ai");
+				this.getLocalAiConfigPage();
 		}
+	}
+
+	getLocalAiConfigPage() {
+		let homeContent = document.getElementById("homeContent");
+		if (!homeContent)
+			return ;
+		this.getApiResponse("/api/view/localAiConfig/").then((response) => {
+			let res = JSON.parse(response);
+			if (res.success) {
+				homeContent.innerHTML += res.html;
+				let configView = document.getElementById("aiConfig");
+				setTimeout(() => {
+					configView.classList.remove("hided");
+				}, 15);
+			}
+		});
 	}
 
 	getCreateGame() {
