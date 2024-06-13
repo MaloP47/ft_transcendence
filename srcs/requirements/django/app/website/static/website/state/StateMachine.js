@@ -5,8 +5,8 @@
 //                                                    +:+ +:+         +:+     //
 //   By: gbrunet <gbrunet@student.42.fr>            +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
-//   Created: 2024/06/07 16:16:11 by gbrunet           #+#    #+#             //
-//   Updated: 2024/06/12 15:04:48 by gbrunet          ###   ########.fr       //
+//   Created: 2024/06/13 11:54:22 by gbrunet           #+#    #+#             //
+//   Updated: 2024/06/13 12:11:26 by gbrunet          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -41,7 +41,7 @@ export default class App {
 			else if (e.target.matches("[data-link]")) {
 				e.preventDefault();
 				history.pushState("", "", e.target.href);
-        		this.router();
+				this.router();
 			}
 		});
 	}
@@ -128,7 +128,7 @@ export default class App {
 	}
 
 	//----------------------------------------------------------//
-	//                  DJANGO-JS COMMUNICATION                 //
+	//					DJANGO-JS COMMUNICATION					//
 	//----------------------------------------------------------//
 
 	getCookie(name) {
@@ -211,7 +211,7 @@ export default class App {
 	}
 
 	//----------------------------------------------------------//
-	//                      VIEW UPDATE                         //
+	//						VIEW UPDATE							//
 	//----------------------------------------------------------//
 
 	toggleProfilMenu() {
@@ -317,10 +317,75 @@ export default class App {
 			let res = JSON.parse(response);
 			if (res.success) {
 				homeContent.innerHTML += res.html;
-				let configView = document.getElementById("aiConfig");
 				setTimeout(() => {
+					let configView = document.getElementById("aiConfig");
 					configView.classList.remove("hided");
-				}, 15);
+					this.setAiConfigInteraction();
+				}, 200);
+			}
+		});
+	}
+
+	setAiConfigInteraction() {
+		let winScore = document.getElementById("winScore");
+		let winScoreText = document.getElementById("winScoreText");
+		winScore.addEventListener('input', (e) => {
+			winScoreText.innerHTML = winScore.value;
+		});
+		let startSpeed = document.getElementById("startSpeed");
+		let startSpeedText = document.getElementById("startSpeedText");
+		startSpeed.addEventListener('input', (e) => {
+			startSpeedText.innerHTML = startSpeed.value;
+		});
+		if (document.querySelector('input[name="bonuses"]')) {
+			document.querySelectorAll('input[name="bonuses"]').forEach((elem) => {
+				elem.addEventListener("change", function(event) {
+					console.log(event.target.value);
+				});
+			});
+		}
+		if (document.querySelector('input[name="aiLevel"]')) {
+			document.querySelectorAll('input[name="aiLevel"]').forEach((elem) => {
+				elem.addEventListener("change", function(event) {
+					console.log(event.target.value);
+				});
+			});
+		}
+		let leftKey = document.getElementById("leftKey");
+		leftKey.addEventListener("click", async (e) => {
+			leftKey.innerHTML = "_";
+			await this.waitKeypress("leftKey");
+		})
+		let rightKey = document.getElementById("rightKey");
+		rightKey.addEventListener("click", async (e) => {
+			rightKey.innerHTML = "_";
+			await this.waitKeypress("rightKey");
+		})
+		let playBtn = document.getElementById("playBtn")
+		playBtn.addEventListener("click", (e) => {
+			console.log("PLAY CLICKED DUDE !");
+		});
+	}
+
+	waitKeypress(id) {
+		return new Promise((resolve) => {
+			let btn = document.getElementById(id);
+			document.addEventListener('keydown', onKeyHandler);
+			function onKeyHandler(e) {
+				if ((e.keyCode >= 65 && e.keyCode <= 90) || (e.keyCode >= 37 && e.keyCode <= 40)) {
+					if (e.keyCode >= 65)
+						btn.innerHTML = String.fromCharCode(e.keyCode);
+					else if (e.keyCode == 37)
+						btn.innerHTML = "←";
+					else if (e.keyCode == 38)
+						btn.innerHTML = "↑";
+					else if (e.keyCode == 39)
+						btn.innerHTML = "→";
+					else if (e.keyCode == 40)
+						btn.innerHTML = "↓";
+					document.removeEventListener('keydown', onKeyHandler);
+					resolve();
+				}
 			}
 		});
 	}
@@ -924,7 +989,7 @@ export default class App {
 	}
 
 	//----------------------------------------------------------//
-	//                       SINGLETON                          //
+	//						 SINGLETON							//
 	//----------------------------------------------------------//
 
 	static get() {

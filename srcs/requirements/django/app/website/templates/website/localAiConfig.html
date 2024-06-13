@@ -1,3 +1,39 @@
-<div id="aiConfig" class="d-flex hided flex-column justify-content-center align-items-center position-fixed w-100">
-	salut
+<div id="aiConfig" class="d-flex hided flex-column justify-content-center align-items-center position-fixed w-100" style="z-index:300">
+	<div class="p-3 bg-blur-5 rounded border border-light d-flex flex-column align-items-center position-fixed" style="--bs-border-opacity:0.25;">
+		<h2>Local 1 VS A.I. - Game configuration</h2>
+		<div class="divider mb-3"></div>
+		<div class="d-flex mb-2" style="width:475px">
+			<label for="winScore" style="width:175px" class="form-label fs-5 flex-shrink-0 me-2">Score to win ( <b><span id="winScoreText">10</span></b> ) :</label>
+			<input type="range" class="form-range mt-1" min="2" max="21" step="1" value="10" id="winScore">
+		</div>
+		<div class="d-flex mb-2" style="width:475px">
+			<label for="startSpeed" style="width:175px" class="form-label fs-5 flex-shrink-0 me-2">Ball start speed ( <b><span id="startSpeedText">8</span></b> ) :</label>
+			<input type="range" class="form-range mt-1" min="5" max="15" step="0.5" value="8" id="startSpeed">
+		</div>
+		<div class="d-flex w-100 align-items-center mb-2">
+			<span class="fs-5 me-auto">Bonuses :</span>
+			<input type="radio" class="btn-check" name="bonuses" id="bonusesOn" autocomplete="off" value="on" checked />
+			<label style="width:140px" class="btn btn-outline-light" for="bonusesOn">On</label>
+			<input type="radio" class="btn-check" name="bonuses" id="bonusesOff" autocomplete="off" value="off" />
+			<label style="width:140px; margin-left:10px" class="btn btn-outline-light" for="bonusesOff">Off</label>
+		</div>
+		<div class="d-flex w-100 align-items-center mb-2">
+			<span class="fs-5 me-auto">A.I. Level :</span>
+			<input type="radio" class="btn-check" name="aiLevel" id="normal" autocomplete="off" value="normal" checked />
+			<label style="width:140px" class="btn btn-outline-light" for="normal">Normal</label>
+			<input type="radio" class="btn-check" name="aiLevel" id="hard" autocomplete="off" value="hard" />
+			<label style="width:140px; margin-left:10px" class="btn btn-outline-light" for="hard">Hard</label>
+		</div>
+		<div class="divider my-3"></div>
+		<div class="d-flex w-100 align-items-center mb-2">
+			<span class="fs-5 me-auto">Left key :</span>
+			<button id="leftKey" class="btn btn-outline-light" style="width:290px">A</button>
+		</div>
+		<div class="d-flex w-100 align-items-center mb-2">
+			<span class="fs-5 me-auto">Right key :</span>
+			<button id="rightKey" class="btn btn-outline-light" style="width:290px">D</button>
+		</div>
+		<div class="divider mt-3 mb-4"></div>
+		<button id="playBtn" class="btn btn-outline-light fs-5 mb-2" style="width:290px">PLAY</button>
+	</div>
 </div>
