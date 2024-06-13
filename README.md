@@ -22,7 +22,7 @@ rm -rf ~/.local/share/Trash/*
     - [ ] relation with wsgi and django?
     - [ ] gunicorn?
 
-# .env Manager
+### .env Manager
 - [ ] choose what language to make manager (bash or something else?)
 - [ ] verify existence of all needed environment variables in .env file
 - [ ] prompts to create .env if it doesn't exist
