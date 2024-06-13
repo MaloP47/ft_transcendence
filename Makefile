@@ -10,6 +10,10 @@
 #                                                                              #
 # **************************************************************************** #
 
+
+### ------------------ ###
+### --- Formatting --- ###
+
 _BLACK = \033[0;30m
 _RED = \033[0;31m
 _GREEN = \033[0;32m
@@ -24,7 +28,10 @@ _THIN = \e[2m
 
 _END = \033[0m
 
-.PHONY : all stop re clean
+### --- Formatting --- ###
+### ------------------ ###
+
+.PHONY : all stop clean fclean migrate makemigrations createsuperuser list help re rere
 
 all:
 	@echo "$(_GREEN)Building and running Transcendence...$(_END)"
