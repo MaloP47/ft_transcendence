@@ -2,9 +2,25 @@ global:
   scrape_interval: 1s
 
 scrape_configs:
-  - job_name: 'prometheus'
+  - job_name: 'django'
     static_configs:
-      - targets: ['prometheus:9090']
+      - targets: ['django:8000']
+
+  - job_name: 'db'
+    static_configs:
+      - targets: ['postgres:5432']
+
+  - job_name: 'nginx'
+    static_configs:
+      - targets: ['nginx:80']
+
+  - job_name: 'rabbitmq'
+    static_configs:
+      - targets: ['rabbitmq:15672']
+
+  - job_name: 'grafana'
+    static_configs:
+      - targets: ['grafana:3000']
 
   - job_name: 'docker-exporter'
     static_configs:

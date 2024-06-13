@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: gbrunet <gbrunet@student.42.fr>            +#+  +:+       +#+         #
+#    By: guderram <guderram@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/05/28 10:17:29 by gbrunet           #+#    #+#              #
-#    Updated: 2024/05/28 10:40:28 by gbrunet          ###   ########.fr        #
+#    Updated: 2024/06/13 18:10:46 by guderram         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -41,8 +41,8 @@ stop:
 clean:
 	make stop --no-print-directory
 	@echo "$(_YELLOW)Removing all unused containers...$(_END)"
-	docker system prune
-	docker volume prune
+	docker system prune -f
+	docker volume prune -f
 
 
 fclean:

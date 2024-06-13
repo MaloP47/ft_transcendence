@@ -70,6 +70,10 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=adminpassword
       - GF_SERVER_ROOT_URL=%(protocol)s://%(domain)s:%(http_port)s/grafana/
       - GF_SERVER_SERVE_FROM_SUB_PATH=true
+    volumes:
+      - ./requirements/grafana/conf/datasource.yml:/etc/grafana/provisioning/datasources/datasource.yml
+      - ./requirements/grafana/conf/dashboard.yml:/etc/grafana/provisioning/dashboards/dashboard.yml
+      - ./requirements/grafana/conf/dashboards:/etc/grafana/provisioning/dashboards
     networks:
       - transcendence
     restart: on-failure
@@ -79,6 +83,8 @@ services:
     container_name: prometheus
     ports:
       - "9090:9090"
+    volumes:
+      - ./requirements/prometheus/conf/prometheus.yml:/etc/prometheus/prometheus.yml
     networks:
       - transcendence
     restart: on-failure
