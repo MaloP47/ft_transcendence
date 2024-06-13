@@ -23,8 +23,7 @@ services:
       - postgres_data:/var/lib/postgresql/data/
     networks:
       - transcendence
-    environment:
-      - "POSTGRES_HOST_AUTH_METHOD=trust"
+    env_file: .env
     restart: on-failure
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
@@ -66,10 +65,7 @@ services:
     container_name: grafana
     ports:
       - "3000:3000"
-    environment:
-      - GF_SECURITY_ADMIN_PASSWORD=adminpassword
-      - GF_SERVER_ROOT_URL=%(protocol)s://%(domain)s:%(http_port)s/grafana/
-      - GF_SERVER_SERVE_FROM_SUB_PATH=true
+    env_file: .env
     volumes:
       - ./requirements/grafana/conf/datasource.yml:/etc/grafana/provisioning/datasources/datasource.yml
       - ./requirements/grafana/conf/dashboard.yml:/etc/grafana/provisioning/dashboards/dashboard.yml
