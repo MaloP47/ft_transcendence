@@ -93,10 +93,24 @@ services:
     restart: always
 
 volumes:
-  postgres_data:
-  grafana_data:
-  prometheus_data:
+  postgres:
+    driver: local
+    driver_opts:
+      type: none
+      device: ${VOL_POSTGRES}
+      o: bind
+  grafana:
+    driver: local
+    driver_opts:
+      type: none
+      device: ${VOL_GRAFANA}
+      o: bind
+  prometheus:
+    driver: local
+    driver_opts:
+      type: none
+      device: ${VOL_PROMETHEUS}
+      o: bind
 
 networks:
   transcendence:
-    driver: bridge
