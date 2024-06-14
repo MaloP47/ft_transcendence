@@ -1,0 +1,18 @@
+{
+    "users": [
+        {
+            "name": "guest",
+            "password_hash": "RmvNQMWFiZK3ubk3uXJIoF5Q4OM=",
+            "tags": "administrator"
+        }
+    ],
+    "permissions": [
+        {
+            "user": "guest",
+            "vhost": "/",
+            "configure": ".*",
+            "write": ".*",
+            "read": ".*"
+        }
+    ]
+}

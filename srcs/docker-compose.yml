@@ -15,6 +15,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
 
   db:
     container_name: postgres
@@ -59,6 +61,14 @@ services:
     networks:
       - transcendence
     restart: on-failure
+    volumes:
+      - ./requirements/conf/rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
+      - ./requirements/conf/rabbitmq/definitions.json:/etc/rabbitmq/definitions.json
+    healthcheck:
+      test: ["CMD-SHELL", "rabbitmqctl status"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   grafana:
     image: grafana/grafana:9.5.19
@@ -88,8 +98,8 @@ services:
   docker-exporter:
     image: prom/node-exporter
     container_name: docker-exporter
-    ports:
-      - "9300:9100"
+    # ports:
+    #   - "9300:9100"
     networks:
       - transcendence
     restart: always
