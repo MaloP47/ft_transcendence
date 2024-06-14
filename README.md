@@ -7,6 +7,30 @@ sudo journalctl --vacuum-time=1d
 rm -rf ~/.local/share/Trash/*
 ```
 
+# File structure
+```
+.
+├── .gitignore
+├── docker-compose.yml
+├── Makefile
+├── README.md
+└── srcs
+    ├── services
+    │   ├── django
+    │   │   ├── app
+    │   │   └── Dockerfile
+    │   ├── grafana
+    │   │   └── conf
+    │   ├── nginx
+    │   │   ├── conf
+    │   │   └── Dockerfile
+    │   └── prometheus
+    │       └── conf
+    └── tools
+        ├── check_dotenv.sh
+        └── install_docker.sh
+```
+
 # TODO
 ### Makefile
 - [ ] Unify django manage commands in one rule (use arguments or a script, idk yet)
