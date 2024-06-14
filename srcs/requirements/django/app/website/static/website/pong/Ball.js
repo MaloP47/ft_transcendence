@@ -114,6 +114,7 @@ export default class Ball {
 		this.ball.position.y = 0;
 		this.ball.position.x = 0;
 		if (player == 1) {
+			console.log(this.pong.state)
 			this.pong.p1.score += 1;
 			this.pong.stateMachine.getApiResponseJson("/api/game/save/",
 				{
@@ -141,6 +142,25 @@ export default class Ball {
 		if (this.pong.bonus)
 			clearTimeout(this.pong.bonus.nextTimeout);
 		if (this.pong.p1.score >= this.pong.winScore || this.pong.p2.score >= this.pong.winScore) {
+			let endDiv = document.getElementById("countdown");
+			if (endDiv) {
+				if (this.pong.p1.score > this.pong.p2.score) {
+					if (this.pong.p1.AI) {
+						endDiv.innerHTML = "A.I. wins this game !"
+					} else {
+						endDiv.innerHTML = this.pong.p1infos.username + " wins this game !"
+					}
+				} else {
+					if (this.pong.p2.AI) {
+						endDiv.innerHTML = "A.I. wins this game !"
+					} else {
+						endDiv.innerHTML = this.pong.p2infos.username + " wins this game !"
+					}
+				}
+				endDiv.classList.remove("coundown");
+				endDiv.style.fontSize = "5rem";
+				endDiv.classList.add("visible");
+			}
 			console.log("game finished...")
 		} else {
 			this.nextTimeout = setTimeout(() => {

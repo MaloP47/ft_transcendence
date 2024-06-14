@@ -6,7 +6,7 @@
 //   By: gbrunet <gbrunet@student.42.fr>            +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2024/05/21 13:52:15 by gbrunet           #+#    #+#             //
-//   Updated: 2024/06/14 12:13:15 by gbrunet          ###   ########.fr       //
+//   Updated: 2024/06/14 17:15:07 by gbrunet          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -57,7 +57,7 @@ function sub(val, sub, max) {
 }
 
 export default class Pong {
-	constructor() {
+	constructor(data) {
 		this.InitThreeJs();
 		this.InitKeys();
 		this.InitMesh();
@@ -444,6 +444,8 @@ export default class Pong {
 		this.bonuses = res.bonuses;
 		this.p1.score = res.p1score;
 		this.p2.score = res.p2score;
+		this.p1infos = res.p1;
+		this.p2infos = res.p2;
 	}
 
 	Animate() {

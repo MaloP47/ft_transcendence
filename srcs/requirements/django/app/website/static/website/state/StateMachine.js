@@ -6,7 +6,7 @@
 //   By: gbrunet <gbrunet@student.42.fr>            +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2024/06/13 11:54:22 by gbrunet           #+#    #+#             //
-//   Updated: 2024/06/14 14:04:57 by gbrunet          ###   ########.fr       //
+//   Updated: 2024/06/14 17:23:38 by gbrunet          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -352,12 +352,32 @@ export default class App {
 					document.getElementById("p1score").innerHTML = res.p1score
 					document.getElementById("p2score").innerHTML = res.p2score
 					if (res.p1score >= res.winScore || res.p2score >= res.winScore) {
+						let endDiv = document.getElementById("countdown");
+						if (endDiv) {
+							if (res.p1score > res.p2score) {
+								if (res.p1.id == -1) {
+									endDiv.innerHTML = "A.I. wins this game !"
+								} else {
+									endDiv.innerHTML = res.p1.username + " wins this game !"
+								}
+							} else {
+								if (res.p2.id == -1) {
+									endDiv.innerHTML = "A.I. wins this game !"
+								} else {
+									endDiv.innerHTML = res.p2.username + " wins this game !"
+								}
+							}
+							endDiv.classList.remove("coundown");
+							endDiv.style.fontSize = "5rem"
+							endDiv.classList.add("visible");
+						}
 						console.log('game is finished...')
 					} else {
 						this.pong.setConfig(res);
 						this.pong.p1.setAI(false);
 						this.pong.p2.setAI(false);
 						this.pong.ToState(this.pong.states.ready);
+						console.log("sdfsdfsdf")
 						setTimeout(()=> {
 							this.animateCountdown(5, res);
 						}, 1000)
@@ -369,7 +389,7 @@ export default class App {
 
 	animateCountdown(sec, res) {
 		let countdown = document.getElementById("countdown");
-		if (sec >= 0 && countdown) {
+		if (sec >= 0 && countdown && countdown.innerHTML != sec) {
 			countdown.innerHTML = sec;
 			countdown.classList.remove("countdown");
 			setTimeout(()=>{
@@ -527,7 +547,7 @@ export default class App {
 				homeContent.innerHTML = res.html;
 				let gameBtns = document.getElementById("createGame");
 				setTimeout(() => {
-					gameBtns.classList.remove("hided");
+					document.getElementById("createGame").classList.remove("hided");
 				}, 15);
 			}
 		});
