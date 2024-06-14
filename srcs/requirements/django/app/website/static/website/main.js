@@ -5,5 +5,6 @@ window.addEventListener('DOMContentLoaded', () => {
 	setTimeout(() => {
 		const website = App.get();
 		website.pong = new Pong();
+		website.pong.stateMachine = website;
 	}, 250)
 })

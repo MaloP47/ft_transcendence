@@ -6,7 +6,7 @@
 //   By: gbrunet <gbrunet@student.42.fr>            +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2024/05/21 13:52:15 by gbrunet           #+#    #+#             //
-//   Updated: 2024/06/14 10:02:13 by gbrunet          ###   ########.fr       //
+//   Updated: 2024/06/14 11:40:06 by gbrunet          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -74,7 +74,7 @@ export default class Pong {
 			antialias: true,
 		});
 		this.threejs.setSize(WIDTH, HEIGHT);
-		this.threejs.setPixelRatio(window.devicePixelRatio * 0.50)
+		this.threejs.setPixelRatio(window.devicePixelRatio * 1)
 		this.canvas = document.getElementById('canvas').appendChild(this.threejs.domElement);
 		this.camera = new THREE.PerspectiveCamera(58, WIDTH / HEIGHT, 0.1, 1000);
 		this.camera.position.set(0, 0, 27);
@@ -220,6 +220,7 @@ export default class Pong {
 		this.endRound = false;
 		this.transiWaitScreen = 0;
 		this.waitScreen = true;
+		this.winScore = 10;
 	}
 
 	InitStates() {
@@ -347,9 +348,6 @@ export default class Pong {
 						pong.bonus.Update();
 						pong.bonusParticles.Update();
 						pong.ballParticles.Update();
-					} else {
-						pong.p1.reset();
-						pong.p2.reset();
 					}
 				},
 				fadeOut(pong) {
@@ -357,10 +355,10 @@ export default class Pong {
 					var progress = pong.easeInCubic(Math.min(this.time / this.outTime, 1));
 					pong.fade.uniforms['amount'].value = 1 - progress;
 					if (HEIGHT < 800) {
-						pong.camera.position.set(0, (progress) * -20 - 11, 17 + (800 - HEIGHT) / 70);
-						pong.camera.lookAt(new THREE.Vector3(0, progress * ((HEIGHT / 800) * 3), 0));
+						pong.camera.position.set(0, (progress) * -20 - 13, 20 + (800 - HEIGHT) / 20);
+						pong.camera.lookAt(new THREE.Vector3(0, (1 - progress) * (2 - (HEIGHT / 800) * 4), 0));
 					} else {
-						pong.camera.position.set(0, (progress) * -20 - 11, 17 + (progress) * 10);
+						pong.camera.position.set(0, (progress) * -20 - 13, 20 + (progress) * 10);
 						pong.camera.lookAt(new THREE.Vector3(0, (1 - progress) * -2, 0));	
 					}
 					if (this.time > this.outTime) {
@@ -411,19 +409,21 @@ export default class Pong {
 	}
 
 	setConfig(res) {
-		console.log(res);
 		this.p1LeftKey = res.p1Left;
 		this.p1RightKey = res.p1Right;
 		this.p2LeftKey = res.p2Left;
 		this.p2RightKey = res.p2Right;
 		this.ball.initSpeed = res.ballSpeed / 100;
-		this.ball.resetBall(1, true);
+		this.ball.resetBall(0, true);
+		this.winScore = res.winScore;
+		this.bonuses = res.bonuses;
+		this.p1.score = res.p1score;
+		this.p2.score = res.p2score;
 	}
 
 	Animate() {
 		this.elapsedTime = performance.now() - this.totalTime;
 		this.totalTime = performance.now()
-		
 		this.CheckState();
 		this.UpdateShaders();
 

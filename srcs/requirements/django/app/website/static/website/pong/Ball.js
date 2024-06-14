@@ -6,7 +6,7 @@
 //   By: gbrunet <gbrunet@student.42.fr>            +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2024/05/24 13:13:55 by gbrunet           #+#    #+#             //
-//   Updated: 2024/06/14 10:01:25 by gbrunet          ###   ########.fr       //
+//   Updated: 2024/06/14 11:31:57 by gbrunet          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -101,42 +101,59 @@ export default class Ball {
 		this.velocity.y = Math.cos((this.initAngle - 45) * Math.PI / 180);
 	}
 
-	resetBall(player, full) {
+	resetBall(player) {
 		this.pong.endRound = true;
 		this.pong.bonus.setActive(false);
 		this.pong.exchange = 0;
+		this.ball.position.y = 0;
 		this.ball.position.x = 0;
 		if (player == 1) {
 			this.pong.p1.score += 1;
+			this.pong.stateMachine.getApiResponseJson("/api/game/save/",
+				{
+					id: this.pong.game_id,
+					p1: this.pong.p1.score,
+					p2: this.pong.p2.score
+				})
 			this.ball.position.y = -0.5;
 			let p1score = document.getElementById("p1score");
-			if (p1score && !full)
+			if (p1score)
 				p1score.innerHTML = this.pong.p1.score;
-		} else {
+		} else if (player == 2) {
 			this.pong.p2.score += 1;
+			this.pong.stateMachine.getApiResponseJson("/api/game/save/",
+				{
+					id: this.pong.game_id,
+					p1: this.pong.p1.score,
+					p2: this.pong.p2.score
+				})
 			this.ball.position.y = 0.5;
 			let p2score = document.getElementById("p2score");
-			if (p2score && !full)
+			if (p2score)
 				p2score.innerHTML = this.pong.p2.score;
 		}
 		clearTimeout(this.pong.bonus.nextTimeout);
-		this.nextTimeout = setTimeout(() => {
-			this.initAngle = Math.random() * 90;
-			this.velocity = new THREE.Vector3(0, 0, 0);
-			if (player == 1) {
-				this.velocity.x = Math.sin((this.initAngle + 135) * Math.PI / 180);
-				this.velocity.y = Math.cos((this.initAngle + 135) * Math.PI / 180);
-			} else {
-				this.velocity.x = Math.sin((this.initAngle - 45) * Math.PI / 180);
-				this.velocity.y = Math.cos((this.initAngle - 45) * Math.PI / 180);
-			}
-			this.pong.endRound = false;
-			this.speed = this.initSpeed;
-			this.pong.bonus.bonus.position.x = (Math.random() - 0.5) * 12;
-			this.pong.bonus.bonus.position.y = (Math.random() - 0.5) * 4;
-			this.pong.bonus.startTime = 0;
-			this.pong.bonus.type = Math.floor(Math.random() * 5);
-		}, "3000");
+		if (this.pong.p1.score >= this.pong.winScore || this.pong.p2.score >= this.pong.winScore) {
+			console.log("game finished...")
+		} else {
+			this.nextTimeout = setTimeout(() => {
+				this.initAngle = Math.random() * 90;
+				this.velocity = new THREE.Vector3(0, 0, 0);
+				if (player == 1) {
+					this.velocity.x = Math.sin((this.initAngle + 135) * Math.PI / 180);
+					this.velocity.y = Math.cos((this.initAngle + 135) * Math.PI / 180);
+				} else {
+					this.velocity.x = Math.sin((this.initAngle - 45) * Math.PI / 180);
+					this.velocity.y = Math.cos((this.initAngle - 45) * Math.PI / 180);
+				}
+				this.pong.endRound = false;
+				this.speed = this.initSpeed;
+				this.pong.bonus.bonus.position.x = (Math.random() - 0.5) * 12;
+				this.pong.bonus.bonus.position.y = (Math.random() - 0.5) * 4;
+				this.pong.bonus.startTime = 0;
+				this.pong.bonus.type = Math.floor(Math.random() * 5);
+			}, 1000);
+		}
 	}
 	
 	checkCollisionPlayer(player) {

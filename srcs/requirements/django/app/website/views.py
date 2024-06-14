@@ -68,6 +68,19 @@ def signinUser(request):
 		'success': False,
 	})
 
+def saveGame(request):
+	if request.method == 'POST':
+		data = json.loads(request.POST["data"]);
+		game = Game.objects.get(id=data['id'])
+		print(data['id'])
+		print(game)
+		game.p1Score = data['p1']
+		game.p2Score = data['p2']
+		game.save()
+		return JsonResponse({
+			'success': True,
+		})
+
 def getGame(request):
 	if request.method == 'POST':
 		data = json.loads(request.POST["data"]);

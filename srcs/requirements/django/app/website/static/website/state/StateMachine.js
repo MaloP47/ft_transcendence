@@ -6,7 +6,7 @@
 //   By: gbrunet <gbrunet@student.42.fr>            +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2024/06/13 11:54:22 by gbrunet           #+#    #+#             //
-//   Updated: 2024/06/13 16:24:13 by gbrunet          ###   ########.fr       //
+//   Updated: 2024/06/14 11:37:48 by gbrunet          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -341,6 +341,7 @@ export default class App {
 		this.getApiResponseJson("/api/game/get/", {id: id}).then((response) => {
 			let res = JSON.parse(response);
 			if (res.success) {
+				this.pong.game_id = id;
 				let homeContent = document.getElementById("homeContent");
 				if (document.getElementById("gameOverlay"))
 					return ;
@@ -348,6 +349,8 @@ export default class App {
 				let gameOverlay = document.getElementById("gameOverlay")
 				if (gameOverlay.dataset.loaded != "true") {
 					gameOverlay.dataset.loaded = "true";
+					document.getElementById("p1score").innerHTML = res.p1score
+					document.getElementById("p2score").innerHTML = res.p2score
 					this.pong.setConfig(res);
 					this.pong.ToState(this.pong.states.ready);
 					setTimeout(()=> {
@@ -373,6 +376,7 @@ export default class App {
 		if (sec == 0 && countdown) {
 			setTimeout(()=>{
 				this.pong.start = true;
+				this.pong.endRound = false;
 				if (res.ai == 1) {
 					this.pong.p2.setAI(true);
 					this.pong.p2.startAI();

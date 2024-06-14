@@ -158,7 +158,6 @@ export default class Player {
 		if (this.bonus.reversed.on)
 			coef = -1;
 		var mult = 1;
-		console.log("allo")
 		if (this.bonus.frozen.on)
 			mult = 0.2;
 		if (this.player == 1) {

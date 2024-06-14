@@ -13,8 +13,11 @@ urlpatterns = [
 	path('api/user/acceptfriend/', views.acceptFriend, name="acceptFriend"),
 	path('api/user/deleterequest/', views.deleteRequest, name="deleteRequest"),
 	path('api/user/', views.getUser, name="getUser"),
+
 	path('api/game/get/', views.getGame, name="getGame"),
+	path('api/game/save/', views.saveGame, name="saveGame"),
 	path('api/game/new/1vsAI/', views.gameNew1vsAi, name="gameNew1vsAi"),
+
 	path('api/messages/setRead/', views.messageSetRead, name="messageSetRead"),
 	path('api/view/chatMenu/', views.chatMenu, name="chatMenu"),
 	path('api/view/createGame/', views.createGame, name="createGame"),
