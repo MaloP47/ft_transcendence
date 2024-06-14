@@ -6,7 +6,7 @@
 //   By: gbrunet <gbrunet@student.42.fr>            +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2024/05/24 13:13:55 by gbrunet           #+#    #+#             //
-//   Updated: 2024/05/24 16:57:00 by gbrunet          ###   ########.fr       //
+//   Updated: 2024/06/14 10:01:25 by gbrunet          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -24,7 +24,8 @@ export default class Ball {
 		this.ball = new THREE.Mesh(this.geometry, this.material);
 		this.pong.scene.add(this.ball);
 
-		this.speed = 0.08;
+		this.initSpeed = 0.08;
+		this.speed = this.initSpeed;
 
 		this.prevPos = this.ball.position.clone();
 		this.currentPos = this.ball.position.clone();
@@ -100,7 +101,7 @@ export default class Ball {
 		this.velocity.y = Math.cos((this.initAngle - 45) * Math.PI / 180);
 	}
 
-	resetBall(player) {
+	resetBall(player, full) {
 		this.pong.endRound = true;
 		this.pong.bonus.setActive(false);
 		this.pong.exchange = 0;
@@ -108,11 +109,15 @@ export default class Ball {
 		if (player == 1) {
 			this.pong.p1.score += 1;
 			this.ball.position.y = -0.5;
-//			this.pong.p1score.innerHTML = this.pong.p1.score + "";
+			let p1score = document.getElementById("p1score");
+			if (p1score && !full)
+				p1score.innerHTML = this.pong.p1.score;
 		} else {
 			this.pong.p2.score += 1;
 			this.ball.position.y = 0.5;
-//			this.pong.p2score.innerHTML = this.pong.p2.score + "";
+			let p2score = document.getElementById("p2score");
+			if (p2score && !full)
+				p2score.innerHTML = this.pong.p2.score;
 		}
 		clearTimeout(this.pong.bonus.nextTimeout);
 		this.nextTimeout = setTimeout(() => {
@@ -126,7 +131,7 @@ export default class Ball {
 				this.velocity.y = Math.cos((this.initAngle - 45) * Math.PI / 180);
 			}
 			this.pong.endRound = false;
-			this.speed = 0.08;
+			this.speed = this.initSpeed;
 			this.pong.bonus.bonus.position.x = (Math.random() - 0.5) * 12;
 			this.pong.bonus.bonus.position.y = (Math.random() - 0.5) * 4;
 			this.pong.bonus.startTime = 0;
@@ -191,7 +196,7 @@ export default class Ball {
 			this.pong.exchange++;
 			if (this.pong.exchange == 2)
 				this.pong.bonus.active = true;
-			this.speed = 0.08 + Math.min(this.pong.exchange / 300, 0.15);
+			this.speed = this.initSpeed + Math.min(this.pong.exchange / 300, 0.15);
 		}
 	}
 

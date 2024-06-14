@@ -6,7 +6,7 @@
 //   By: gbrunet <gbrunet@student.42.fr>            +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2024/05/21 13:52:15 by gbrunet           #+#    #+#             //
-//   Updated: 2024/06/13 16:02:10 by gbrunet          ###   ########.fr       //
+//   Updated: 2024/06/14 10:02:13 by gbrunet          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -194,13 +194,6 @@ export default class Pong {
 				this.p2Left = false;
 			} else if (keyCode == this.p2RightKey && this.p2Right && !this.p2.AI) {
 				this.p2Right = false;
-			} else if (keyCode == 32) {
-			//	this.start = true;
-				if (this.currentState == this.states.ready && this.currentState.status == "active" && !this.start) {
-					this.start = true;
-					this.p2.setAI(true);
-					this.p2.startAI();
-				}
 			}
 		};
 		window.addEventListener('resize', () => {
@@ -324,10 +317,10 @@ export default class Pong {
 					pong.vignette.uniforms['amount'].value = 1;
 					var progress = pong.easeOutCubic(Math.min(this.time / this.inTime, 1));
 					if (HEIGHT < 800) {
-						pong.camera.position.set(0, (1 - progress) * -20 - 11, 17 + (800 - HEIGHT) / 70);
-						pong.camera.lookAt(new THREE.Vector3(0, progress * (1 - (HEIGHT / 800) * 3), 0));
+						pong.camera.position.set(0, (1 - progress) * -20 - 13, 20 + (800 - HEIGHT) / 20);
+						pong.camera.lookAt(new THREE.Vector3(0, progress * (2 - (HEIGHT / 800) * 4), 0));
 					} else {
-						pong.camera.position.set(0, (1 - progress) * -20 - 11, 17 + (1 - progress) * 10);
+						pong.camera.position.set(0, (1 - progress) * -20 - 13, 20 + (1 - progress) * 10);
 						pong.camera.lookAt(new THREE.Vector3(0, progress * -2, 0));	
 					}
 					pong.fade.uniforms['amount'].value = Math.min(progress, 0.75) / 0.75;
@@ -339,10 +332,10 @@ export default class Pong {
 				},
 				run(pong) {
 					if (HEIGHT < 800) {
-						pong.camera.position.set(0, -11, 17 + (800 - HEIGHT) / 70);
-						pong.camera.lookAt(new THREE.Vector3(0, 1 - (HEIGHT / 800) * 3, 0));
+						pong.camera.position.set(0, -13, 20 + (800 - HEIGHT) / 20);
+						pong.camera.lookAt(new THREE.Vector3(0, 2 - (HEIGHT / 800) * 4, 0));
 					} else {
-						pong.camera.position.set(0, -11, 17);
+						pong.camera.position.set(0, -13, 20);
 						pong.camera.lookAt(new THREE.Vector3(0, -2, 0));	
 					}
 					if (pong.start) {
@@ -417,6 +410,16 @@ export default class Pong {
 		this.currentState = state;
 	}
 
+	setConfig(res) {
+		console.log(res);
+		this.p1LeftKey = res.p1Left;
+		this.p1RightKey = res.p1Right;
+		this.p2LeftKey = res.p2Left;
+		this.p2RightKey = res.p2Right;
+		this.ball.initSpeed = res.ballSpeed / 100;
+		this.ball.resetBall(1, true);
+	}
+
 	Animate() {
 		this.elapsedTime = performance.now() - this.totalTime;
 		this.totalTime = performance.now()
@@ -434,76 +437,6 @@ export default class Pong {
 			this.p2.subSpeed();
 		if ((!this.p2.bonus.reversed.on && this.p2Right) || (this.p2.bonus.reversed.on && this.p2Left))
 			this.p2.addSpeed();
-		/*
-
-		this.p1.Update();
-		this.p2.Update();
-
-		
-		if (this.start) {
-			if (this.transiWaitScreen < 1)
-				this.transiWaitScreen = Math.min(this.transiWaitScreen + this.elapsedTime / 1000, 1);
-		}
-		if (this.start || this.waitScreen) {
-			this.ball.Update();
-			this.ballFire.Update();
-			this.impactParticles.Update();
-			this.bonus.Update();
-			this.bonusParticles.Update();
-			this.ballParticles.Update();
-		}
-		if (this.waitScreen) {
-			this.camera.position.set(Math.cos(this.totalTime / 3000) * 20, Math.sin(this.totalTime / 2000) * 20, Math.sin(this.totalTime / 2500) * 7 + 23);
-			this.camera.lookAt(new THREE.Vector3(0, 0, 0));
-			this.camera.rotation.z = this.totalTime / 2000 + 3.1415 / 2;
-			if (this.transiWaitScreen != 0) {
-				this.endRound = true;
-				var initCam = {
-					p: {
-						x: this.camera.position.x,
-						y: this.camera.position.y,
-						z: this.camera.position.z,
-					},
-					r:{
-						x: this.camera.rotation.x % 6.283185307,
-						y: this.camera.rotation.y % 6.283185307,
-						z: this.camera.rotation.z % 6.283185307,
-					}
-				}
-				this.camera.position.set(0, 0, 27);
-				this.camera.lookAt(new THREE.Vector3(0, 0, 0));
-				this.camera.rotation.z = 0;
-				var endCam = {
-					p: {
-						x: this.camera.position.x,
-						y: this.camera.position.y,
-						z: this.camera.position.z,
-					},
-					r:{
-						x: this.camera.rotation.x % 6.283185307,
-						y: this.camera.rotation.y % 6.283185307,
-						z: this.camera.rotation.z % 6.283185307,
-					}
-				}
-				this.LerpCamera(initCam, endCam, this.transiWaitScreen);
-				if (this.transiWaitScreen == 1) {
-					this.waitScreen = false;
-					this.p1.stopAI();
-					this.p2.stopAI();
-					this.totalTime = 0;
-					this.elapsedTime = 0;
-					this.lastHit = 0;
-					this.exchange = 0;
-					this.start = false;
-					this.ball.ball.position.x = 0;
-					this.ball.ball.position.y = 0;
-					this.p1.bar.position.x = 0;
-					this.p2.bar.position.x = 0;
-				}
-			}
-		}
-		*/
-		// end temp
 		this.composer.render();
 	}
 
@@ -550,185 +483,11 @@ export default class Pong {
 	LerpCamera(initCam, endCam, t) {
 		var sqr = t * t;
 		var smooth = sqr / (2 * (sqr - t) + 1);
-//		if (initCam.r.x > 3.141592653) {initCam.r.x -= 6.283185307}
-//		if (initCam.r.y > 3.141592653) {initCam.r.y -= 6.283185307}
-//		if (initCam.r.z > 3.141592653) {initCam.r.z -= 6.283185307}
-//		if (endCam.r.x > 3.141592653) {endCam.r.x -= 6.283185307}
-//		if (endCam.r.y > 3.141592653) {endCam.r.y -= 6.283185307}
-//		if (endCam.r.z > 3.141592653) {endCam.r.z -= 6.283185307}
 		this.camera.position.x = (1 - smooth) * initCam.p.x + smooth * endCam.p.x;
 		this.camera.position.y = (1 - smooth) * initCam.p.y + smooth * endCam.p.y;
 		this.camera.position.z = (1 - smooth) * initCam.p.z + smooth * endCam.p.z;
 		this.camera.rotation.x = (1 - smooth) * initCam.r.x + smooth * endCam.r.x;
 		this.camera.rotation.y = (1 - smooth) * initCam.r.y + smooth * endCam.r.y;
 		this.camera.rotation.z = (1 - smooth) * initCam.r.z + smooth * endCam.r.z;
-	}
-}
-
-let APP = null;
-
-class Transcendence {
-	constructor() {
-		this.pong = new Pong();
-		window.addEventListener("click", e => {
-			if (e.target.matches("[data-api]")) {
-				e.preventDefault();
-				this.getApiResponse(e.target.dataset.api).then((val) => {
-					console.log(val);
-					this.updateUser();
-				});
-			}
-		});
-		this.initUser();
-		this.updateUser();
-	}
-
-	initUser() {
-		this.user = {
-			authenticated: false,
-			username: "",
-		};
-	}
-
-	updateUser() {
-		this.getApiResponse("/api/user/").then((response) => {
-			let user = JSON.parse(response);
-			if (user.authenticated) {
-				this.user.authenticated = true;
-				this.user.username = user.username;
-			}
-			else {
-				this.user.authenticated = false;
-				this.user.username = "";
-			}
-			this.updateView();
-		});
-	}
-
-/*
-window.addEventListener("popstate", router);
-window.addEventListener("DOMContentLoaded", router);
-	let home = "<h1>home</h1>";
-	let about = "<h1>about</h1>";
-	const routes = {
-		"/": {title: "home", render: home},
-		"/about": {title: "about", render: about}
-	}
-
-function router() {
-	let view = routes[location.pathname];
-
-	if (view) {
-		document.title = view.title;
-		document.getElementById('test').innerHTML = view.render;
-	} else {
-		history.replaceState("", "", "/");
-		router();
-	}
-}*/
-
-	getCookie(name) {
-		let cookieValue = null;
-		if (document.cookie && document.cookie !== '') {
-			const cookies = document.cookie.split(';');
-			for (let i = 0; i < cookies.length; i++) {
-				const cookie = cookies[i].trim();
-				if (cookie.substring(0, name.length + 1) === (name + '=')) {
-					cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-					break;
-				}
-			}
-		}
-		return cookieValue;
-	}
-
-	makeApiRequest(url) {
-		let csrf = this.getCookie('csrftoken');
-		return new Promise(function (resolve, reject) {
-			let xhr = new XMLHttpRequest();
-			xhr.open("POST", url);
-			xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
-			xhr.onload = function () {
-				if (this.status >= 200 && this.status < 300) {
-					resolve(xhr.response);
-				} else {
-					reject({
-						status: this.status,
-						statusText: xhr.statusText
-					});
-				}
-			};
-			xhr.onerror = function () {
-				reject({
-					status: this.status,
-					statusText: xhr.statusText
-				});
-			};
-			xhr.setRequestHeader("X-CSRFToken", csrf);
-			xhr.send();
-		});
-	}
-
-	async getApiResponse(url) {
-		return await this.makeApiRequest(url);
-	}
-
-	updateView() {
-		this.toggleProfilMenu();
-		this.toggleLoginForm();
-	}
-
-	toggleProfilMenu() {
-		let profilMenu = document.getElementById("profilMenu");
-		if (this.user.authenticated) {
-			this.getApiResponse("/api/view/profilMenu/")
-				.then((response) => {
-					let res = JSON.parse(response);
-					if (res.success) {
-						profilMenu.innerHTML = res.html;
-						let username = document.getElementById("navBarUsername");
-						username.innerHTML = this.user.username;
-						profilMenu.classList.remove("hided");
-					}
-				})
-		} else {
-			profilMenu.classList.add("hided");
-			setTimeout(() => {
-				profilMenu.innerHTML = "";
-			}, 200);
-		}
-	}
-
-	toggleLoginForm() {
-		let loginForm = document.getElementById("loginForm");
-		if (this.user.authenticated) {
-			if (loginForm) {
-				loginForm.classList.add("hided");
-				loginForm.classList.add("trXp100");
-				setTimeout(() => {
-					loginForm.remove();
-				}, 200);
-			}
-		} else {
-			this.getApiResponse("/api/view/login/").then((response) => {
-				let res = JSON.parse(response);
-				if (res.success) {
-					let topContent = document.getElementById("topContent");
-					topContent.innerHTML += res.html;
-					let loginForm = document.getElementById("loginForm");
-					loginForm.classList.add("trXm100");
-					document.getElementById("submitBtn").addEventListener("click", e => {
-						e.preventDefault();
-						console.log(document.getElementById("loginFormUsername").value());
-						console.log(document.getElementById("loginFormPassword").value());
-						console.log(e);
-					});
-					setTimeout(() => {
-						loginForm.classList.remove("hided");
-						loginForm.classList.remove("trXm100");
-					}, 15);
-				}
-			})
-		}
 	}
 }

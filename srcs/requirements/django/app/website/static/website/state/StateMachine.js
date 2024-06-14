@@ -27,7 +27,6 @@ export default class App {
 			if (e.target.matches("[data-api]")) {
 				e.preventDefault();
 				this.getApiResponse(e.target.dataset.api).then((response) => {
-					console.log('ok')
 					history.pushState("", "", e.target.href);
 					let res = JSON.parse(response)
 					if (res.needUserUpdate) {
@@ -339,19 +338,50 @@ export default class App {
 	}
 
 	getLocalAiGame(id) {
-		console.log(id)
 		this.getApiResponseJson("/api/game/get/", {id: id}).then((response) => {
 			let res = JSON.parse(response);
 			if (res.success) {
 				let homeContent = document.getElementById("homeContent");
+				if (document.getElementById("gameOverlay"))
+					return ;
 				homeContent.innerHTML += res.html;
 				let gameOverlay = document.getElementById("gameOverlay")
 				if (gameOverlay.dataset.loaded != "true") {
 					gameOverlay.dataset.loaded = "true";
-					this.pong.ToState(this.pong.states.ready)
+					this.pong.setConfig(res);
+					this.pong.ToState(this.pong.states.ready);
+					setTimeout(()=> {
+						this.animateCountdown(5, res);
+					}, 1000)
 				}
 			}
 		});
+	}
+
+	animateCountdown(sec, res) {
+		let countdown = document.getElementById("countdown");
+		if (sec >= 0 && countdown) {
+			countdown.innerHTML = sec;
+			countdown.classList.remove("countdown");
+			setTimeout(()=>{
+				countdown.classList.add("countdown");
+			}, 15)
+			setTimeout(() => {
+				this.animateCountdown(sec - 1, res);
+			}, 1000)	
+		}
+		if (sec == 0 && countdown) {
+			setTimeout(()=>{
+				this.pong.start = true;
+				if (res.ai == 1) {
+					this.pong.p2.setAI(true);
+					this.pong.p2.startAI();
+				} else if (res.ai == 2) {
+					console.log("a faire !!!")
+				}
+				console.log("joue");
+			}, 500);
+		}
 	}
 	
 	hideLocalAiConfigPage() {

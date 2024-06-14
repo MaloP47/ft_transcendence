@@ -20,15 +20,12 @@ from website.models import Game, BlockedUser, User, Message, Room, FriendRequest
 import json
 from datetime import datetime, timedelta
 
-@csrf_exempt
 def index(request):
 	return render(request, "website/index.html");
 
-@csrf_exempt
 def indexGame(request, game_id):
 	return render(request, "website/index.html");
 
-@csrf_exempt
 def getUser(request):
 	if request.method == 'POST':
 		if request.user.is_authenticated:
@@ -44,7 +41,6 @@ def getUser(request):
 				'authenticated': False,
 			})
 
-@csrf_exempt
 def logoutUser(request):
 	if request.method == 'POST':
 		if request.user.is_authenticated:
@@ -59,7 +55,6 @@ def logoutUser(request):
 		'success': False,
 	})
 
-@csrf_exempt
 def signinUser(request):
 	if request.method == 'POST':
 		if request.user.is_authenticated == False:
@@ -73,7 +68,6 @@ def signinUser(request):
 		'success': False,
 	})
 
-@csrf_exempt
 def getGame(request):
 	if request.method == 'POST':
 		data = json.loads(request.POST["data"]);
@@ -106,7 +100,6 @@ def getGame(request):
 			'html': render_to_string('website/gameOverlay.html'),
 		});
 
-@csrf_exempt
 def searchUser(request):
 	if request.method == 'POST':
 		data = json.loads(request.POST["data"]);
@@ -122,7 +115,6 @@ def searchUser(request):
 			'html': render_to_string('website/searchUser.html', {"user": request.user, "users": users}),
 		});
 
-@csrf_exempt
 def deleteRequest(request):
 	if request.method == 'POST':
 		data = json.loads(request.POST["data"]);
@@ -132,7 +124,6 @@ def deleteRequest(request):
 			'success': True,
 		});
 
-@csrf_exempt
 def addFriend(request):
 	if request.method == 'POST':
 		data = json.loads(request.POST["data"]);
@@ -143,7 +134,6 @@ def addFriend(request):
 			'success': True,
 		});
 
-@csrf_exempt
 def gameNew1vsAi(request):
 	if request.method == 'POST':
 		data = json.loads(request.POST["data"]);
@@ -154,7 +144,6 @@ def gameNew1vsAi(request):
 			'id': game.id,
 		});
 
-@csrf_exempt
 def deleteFriend(request):
 	if request.method == 'POST':
 		data = json.loads(request.POST["data"]);
@@ -166,7 +155,6 @@ def deleteFriend(request):
 			'success': True,
 		});
 
-@csrf_exempt
 def unblockUser(request):
 	if request.method == 'POST':
 		data = json.loads(request.POST["data"]);
@@ -177,7 +165,6 @@ def unblockUser(request):
 			'success': True,
 		});
 
-@csrf_exempt
 def blockUser(request):
 	if request.method == 'POST':
 		data = json.loads(request.POST["data"]);
@@ -191,7 +178,6 @@ def blockUser(request):
 			'success': True,
 		});
 
-@csrf_exempt
 def acceptFriend(request):
 	if request.method == 'POST':
 		data = json.loads(request.POST["data"]);
@@ -207,7 +193,6 @@ def acceptFriend(request):
 			'success': True,
 		});
 
-@csrf_exempt
 def profilMenu(request):
 	if request.method == 'POST':
 		return JsonResponse({
@@ -215,7 +200,6 @@ def profilMenu(request):
 			'html': render_to_string('website/profilMenu.html', {"user": request.user}),
 		});
 
-@csrf_exempt
 def loginForm(request):
 	if request.method == 'POST':
 		return JsonResponse({
@@ -223,7 +207,6 @@ def loginForm(request):
 			'html': render_to_string('website/login.html', {"user": request.user}),
 		});
 
-@csrf_exempt
 def registerForm(request):
 	if request.method == 'POST':
 		return JsonResponse({
@@ -231,7 +214,6 @@ def registerForm(request):
 			'html': render_to_string('website/register.html'),
 		});
 
-@csrf_exempt
 def homeView(request):
 	if request.method == 'POST':
 		if request.user.is_authenticated:
@@ -243,7 +225,6 @@ def homeView(request):
 			'html': render_to_string('website/home.html', {"user": request.user, "friendRequest": friendRequest}),
 		});
 
-@csrf_exempt
 def chatView(request):
 	if request.method == 'POST' and request.user.is_authenticated:
 		data = json.loads(request.POST["data"]);
@@ -269,7 +250,6 @@ def chatView(request):
 			'success': False,
 		});
 
-@csrf_exempt
 def chatMenu(request):
 	if request.method == 'POST':
 		data = json.loads(request.POST["data"]);
@@ -281,7 +261,6 @@ def chatMenu(request):
 			'html': render_to_string('website/chatMenu.html', {"user": request.user, "isFriend": isFriend, "isBlocked": isBlocked, "for": user}),
 		})
 
-@csrf_exempt
 def localAiConfig(request):
 	if request.method == 'POST':
 		return JsonResponse({
@@ -289,7 +268,6 @@ def localAiConfig(request):
 			'html': render_to_string('website/localAiConfig.html'),
 		})
 
-@csrf_exempt
 def createGame(request):
 	if request.method == 'POST':
 		return JsonResponse({
@@ -297,7 +275,6 @@ def createGame(request):
 			'html': render_to_string('website/createGame.html'),
 		})
 
-@csrf_exempt
 def chatUserView(request):
 	if request.method == 'POST' and request.user.is_authenticated:
 		friends = User.objects.filter(id__in=request.user.friends.all()).annotate(connected=Subquery(Exists(User.objects.filter(id=OuterRef("id")).filter(last_login__gt=datetime.now() - timedelta(minutes=15))))).annotate(live=Subquery(Exists(User.objects.filter(id=OuterRef("id")).filter(online=True).filter(last_login__gt=datetime.now() - timedelta(hours=1)))))
@@ -310,7 +287,6 @@ def chatUserView(request):
 			'success': False,
 		});
 
-@csrf_exempt
 def chatRoomsView(request):
 	if request.method == 'POST' and request.user.is_authenticated:
 		rooms = Room.objects.filter(users=request.user).annotate(unread=Subquery(Exists(Message.objects.filter(room_id=OuterRef("id")).exclude(user=request.user).exclude(read=True))))
@@ -323,7 +299,6 @@ def chatRoomsView(request):
 			'success': False,
 		});
 
-@csrf_exempt
 def chatMessageView(request):
 	if request.method == 'POST':
 		data = json.loads(request.POST["data"]);
@@ -334,7 +309,6 @@ def chatMessageView(request):
 			'html': render_to_string('website/chatMessageView.html', {"data": data, "user": request.user, "friend": friend, "blocked": blocked}),
 		});
 
-@csrf_exempt
 def friendRequestView(request):
 	if request.method == 'POST':
 		data = json.loads(request.POST["data"]);
@@ -344,7 +318,6 @@ def friendRequestView(request):
 			'html': render_to_string('website/friendRequestView.html', {"friend": friend, "user": request.user}),
 		});
 
-@csrf_exempt
 def messageSetRead(request):
 	if request.method == 'POST':
 		data = json.loads(request.POST["data"]);

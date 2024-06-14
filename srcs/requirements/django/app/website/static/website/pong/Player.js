@@ -133,7 +133,7 @@ export default class Player {
 	startAI() {
 		if (!this.AI)
 			return ;
-		this.brainTimeout = setTimeout(this.startAI.bind(this), "1000");
+		this.brainTimeout = setTimeout(this.startAI.bind(this), 1000);
 		this.basicAI();
 	}
 
@@ -158,6 +158,7 @@ export default class Player {
 		if (this.bonus.reversed.on)
 			coef = -1;
 		var mult = 1;
+		console.log("allo")
 		if (this.bonus.frozen.on)
 			mult = 0.2;
 		if (this.player == 1) {
