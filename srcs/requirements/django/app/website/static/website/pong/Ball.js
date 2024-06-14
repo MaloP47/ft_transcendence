@@ -6,7 +6,7 @@
 //   By: gbrunet <gbrunet@student.42.fr>            +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2024/05/24 13:13:55 by gbrunet           #+#    #+#             //
-//   Updated: 2024/06/14 11:31:57 by gbrunet          ###   ########.fr       //
+//   Updated: 2024/06/14 11:59:38 by gbrunet          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -47,25 +47,30 @@ export default class Ball {
 		if (this.ball.position.x + this.velocity.x * this.speed * this.pong.elapsedTime / 10 > this.maxXPos
 				|| this.ball.position.x + this.velocity.x * this.speed * this.pong.elapsedTime / 10 < -this.maxXPos){
 			this.velocity.x = -this.velocity.x;
-			this.pong.impactParticles.AddParticles();
+			if (this.pong.impactParticles)
+				this.pong.impactParticles.AddParticles();
 		}
 		// Top - Bottom collisions
 		if (this.ball.position.y + this.velocity.y * this.speed * this.pong.elapsedTime / 10 > this.maxYPos) {
-			this.pong.impactParticles.AddParticles();
+			if (this.pong.impactParticles)
+				this.pong.impactParticles.AddParticles();
 			this.resetBall(1);
 		}
 		if (this.ball.position.y + this.velocity.y * this.speed * this.pong.elapsedTime / 10 < -this.maxYPos) {
-			this.pong.impactParticles.AddParticles();
+			if (this.pong.impactParticles)
+				this.pong.impactParticles.AddParticles();
 			this.resetBall(2);
 		}
 		// Line Bonus collisions
 		if (this.pong.p1.bonus.line.on && this.ball.position.y + this.velocity.y * this.speed * this.pong.elapsedTime / 10 < -8.5) {
 			this.velocity.y = -this.velocity.y;
-			this.pong.impactParticles.AddParticles();
+			if (this.pong.impactParticles)
+				this.pong.impactParticles.AddParticles();
 		}
 		if (this.pong.p2.bonus.line.on && this.ball.position.y + this.velocity.y * this.speed * this.pong.elapsedTime / 10 > 8.5) {
 			this.velocity.y = -this.velocity.y;
-			this.pong.impactParticles.AddParticles();
+			if (this.pong.impactParticles)
+				this.pong.impactParticles.AddParticles();
 		}
 		// Players collisions
 		if (this.ball.position.y + this.velocity.y * this.speed * this.pong.elapsedTime / 10 < -this.maxPlayerPos)
@@ -73,7 +78,7 @@ export default class Ball {
 		if (this.ball.position.y + this.velocity.y * this.speed * this.pong.elapsedTime / 10 > this.maxPlayerPos)
 			this.checkCollisionPlayer(2);
 		// Bonus attractor
-		if (this.pong.bonus.isActive()) {
+		if (this.pong.bonus && this.pong.bonus.isActive()) {
 			let distanceSq = distSq(this.getPos(), this.pong.bonus.getPos());
 			if (distanceSq < 0.3) {
 				this.pong.bonus.setActive(false);
@@ -103,7 +108,8 @@ export default class Ball {
 
 	resetBall(player) {
 		this.pong.endRound = true;
-		this.pong.bonus.setActive(false);
+		if (this.pong.bonus)
+			this.pong.bonus.setActive(false);
 		this.pong.exchange = 0;
 		this.ball.position.y = 0;
 		this.ball.position.x = 0;
@@ -132,7 +138,8 @@ export default class Ball {
 			if (p2score)
 				p2score.innerHTML = this.pong.p2.score;
 		}
-		clearTimeout(this.pong.bonus.nextTimeout);
+		if (this.pong.bonus)
+			clearTimeout(this.pong.bonus.nextTimeout);
 		if (this.pong.p1.score >= this.pong.winScore || this.pong.p2.score >= this.pong.winScore) {
 			console.log("game finished...")
 		} else {
@@ -148,10 +155,12 @@ export default class Ball {
 				}
 				this.pong.endRound = false;
 				this.speed = this.initSpeed;
-				this.pong.bonus.bonus.position.x = (Math.random() - 0.5) * 12;
-				this.pong.bonus.bonus.position.y = (Math.random() - 0.5) * 4;
-				this.pong.bonus.startTime = 0;
-				this.pong.bonus.type = Math.floor(Math.random() * 5);
+				if (this.pong.bonus) {
+					this.pong.bonus.bonus.position.x = (Math.random() - 0.5) * 12;
+					this.pong.bonus.bonus.position.y = (Math.random() - 0.5) * 4;
+					this.pong.bonus.startTime = 0;
+					this.pong.bonus.type = Math.floor(Math.random() * 5);
+				}
 			}, 1000);
 		}
 	}
@@ -209,9 +218,10 @@ export default class Ball {
 			this.velocity.x = vel.x;
 			this.velocity.y = vel.y;
 			this.pong.lastHit = player;
-			this.pong.impactParticles.AddParticles();
+			if (this.pong.impactParticles)
+				this.pong.impactParticles.AddParticles();
 			this.pong.exchange++;
-			if (this.pong.exchange == 2)
+			if (this.pong.bonus && this.pong.exchange == 2)
 				this.pong.bonus.active = true;
 			this.speed = this.initSpeed + Math.min(this.pong.exchange / 300, 0.15);
 		}

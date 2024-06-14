@@ -6,7 +6,7 @@
 //   By: gbrunet <gbrunet@student.42.fr>            +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2024/05/21 13:52:15 by gbrunet           #+#    #+#             //
-//   Updated: 2024/06/14 11:40:06 by gbrunet          ###   ########.fr       //
+//   Updated: 2024/06/14 12:13:15 by gbrunet          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -83,7 +83,7 @@ export default class Pong {
 		this.scene.background = new THREE.Color(0x596077);
 		this.composer = new EffectComposer(this.threejs);
 		const renderPass = new RenderPass( this.scene, this.camera );
-		this.composer.addPass( renderPass );
+		this.composer.addPass(renderPass);
 		this.dot = new ShaderPass(new THREE.ShaderMaterial({
 			uniforms: {
 				'tDiffuse': {value: null},
@@ -156,17 +156,17 @@ export default class Pong {
 
 	InitGameAssets() {
 		this.ball = new Ball({pong: this});
-		this.ballFire = new BallFire({pong: this});
-		this.ballParticles = new BallParticles({pong: this});
-		this.impactParticles = new ImpactParticles({pong: this});
+//		this.ballFire = new BallFire({pong: this});
+//		this.ballParticles = new BallParticles({pong: this});
+//		this.impactParticles = new ImpactParticles({pong: this});
 
-		this.bonus = new Bonus({pong: this});
-		this.bonusParticles = new BonusParticles({pong: this});
+//		this.bonus = new Bonus({pong: this});
+//		this.bonusParticles = new BonusParticles({pong: this});
 
 		this.p1 = new Player({pong: this, player:1});
 		this.p2 = new Player({pong: this, player:2});
-		this.p2.setAI(true);
 		this.p1.setAI(true);
+		this.p2.setAI(true);
 	}
 
 	InitEvents() {
@@ -271,11 +271,16 @@ export default class Pong {
 					pong.p1.Update();
 					pong.p2.Update();
 					pong.ball.Update();
-					pong.ballFire.Update();
-					pong.impactParticles.Update();
-					pong.bonus.Update();
-					pong.bonusParticles.Update();
-					pong.ballParticles.Update();
+					if (pong.ballFire)
+						pong.ballFire.Update();
+					if (pong.impactParticles)
+						pong.impactParticles.Update();
+					if (pong.bonus)
+						pong.bonus.Update();
+					if (pong.bonusParticles)
+						pong.bonusParticles.Update();
+					if (pong.ballParticles)
+						pong.ballParticles.Update();
 				},
 				fadeOut(pong) {
 					this.time += pong.elapsedTime;
@@ -287,11 +292,16 @@ export default class Pong {
 					pong.p1.Update();
 					pong.p2.Update();
 					pong.ball.Update();
-					pong.ballFire.Update();
-					pong.impactParticles.Update();
-					pong.bonus.Update();
-					pong.bonusParticles.Update();
-					pong.ballParticles.Update();
+					if (pong.ballFire)
+						pong.ballFire.Update();
+					if (pong.impactParticles)
+						pong.impactParticles.Update();
+					if (pong.bonus)
+						pong.bonus.Update();
+					if (pong.bonusParticles)
+						pong.bonusParticles.Update();
+					if (pong.ballParticles)
+						pong.ballParticles.Update();
 					if (this.time > this.outTime) {
 						this.status = "in";
 						this.time = 0;
@@ -299,12 +309,17 @@ export default class Pong {
 						pong.p2.reset();
 						pong.camera.position.set(0, 0, 27);
 						pong.camera.lookAt(new THREE.Vector3(0, 0, 0));
-						pong.bonus.reset();
-						pong.bonusParticles.reset();
 						pong.ball.reset();
-						pong.ballFire.reset();
-						pong.impactParticles.reset();
-						pong.ballParticles.reset();
+						if (pong.bonus)
+							pong.bonus.reset();
+						if (pong.bonusParticles)
+							pong.bonusParticles.reset();
+						if (pong.ballFire)
+							pong.ballFire.reset();
+						if (pong.impactParticles)
+							pong.impactParticles.reset();
+						if (pong.ballParticles)
+							pong.ballParticles.reset();
 					}
 				}
 			},
@@ -343,11 +358,16 @@ export default class Pong {
 						pong.p1.Update();
 						pong.p2.Update();
 						pong.ball.Update();
-						pong.ballFire.Update();
-						pong.impactParticles.Update();
-						pong.bonus.Update();
-						pong.bonusParticles.Update();
-						pong.ballParticles.Update();
+						if (pong.ballFire)
+							pong.ballFire.Update();
+						if (pong.impactParticles)
+							pong.impactParticles.Update();
+						if (pong.bonus)
+							pong.bonus.Update();
+						if (pong.bonusParticles)
+							pong.bonusParticles.Update();
+						if (pong.ballParticles)
+							pong.ballParticles.Update();
 					}
 				},
 				fadeOut(pong) {
@@ -368,13 +388,18 @@ export default class Pong {
 						pong.p2.reset();
 						pong.camera.position.set(0, 0, 27);
 						pong.camera.lookAt(new THREE.Vector3(0, 0, 0));
-						pong.bonus.reset();
-						pong.bonusParticles.reset();
 						pong.ball.reset();
-						pong.ballFire.reset();
-						pong.impactParticles.reset();
-						pong.ballParticles.reset();
 						pong.dot.uniforms['amount'].value = 1;
+						if (pong.bonuse)
+							pong.bonus.reset();
+						if (pong.bonusParticles)
+							pong.bonusParticles.reset();
+						if (pong.ballFire)
+							pong.ballFire.reset();
+						if (pong.impactParticles)
+							pong.impactParticles.reset();
+						if (pong.ballParticles)
+							pong.ballParticles.reset();
 					}
 				}
 			}
@@ -442,9 +467,12 @@ export default class Pong {
 
 	UpdateShaders() {
 		this.vignette.material.uniforms.time = {value: this.totalTime};
-		this.bonusParticles.particleShader.uniforms.uCenter = {value: this.bonus.getPos()};
-		this.bonusParticles.particleShader.uniforms.uType = {value: this.bonus.type};
-		this.ballParticles.particleShader.uniforms.uTime = {value: this.totalTime};
+		if (this.bonusParticles) {
+			this.bonusParticles.particleShader.uniforms.uCenter = {value: this.bonus.getPos()};
+			this.bonusParticles.particleShader.uniforms.uType = {value: this.bonus.type};
+		}
+		if (this.ballParticles)
+			this.ballParticles.particleShader.uniforms.uTime = {value: this.totalTime};
 		this.bgShader.uniforms.uInfos = {
 			value: {
 				p1Pos: [this.p1.getPos().x, this.p1.getPos().y],
@@ -463,8 +491,10 @@ export default class Pong {
 				p2Bonus: this.p2.bonus,
 			}
 		}
-		this.bonus.material.uniforms.uTime = {value: this.totalTime};
-		this.bonus.material.uniforms.uType = {value: this.bonus.type};
+		if (this.bonuse) {
+			this.bonus.material.uniforms.uTime = {value: this.totalTime};
+			this.bonus.material.uniforms.uType = {value: this.bonus.type};
+		}
 	}
 
 	Smooth(t) {

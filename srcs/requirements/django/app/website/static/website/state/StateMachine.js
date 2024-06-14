@@ -6,7 +6,7 @@
 //   By: gbrunet <gbrunet@student.42.fr>            +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2024/06/13 11:54:22 by gbrunet           #+#    #+#             //
-//   Updated: 2024/06/14 11:37:48 by gbrunet          ###   ########.fr       //
+//   Updated: 2024/06/14 12:17:26 by gbrunet          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -351,11 +351,17 @@ export default class App {
 					gameOverlay.dataset.loaded = "true";
 					document.getElementById("p1score").innerHTML = res.p1score
 					document.getElementById("p2score").innerHTML = res.p2score
-					this.pong.setConfig(res);
-					this.pong.ToState(this.pong.states.ready);
-					setTimeout(()=> {
-						this.animateCountdown(5, res);
-					}, 1000)
+					if (res.p1score >= res.winScore || res.p2score >= res.winScore) {
+						console.log('game is finished...')
+					} else {
+						this.pong.setConfig(res);
+						this.pong.p1.setAI(false);
+						this.pong.p2.setAI(false);
+						this.pong.ToState(this.pong.states.ready);
+						setTimeout(()=> {
+							this.animateCountdown(5, res);
+						}, 1000)
+					}
 				}
 			}
 		});

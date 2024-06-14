@@ -84,7 +84,10 @@ def saveGame(request):
 def getGame(request):
 	if request.method == 'POST':
 		data = json.loads(request.POST["data"]);
-		game = Game.objects.get(id=data['id'])
+		try:
+			game = Game.objects.get(id=data['id'])
+		except:
+			return JsonResponse({'success': False})
 		p1Id = -1
 		p1Username = ""
 		p2Id = -1
