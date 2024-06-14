@@ -14,21 +14,21 @@ rm -rf ~/.local/share/Trash/*
 ├── docker-compose.yml
 ├── Makefile
 ├── README.md
-└── srcs
-    ├── services
-    │   ├── django
-    │   │   ├── app
-    │   │   └── Dockerfile
-    │   ├── grafana
-    │   │   └── conf
-    │   ├── nginx
-    │   │   ├── conf
-    │   │   └── Dockerfile
-    │   └── prometheus
-    │       └── conf
-    └── tools
-        ├── check_dotenv.sh
-        └── install_docker.sh
+├── srcs
+│   └── services
+│       ├── django
+│       │   ├── app
+│       │   └── Dockerfile
+│       ├── grafana
+│       │   └── conf
+│       ├── nginx
+│       │   ├── conf
+│       │   └── Dockerfile
+│       └── prometheus
+│           └── conf
+└── tools
+    ├── check_dotenv.sh
+    └── install_docker.sh
 ```
 
 # TODO
