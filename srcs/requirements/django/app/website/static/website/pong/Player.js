@@ -1,4 +1,3 @@
-
 import * as THREE from 'three';
 
 function add(val, add, max) {
@@ -40,6 +39,7 @@ export default class Player {
 			frozen: {on: false, end: false, time: 0.0001},
 			reversed: {on: false, end: false, time: 0.0001}
 		}
+		this.AI = false;
 	}
 
 	UpdateBonus(bonus, timeRatio, max) {

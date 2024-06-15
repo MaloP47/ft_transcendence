@@ -105,22 +105,22 @@ export default class App {
 					if (document.getElementById("loginForm"))
 						this.hideLoginForm();
 					this.getHomePage("home");
-					if (this.pong)
-						this.pong.ToState(this.pong.states.login)
+//					if (this.pong)
+//						this.pong.ToState(this.pong.states.login)
 					break;
 				case "Login":
 					if (document.getElementById("registerForm"))
 						this.hideRegisterForm();
 					this.getLoginForm();
-					if (this.pong)
-						this.pong.ToState(this.pong.states.login)
+//					if (this.pong)
+//						this.pong.ToState(this.pong.states.login)
 					break;
 				case "Register":
 					if (document.getElementById("loginForm"))
 						this.hideLoginForm();
 					this.getRegisterForm();
-					if (this.pong)
-						this.pong.ToState(this.pong.states.login)
+//					if (this.pong)
+//						this.pong.ToState(this.pong.states.login)
 					break;
 				case "Play1vsAI":
 					if (document.getElementById("registerForm"))
@@ -129,8 +129,8 @@ export default class App {
 						this.hideLoginForm();
 					if (document.getElementById("createGame"))
 						this.hideCreateGame();
-					if (id == -1 && this.pong)
-						this.pong.ToState(this.pong.states.login)
+//					if (id == -1 && this.pong)
+//						this.pong.ToState(this.pong.states.login)
 					this.getHomePage("1vsAI", id);
 					break;
 			}

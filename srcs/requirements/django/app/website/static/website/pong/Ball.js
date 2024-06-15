@@ -17,8 +17,8 @@ function distSq(a, b) {
 }
 
 export default class Ball {
-	constructor(params) {
-		this.pong = params.pong;
+	constructor(data) {
+		this.pong = data.pong;
 		this.geometry = new THREE.IcosahedronGeometry(0.2, 3);
 		this.material = new THREE.MeshBasicMaterial({ color: 0xffffff });
 		this.ball = new THREE.Mesh(this.geometry, this.material);
