@@ -16,8 +16,8 @@ import ballParticleVertexShader from './assets/shaders/ballParticleV.js'
 import ballParticleFragmentShader from './assets/shaders/ballParticleF.js'
 
 export default class BallParticles {
-	constructor(params) {
-		this.pong = params.pong;
+	constructor(data) {
+		this.pong = data.pong;
 		this.particleShader = new THREE.ShaderMaterial({
 			vertexShader: ballParticleVertexShader,
 			fragmentShader: ballParticleFragmentShader,
@@ -39,16 +39,16 @@ export default class BallParticles {
 		});
 		this.sizeSpline.AddPoint(0.0, 0.0);
 		this.sizeSpline.AddPoint(2.0, 300.0);
-		params.pong.scene.add(this.points);
+		this.pong.scene.add(this.points);
 	}
 
 	AddParticles() {
 		if(this.pong.totalTime > this.lastEmit + this.nextEmit) {
 			this.lastEmit = this.pong.totalTime;
 			this.ballParticles.push({
-				position: this.pong.ball.getPos(),
-				velocity: this.pong.ball.getVelocity(),
-				size: 1,
+				position: this.pong.assets.ball.getPos(),
+				velocity: this.pong.assets.ball.getVelocity(),
+				size: this.pong.scaleFactor,
 				life: 1.25,
 				age: 1.25,
 			})
@@ -86,12 +86,13 @@ export default class BallParticles {
 		}
 	}
 
-	reset() {
+	delete() {
 		this.ballParticles = [];
 		this.UpdateGeometry();
+		this.pong.assets.ballParticles = undefined;
 	}
 
-	Update() {
+	update() {
 		if (!this.pong.endRound)
 			this.AddParticles();
 		this.UpdateParticles(this.pong.elapsedTime / 1000.0);

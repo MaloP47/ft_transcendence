@@ -35,6 +35,10 @@ export default class PongTransi {
 		if (time != undefined) {
 			this.initTransi("toBg", time);
 			this.pong.scene.vignette.uniforms['amount'].value = 0;
+			this.pong.assets.p1.AI = true;
+			this.pong.assets.p2.AI = true;
+			this.pong.assets.p1.startAI();
+			this.pong.assets.p2.startAI();
   			return new Promise(resolve => setTimeout(resolve, time));
 		}
 		if (this.time > this.transiTime) {
@@ -66,11 +70,14 @@ export default class PongTransi {
 	toP1Game(time) {
 		if (time != undefined) {
 			this.initTransi("toP1Game", time);
+			this.pong.assets.reset();
+			this.pong.bg = false;
 			this.pong.scene.vignette.uniforms['amount'].value = 0;
   			return new Promise(resolve => setTimeout(resolve, time));
 		}
 		if (this.time > this.transiTime) {
 			this.transi = "p1Game";
+			this.pong.start = true;
 			return ;
 		}
 		this.time += this.pong.elapsedTime;

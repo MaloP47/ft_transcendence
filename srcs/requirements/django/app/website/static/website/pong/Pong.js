@@ -48,9 +48,7 @@ export default class Pong {
 		this.transi = new PongTransi({pong: this});
 
 		sleep(500).then(() => {
-			this.transi.toBg(1500).then(() => {
-				console.log("fin mon gars")
-			});
+			this.transi.toBg(1500)
 		})
 		sleep(5000).then(() => {
 			this.transi.toBlack(1000).then(() => {
@@ -58,7 +56,6 @@ export default class Pong {
 					console.log("fin mon gars")
 				});
 			});
-			
 		})
 
 		this.update();
@@ -83,8 +80,10 @@ export default class Pong {
 
 		function onDocumentKeyDown(event) {
 			var keyCode = event.which;
-			if (keyCode == this.p1LeftKey && !this.p1Left && !this.assets.p1.AI)
+			if (keyCode == this.p1LeftKey && !this.p1Left && !this.assets.p1.AI) {
 				this.p1Left = true;
+				console.log('sdfsdf')
+			}
 			else if (keyCode == this.p1RightKey && !this.p1Right && !this.assets.p1.AI)
 				this.p1Right = true;
 			else if (keyCode == this.p2LeftKey && !this.p2Left && !this.assets.p2.AI)
@@ -124,6 +123,8 @@ export default class Pong {
 		this.transiWaitScreen = 0;
 		this.waitScreen = true;
 		this.winScore = 10;
+		this.bg = true;
+		this.scaleFactor = 0.25;
 	}
 
 	update() {
@@ -132,20 +133,21 @@ export default class Pong {
 
 		this.transi.update();
 		this.scene.update();
+		this.assets.update();
 //		this.CheckState();
 //		this.UpdateShaders();
 
 		requestAnimationFrame(this.update.bind(this));
 
-//		if ((!this.p1.bonus.reversed.on && this.p1Left) || (this.p1.bonus.reversed.on && this.p1Right))
-//			this.p1.subSpeed();
-//		if ((!this.p1.bonus.reversed.on && this.p1Right) || (this.p1.bonus.reversed.on && this.p1Left))
-//			this.p1.addSpeed();
-//		if ((!this.p2.bonus.reversed.on && this.p2Left) || (this.p2.bonus.reversed.on && this.p2Right))
-//			this.p2.subSpeed();
-//		if ((!this.p2.bonus.reversed.on && this.p2Right) || (this.p2.bonus.reversed.on && this.p2Left))
-//			this.p2.addSpeed();
-	}
+/*		if ((!this.assets.p1.bonus.reversed.on && this.p1Left) || (this.assets.p1.bonus.reversed.on && this.p1Right))
+			this.p1.subSpeed();
+		if ((!this.assets.p1.bonus.reversed.on && this.p1Right) || (this.assets.p1.bonus.reversed.on && this.p1Left))
+			this.p1.addSpeed();
+		if ((!this.assets.p2.bonus.reversed.on && this.p2Left) || (this.assets.p2.bonus.reversed.on && this.p2Right))
+			this.p2.subSpeed();
+		if ((!this.assets.p2.bonus.reversed.on && this.p2Right) || (this.assets.p2.bonus.reversed.on && this.p2Left))
+			this.p2.addSpeed();
+*/	}
 }
 
 class PongOld {
@@ -161,7 +163,6 @@ class PongOld {
 		this.p2LeftKey = res.p2Left;
 		this.p2RightKey = res.p2Right;
 		this.ball.initSpeed = res.ballSpeed / 100;
-		this.ball.resetBall(0, true);
 		this.winScore = res.winScore;
 		this.bonuses = res.bonuses;
 		this.p1.score = res.p1score;
@@ -215,7 +216,7 @@ class PongOld {
 				p2Bonus: this.p2.bonus,
 			}
 		}
-		if (this.bonuse) {
+		if (this.assets.bonus) {
 			this.bonus.material.uniforms.uTime = {value: this.totalTime};
 			this.bonus.material.uniforms.uType = {value: this.bonus.type};
 		}

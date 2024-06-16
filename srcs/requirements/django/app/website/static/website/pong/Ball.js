@@ -39,7 +39,7 @@ export default class Ball {
 		this.maxPlayerPos = 9;
 	}
 
-	Update() {
+	update() {
 		if (this.pong.endRound) {
 			return ;
 		}
@@ -47,30 +47,30 @@ export default class Ball {
 		if (this.ball.position.x + this.velocity.x * this.speed * this.pong.elapsedTime / 10 > this.maxXPos
 				|| this.ball.position.x + this.velocity.x * this.speed * this.pong.elapsedTime / 10 < -this.maxXPos){
 			this.velocity.x = -this.velocity.x;
-			if (this.pong.impactParticles)
-				this.pong.impactParticles.AddParticles();
+			if (this.pong.assets.impactParticles)
+				this.pong.assets.impactParticles.AddParticles();
 		}
 		// Top - Bottom collisions
 		if (this.ball.position.y + this.velocity.y * this.speed * this.pong.elapsedTime / 10 > this.maxYPos) {
-			if (this.pong.impactParticles)
-				this.pong.impactParticles.AddParticles();
+			if (this.pong.assets.impactParticles)
+				this.pong.assets.impactParticles.AddParticles();
 			this.resetBall(1);
 		}
 		if (this.ball.position.y + this.velocity.y * this.speed * this.pong.elapsedTime / 10 < -this.maxYPos) {
-			if (this.pong.impactParticles)
-				this.pong.impactParticles.AddParticles();
+			if (this.pong.assets.impactParticles)
+				this.pong.assets.impactParticles.AddParticles();
 			this.resetBall(2);
 		}
 		// Line Bonus collisions
-		if (this.pong.p1.bonus.line.on && this.ball.position.y + this.velocity.y * this.speed * this.pong.elapsedTime / 10 < -8.5) {
+		if (this.pong.assets.p1.bonus.line.on && this.ball.position.y + this.velocity.y * this.speed * this.pong.elapsedTime / 10 < -8.5) {
 			this.velocity.y = -this.velocity.y;
-			if (this.pong.impactParticles)
-				this.pong.impactParticles.AddParticles();
+			if (this.pong.assets.impactParticles)
+				this.pong.assets.impactParticles.AddParticles();
 		}
-		if (this.pong.p2.bonus.line.on && this.ball.position.y + this.velocity.y * this.speed * this.pong.elapsedTime / 10 > 8.5) {
+		if (this.pong.assets.p2.bonus.line.on && this.ball.position.y + this.velocity.y * this.speed * this.pong.elapsedTime / 10 > 8.5) {
 			this.velocity.y = -this.velocity.y;
-			if (this.pong.impactParticles)
-				this.pong.impactParticles.AddParticles();
+			if (this.pong.assets.impactParticles)
+				this.pong.assets.impactParticles.AddParticles();
 		}
 		// Players collisions
 		if (this.ball.position.y + this.velocity.y * this.speed * this.pong.elapsedTime / 10 < -this.maxPlayerPos)
@@ -78,12 +78,12 @@ export default class Ball {
 		if (this.ball.position.y + this.velocity.y * this.speed * this.pong.elapsedTime / 10 > this.maxPlayerPos)
 			this.checkCollisionPlayer(2);
 		// Bonus attractor
-		if (this.pong.bonus && this.pong.bonus.isActive()) {
-			let distanceSq = distSq(this.getPos(), this.pong.bonus.getPos());
+		if (this.pong.assets.bonus && this.pong.assets.bonus.isActive()) {
+			let distanceSq = distSq(this.getPos(), this.pong.assets.bonus.getPos());
 			if (distanceSq < 0.3) {
-				this.pong.bonus.setActive(false);
+				this.pong.assets.bonus.setActive(false);
 			} else if (distanceSq < 5) {
-				this.velocity.add(this.pong.bonus.getPos().sub(this.getPos()).normalize().divideScalar(distanceSq * 4));
+				this.velocity.add(this.pong.assets.bonus.getPos().sub(this.getPos()).normalize().divideScalar(distanceSq * 4));
 				this.velocity.normalize();
 			}
 		}
@@ -108,50 +108,53 @@ export default class Ball {
 
 	resetBall(player) {
 		this.pong.endRound = true;
-		if (this.pong.bonus)
-			this.pong.bonus.setActive(false);
+		if (this.pong.assets.bonus)
+			this.pong.assets.bonus.setActive(false);
 		this.pong.exchange = 0;
 		this.ball.position.y = 0;
 		this.ball.position.x = 0;
 		if (player == 1) {
-			console.log(this.pong.state)
-			this.pong.p1.score += 1;
-			this.pong.stateMachine.getApiResponseJson("/api/game/save/",
-				{
-					id: this.pong.game_id,
-					p1: this.pong.p1.score,
-					p2: this.pong.p2.score
-				})
+			if (!this.pong.bg) {
+				this.pong.assets.p1.score += 1;
+				this.pong.stateMachine.getApiResponseJson("/api/game/save/",
+					{
+						id: this.pong.game_id,
+						p1: this.pong.assets.p1.score,
+						p2: this.pong.assets.p2.score
+					})
+				let p1score = document.getElementById("p1score");
+				if (p1score)
+					p1score.innerHTML = this.pong.p1.score;
+			}
 			this.ball.position.y = -0.5;
-			let p1score = document.getElementById("p1score");
-			if (p1score)
-				p1score.innerHTML = this.pong.p1.score;
 		} else if (player == 2) {
-			this.pong.p2.score += 1;
-			this.pong.stateMachine.getApiResponseJson("/api/game/save/",
-				{
-					id: this.pong.game_id,
-					p1: this.pong.p1.score,
-					p2: this.pong.p2.score
-				})
+			if (!this.pong.bg) {
+				this.pong.assets.p2.score += 1;
+				this.pong.stateMachine.getApiResponseJson("/api/game/save/",
+					{
+						id: this.pong.game_id,
+						p1: this.pong.assets.p1.score,
+						p2: this.pong.assets.p2.score
+					})
+				let p2score = document.getElementById("p2score");
+				if (p2score)
+					p2score.innerHTML = this.pong.p2.score;
+			}
 			this.ball.position.y = 0.5;
-			let p2score = document.getElementById("p2score");
-			if (p2score)
-				p2score.innerHTML = this.pong.p2.score;
 		}
-		if (this.pong.bonus)
-			clearTimeout(this.pong.bonus.nextTimeout);
-		if (this.pong.p1.score >= this.pong.winScore || this.pong.p2.score >= this.pong.winScore) {
+		if (this.pong.assets.bonus)
+			clearTimeout(this.pong.assets.bonus.nextTimeout);
+		if (this.pong.assets.p1.score >= this.pong.winScore || this.pong.assets.p2.score >= this.pong.winScore) {
 			let endDiv = document.getElementById("countdown");
 			if (endDiv) {
-				if (this.pong.p1.score > this.pong.p2.score) {
-					if (this.pong.p1.AI) {
+				if (this.pong.assets.p1.score > this.pong.assets.p2.score) {
+					if (this.pong.assets.p1.AI) {
 						endDiv.innerHTML = "A.I. wins this game !"
 					} else {
 						endDiv.innerHTML = this.pong.p1infos.username + " wins this game !"
 					}
 				} else {
-					if (this.pong.p2.AI) {
+					if (this.pong.assets.p2.AI) {
 						endDiv.innerHTML = "A.I. wins this game !"
 					} else {
 						endDiv.innerHTML = this.pong.p2infos.username + " wins this game !"
@@ -175,11 +178,11 @@ export default class Ball {
 				}
 				this.pong.endRound = false;
 				this.speed = this.initSpeed;
-				if (this.pong.bonus) {
-					this.pong.bonus.bonus.position.x = (Math.random() - 0.5) * 12;
-					this.pong.bonus.bonus.position.y = (Math.random() - 0.5) * 4;
-					this.pong.bonus.startTime = 0;
-					this.pong.bonus.type = Math.floor(Math.random() * 5);
+				if (this.pong.assets.bonus) {
+					this.pong.assets.bonus.bonus.position.x = (Math.random() - 0.5) * 12;
+					this.pong.assets.bonus.bonus.position.y = (Math.random() - 0.5) * 4;
+					this.pong.assets.bonus.startTime = 0;
+					this.pong.assets.bonus.type = Math.floor(Math.random() * 5);
 				}
 			}, 1000);
 		}
@@ -197,9 +200,9 @@ export default class Ball {
 				if (this.ball.position.y < -this.maxPlayerPos - 0.3)
 					sideLate = true;
 			}
-			var xPlayer = pong.p1.getPos().x;
-			var sizePlayer = 1.0 + pong.p1.bonus.big.time - pong.p1.bonus.small.time / 2;
-			var xVel = pong.p1.getVelocity().x / 2;
+			var xPlayer = pong.assets.p1.getPos().x;
+			var sizePlayer = 1.0 + pong.assets.p1.bonus.big.time - pong.assets.p1.bonus.small.time / 2;
+			var xVel = pong.assets.p1.getVelocity().x / 2;
 			var minY = 0.05;
 			var angle = 0;
 			var coef = 1;
@@ -210,9 +213,9 @@ export default class Ball {
 					sideLate = true;
 				side = true;
 			}
-			var xPlayer = pong.p2.getPos().x;
-			var sizePlayer = 1.0 + pong.p2.bonus.big.time - pong.p2.bonus.small.time / 2;	
-			var xVel = pong.p2.getVelocity().x / 2
+			var xPlayer = pong.assets.p2.getPos().x;
+			var sizePlayer = 1.0 + pong.assets.p2.bonus.big.time - pong.assets.p2.bonus.small.time / 2;	
+			var xVel = pong.assets.p2.getVelocity().x / 2
 			var minY = -0.05;
 			var angle = 180;
 			var coef = -1;
@@ -238,13 +241,17 @@ export default class Ball {
 			this.velocity.x = vel.x;
 			this.velocity.y = vel.y;
 			this.pong.lastHit = player;
-			if (this.pong.impactParticles)
-				this.pong.impactParticles.AddParticles();
+			if (this.pong.assets.impactParticles)
+				this.pong.assets.impactParticles.AddParticles();
 			this.pong.exchange++;
-			if (this.pong.bonus && this.pong.exchange == 2)
-				this.pong.bonus.active = true;
+			if (this.pong.assets.bonus && this.pong.exchange == 2)
+				this.pong.assets.bonus.active = true;
 			this.speed = this.initSpeed + Math.min(this.pong.exchange / 300, 0.15);
 		}
+	}
+
+	delete() {
+		this.pong.scene.remove(this.ball);
 	}
 
 	getPos() {return(this.ball.position.clone());}

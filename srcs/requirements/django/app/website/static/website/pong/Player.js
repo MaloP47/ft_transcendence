@@ -11,17 +11,16 @@ function sub(val, sub, max) {
 }
 
 export default class Player {
-	constructor(params) {
-		// PARAMS THAT CAN BE UPDATED WITH BONUSES
+	constructor(data) {
 		this.speed = 0.0;
 		this.drag = 1;
-		this.speedInc = 0.03;
-		this.pong = params.pong;
+		this.speedInc = 0.02;
+		this.pong = data.pong;
 		this.maxPos = 6;
 		this.geometry = new THREE.BoxGeometry(2.0, 0.2, 0.5);
 		this.material = new THREE.MeshBasicMaterial({ color: 0xffffff });
 		this.bar = new THREE.Mesh(this.geometry, this.material);
-		if (params.player == 1) {
+		if (data.player == 1) {
 			this.player = 1;
 			this.bar.position.y = -9.2;
 		} else {
@@ -42,7 +41,7 @@ export default class Player {
 		this.AI = false;
 	}
 
-	UpdateBonus(bonus, timeRatio, max) {
+	updateBonus(bonus, timeRatio, max) {
 		if (bonus.on) {
 			if (!bonus.end)
 				bonus.time = Math.min(bonus.time + this.pong.elapsedTime / timeRatio, max);
@@ -57,13 +56,47 @@ export default class Player {
 			bonus.time = 0.0001;
 	}
 
-	Update() {
-		this.UpdateBonus(this.bonus.big, 200, 1);
-		this.UpdateBonus(this.bonus.small, 200, 1);
-		this.UpdateBonus(this.bonus.frozen, 200, 1);
-		this.UpdateBonus(this.bonus.line, 100, 10);
-		this.UpdateBonus(this.bonus.reversed, 200, 1);
+	update() {
 		const maxPos = this.maxPos - this.bonus.big.time + this.bonus.small.time / 2;
+
+		if (this.player == 1) {
+			this.LEFT = this.pong.p1Left;
+			this.RIGHT = this.pong.p1Right;
+		} else {
+			this.LEFT = this.pong.p2Left;
+			this.RIGHT = this.pong.p2Right;
+		}
+		if ((!this.bonus.reversed.on && this.LEFT) || (this.bonus.reversed.on && this.RIGHT))
+			this.subSpeed();
+		if ((!this.bonus.reversed.on && this.RIGHT) || (this.bonus.reversed.on && this.LEFT))
+			this.addSpeed();
+		if (!this.LEFT && !this.RIGHT) {
+			if (this.bar.position.x + this.speed > maxPos && Math.abs(this.speed) > 0.1) {
+				this.bar.position.x = maxPos;
+				this.speed = -this.speed / 2.25;
+			} else if (this.bar.position.x + this.speed < -maxPos && Math.abs(this.speed) > 0.1) {
+				this.bar.position.x = -maxPos;
+				this.speed = -this.speed / 2.25;
+			}
+			this.bar.position.x = Math.min(maxPos, Math.max(-maxPos, this.bar.position.x + this.speed * this.pong.elapsedTime / 30));
+			this.updateSpeed();
+		} else {
+			this.bar.position.x = Math.min(maxPos, Math.max(-maxPos, this.bar.position.x + this.speed * this.pong.elapsedTime / 30));
+			if (this.bar.position.x <= -maxPos || this.bar.position.x >= maxPos) {
+				this.speed = 0;
+			}
+		}
+		this.prevPos = this.currentPos.clone();
+		this.currentPos = this.bar.position.clone();
+		this.velcity = this.prevPos.clone();
+		this.velcity.sub(this.currentPos);
+
+		this.updateBonus(this.bonus.big, 200, 1);
+		this.updateBonus(this.bonus.small, 200, 1);
+		this.updateBonus(this.bonus.frozen, 200, 1);
+		this.updateBonus(this.bonus.line, 100, 10);
+		this.updateBonus(this.bonus.reversed, 200, 1);
+/*		const maxPos = this.maxPos - this.bonus.big.time + this.bonus.small.time / 2;
 		if (this.player == 1) {
 			this.LEFT = this.pong.p1Left;
 			this.RIGHT = this.pong.p1Right;
@@ -81,6 +114,7 @@ export default class Player {
 			}
 			this.bar.position.x = Math.min(maxPos, Math.max(-maxPos, this.bar.position.x + this.speed * this.pong.elapsedTime / 12));
 		} else {
+			console.log('slut')
 			this.bar.position.x = Math.min(maxPos, Math.max(-maxPos, this.bar.position.x + this.speed * this.pong.elapsedTime / 12));
 			if (this.bar.position.x <= -maxPos || this.bar.position.x >= maxPos) {
 				this.speed = 0;
@@ -91,18 +125,18 @@ export default class Player {
 		this.currentPos = this.bar.position.clone();
 		this.velcity = this.prevPos.clone();
 		this.velcity.sub(this.currentPos);
-	}
+*/	}
 	
 	getPos() { return(this.bar.position.clone()); }
 	getSpeed() { return(this.speed); }
 	getVelocity() { return(this.velcity.clone()); }
 	getDrag() { return(this.drag); }
 	getAddSpeed() { return(this._addSpeed); }
-	addSpeed() { this.speed = add(this.speed, this.speedInc * this.pong.elapsedTime / 12, 0.3); }
-	subSpeed() { this.speed = sub(this.speed, this.speedInc * this.pong.elapsedTime / 12, 0.3); }
+	addSpeed() { this.speed = add(this.speed, this.speedInc * this.pong.elapsedTime / 5, 0.6); }
+	subSpeed() { this.speed = sub(this.speed, this.speedInc * this.pong.elapsedTime / 5, 0.6); }
 	updateSpeed() {
 		if (Math.abs(this.speed) > 0.005)
-			this.speed /= (1 + ((this.drag - (this.bonus.frozen.time * 0.9))) * this.pong.elapsedTime / 50);
+			this.speed /= (1 + ((this.drag - (this.bonus.frozen.time * 0.9))) * this.pong.elapsedTime / 150);
 		else
 			this.speed = 0;
 	}
@@ -144,7 +178,7 @@ export default class Player {
 	basicAI() {
 		if (this.bonus.line.on)
 			return ;
-		const ball = this.pong.ball;
+		const ball = this.pong.assets.ball;
 		let pos = ball.getPos();
 		let vel = ball.getVelocity();
 		let speed = ball.getSpeed();
@@ -197,7 +231,7 @@ export default class Player {
 			else
 				x = -14 - x;
 		}
-		var time = travel.length() / this.pong.ball.getSpeed() * 10;
+		var time = travel.length() / this.pong.assets.ball.getSpeed() * 10;
 		return ({pos: x, time: time});
 	}
 }

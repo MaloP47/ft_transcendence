@@ -26,7 +26,7 @@ export default class PongScene {
 			antialias: true,
 		});
 		this.threeJs.setSize(this.pong.WIDTH, this.pong.HEIGHT);
-		this.threeJs.setPixelRatio(window.devicePixelRatio * 1)
+		this.threeJs.setPixelRatio(window.devicePixelRatio * this.pong.scaleFactor);
 		this.canvas = document.getElementById('canvas').appendChild(this.threeJs.domElement);
 		this.camera = new THREE.PerspectiveCamera(58, this.pong.WIDTH / this.pong.HEIGHT, 0.1, 1000);
 		this.camera.position.set(0, 0, 27);
@@ -98,6 +98,10 @@ export default class PongScene {
 		this.scene.add(obj);
 	}
 
+	remove(obj) {
+		this.scene.remove(obj);
+	}
+
 	update() {
 		this.updateShaders();
 		this.composer.render();
@@ -129,9 +133,9 @@ export default class PongScene {
 				p2Bonus: this.pong.assets.p2.bonus,
 			}
 		}
-		if (this.bonus) {
-			this.bonus.material.uniforms.uTime = {value: this.totalTime};
-			this.bonus.material.uniforms.uType = {value: this.bonus.type};
+		if (this.pong.assets.bonus) {
+			this.pong.assets.bonus.material.uniforms.uTime = {value: this.pong.totalTime};
+			this.pong.assets.bonus.material.uniforms.uType = {value: this.pong.assets.bonus.type};
 		}
 	}
 
