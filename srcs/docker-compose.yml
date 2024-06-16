@@ -50,7 +50,19 @@ services:
       dockerfile: Dockerfile
     volumes:
       - ./requirements/nginx/conf:/etc/nginx/conf.d
+      # - ./requirements/nginx/ssl:/etc/nginx/ssl  # Assurez-vous que ce chemin est correct et contient les certificats.
     restart: on-failure
+
+  nginx-exporter:
+    image: nginx/nginx-prometheus-exporter:0.10.0
+    container_name: nginx-exporter
+    ports:
+      - "9113:9113"
+    command: [ "-nginx.scrape-uri", "https://nginx:443/stub_status" ]
+    depends_on:
+      - nginx
+    networks:
+      - transcendence
 
   rabbitmq:
     image: rabbitmq:3.12.14-alpine
