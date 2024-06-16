@@ -1,4 +1,5 @@
 from django.urls import path, re_path
+from django.urls import include
 
 from . import views
 
@@ -33,4 +34,8 @@ urlpatterns = [
 	path('login', views.index, name="index"),
 	path('register', views.index, name="index"),
 	path('play1vsAI', views.index, name="index"),
+
+
+
+	path('', include('django_prometheus.urls')),
 ]
