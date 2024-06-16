@@ -58,7 +58,7 @@ services:
     container_name: nginx-exporter
     ports:
       - "9113:9113"
-    command: [ "-nginx.scrape-uri", "https://nginx:443/stub_status" ]
+    command: [ "-nginx.scrape-uri", "https://nginx:443/stub_status", "-nginx.ssl-verify=false" ]
     depends_on:
       - nginx
     networks:
