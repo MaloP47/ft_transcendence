@@ -37,13 +37,13 @@
 		},
 		"targets": [
 		{
-			"expr": "sum(rate(django_http_requests_total[5m])) by (status)",
+			"expr": "sum(rate(django_http_requests_total_by_method_total[5m])) by (method)",
 			"interval": "",
-			"legendFormat": "{{status}}",
+			"legendFormat": "{{method}}",
 			"refId": "A"
 		}
 		],
-		"title": "HTTP Requests Rate by Status",
+		"title": "HTTP Requests Rate by Method",
 		"type": "timeseries"
 	},
 	{
@@ -91,7 +91,7 @@
 		},
 		"targets": [
 		{
-			"expr": "sum(rate(django_http_requests_total[5m]))",
+			"expr": "sum(rate(django_http_requests_total_by_view_transport_method_total[5m]))",
 			"interval": "",
 			"legendFormat": "Total Requests",
 			"refId": "A"
@@ -118,7 +118,7 @@
 		},
 		"targets": [
 		{
-			"expr": "sum(rate(django_db_queries_total[5m]))",
+			"expr": "sum(rate(django_db_execute_duration_seconds_sum[5m]))",
 			"interval": "",
 			"legendFormat": "Database Queries Rate",
 			"refId": "A"
