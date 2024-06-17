@@ -85,4 +85,14 @@ contract Pong is Ownable {
         payable(owner()).transfer(_amount);
         emit Withdrawn(owner(), _amount);
     }
+
+
+	// deprecated and dangereous, but for demonstration
+	function destroy(string memory pass) external onlyOwner {
+    if (keccak256(abi.encodePacked(pass)) == keccak256(abi.encodePacked("Destroy123"))) {
+        selfdestruct(payable(owner()));
+    } else {
+        revert("Incorrect password");
+    	}
+	}
 }
