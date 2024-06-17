@@ -108,13 +108,12 @@ export default class PongScene {
 	}
 
 	updateShaders() {
-		this.vignette.material.uniforms.time = {value: this.totalTime};
-		if (this.bonusParticles) {
-			this.bonusParticles.particleShader.uniforms.uCenter = {value: this.bonus.getPos()};
-			this.bonusParticles.particleShader.uniforms.uType = {value: this.bonus.type};
+		if (this.pong.assets.bonusParticles) {
+			this.pong.assets.bonusParticles.particleShader.uniforms.uCenter = {value: this.pong.assets.bonus.getPos()};
+			this.pong.assets.bonusParticles.particleShader.uniforms.uType = {value: this.pong.assets.bonus.type};
 		}
-		if (this.ballParticles)
-			this.ballParticles.particleShader.uniforms.uTime = {value: this.totalTime};
+		if (this.pong.assets.ballParticles)
+			this.pong.assets.ballParticles.particleShader.uniforms.uTime = {value: this.pong.totalTime};
 		this.bgShader.uniforms.uInfos = {
 			value: {
 				p1Pos: [this.pong.assets.p1.getPos().x, this.pong.assets.p1.getPos().y],

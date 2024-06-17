@@ -4,6 +4,7 @@ import BallParticles from './BallParticles.js';
 import ImpactParticles from './ImpactParticles.js';
 import Player from './Player.js';
 import Bonus from './Bonus.js';
+import BonusParticles from './BonusParticles.js';
 
 export default class PongAssets {
 	constructor(data) {
@@ -17,12 +18,10 @@ export default class PongAssets {
 		this.ballParticles = new BallParticles({pong: this.pong});
 		this.impactParticles = new ImpactParticles({pong: this.pong});
 		this.bonus = new Bonus({pong: this.pong});
-//		this.bonusParticles = new BonusParticles({pong: this});
+		this.bonusParticles = new BonusParticles({pong: this.pong});
 
 		this.p1 = new Player({pong: this.pong, player:1});
 		this.p2 = new Player({pong: this.pong, player:2});
-//		this.p1.setAI(true);
-//		this.p2.setAI(true);
 	}
 
 	update() {
@@ -34,6 +33,7 @@ export default class PongAssets {
 			this.ballParticles.update();
 			this.impactParticles.update();
 			this.bonus.update();
+			this.bonusParticles.update();
 		}
 	}
 
@@ -49,12 +49,17 @@ export default class PongAssets {
 		}
 		if (this.ImpactParticles) {
 			this.impactParticles.delete();
-			this.impactParticles = new impactParticles({pong: this.pong});
+			this.impactParticles = new ImpactParticles({pong: this.pong});
 		}
 		if (this.bonus) {
 			this.bonus.reset();
 		}
+		if (this.bonusParticles) {
+			this.bonusParticles.delete();	
+			this.bonusParticles = new BonusParticles({pong: this.pong})
+		}
 		this.ball = new Ball({pong: this.pong});
+		this.pong.exchange = 0;
 		this.p1.stopAI();
 		this.p2.stopAI();
 		this.p1 = new Player({pong: this.pong, player:1});

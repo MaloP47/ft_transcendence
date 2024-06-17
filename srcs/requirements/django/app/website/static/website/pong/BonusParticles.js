@@ -6,7 +6,7 @@
 //   By: gbrunet <gbrunet@student.42.fr>            +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2024/05/24 12:59:36 by gbrunet           #+#    #+#             //
-//   Updated: 2024/05/24 16:16:27 by gbrunet          ###   ########.fr       //
+//   Updated: 2024/06/17 10:22:24 by gbrunet          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -43,16 +43,16 @@ export default class BonusParticles {
 	}
 
 	AddParticles() {
-		if (!this.pong.bonus.active)
+		if (!this.pong.assets.bonus.active)
 			return ;
 		for (let i = 0; i < 3; i++) {
-			const life = (Math.random() + 0.5) * 0.75 + 2;
+			const life = (Math.random() + 0.5) * 0.75 + 1;
 			var rdm = new THREE.Vector3(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5);
 			var vel = new THREE.Vector3(-rdm.y, rdm.x, rdm.z);
 			this.bonusParticles.push({
-				position: this.pong.bonus.getPos().add(rdm.multiplyScalar(10.0)),
+				position: this.pong.assets.bonus.getPos().add(rdm.multiplyScalar(10.0)),
 				velocity: vel.multiplyScalar(-0.25),
-				size: Math.random() * 0.75,
+				size: Math.random() * 0.75 * this.pong.scaleFactor,
 				life: life,
 				age: life,
 			})
@@ -87,20 +87,21 @@ export default class BonusParticles {
 			const t = 1.0 - p.age / p.life;
 			p.currentSize = p.size * this.sizeSpline.Get(t);
 			p.currentAge = t;
-			if (!this.pong.bonus.active && this.pong.bonus.startTime > 500)
+			if (!this.pong.assets.bonus.active && this.pong.assets.bonus.startTime > 500)
 				p.age -= elapsedTime * 2.0;
 			p.position.add(p.velocity);
-			var dir = this.pong.bonus.getPos().sub(p.position).divideScalar(750 * this.pong.elapsedTime / 10);
+			var dir = this.pong.assets.bonus.getPos().sub(p.position).multiplyScalar( 1 / this.pong.elapsedTime / 30);
 			p.velocity.add(dir).divideScalar(1.05);
 		}
 	}
 
-	reset() {
+	delete() {
 		this.bonusParticles = [];
 		this.UpdateGeometry();
+		this.pong.assets.bonusParticles = undefined;
 	}
 
-	Update() {
+	update() {
 		this.AddParticles();
 		this.UpdateParticles(this.pong.elapsedTime / 1000.0);
 		this.UpdateGeometry();

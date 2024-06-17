@@ -6,7 +6,7 @@
 //   By: gbrunet <gbrunet@student.42.fr>            +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2024/05/21 13:52:15 by gbrunet           #+#    #+#             //
-//   Updated: 2024/06/14 17:15:07 by gbrunet          ###   ########.fr       //
+//   Updated: 2024/06/17 10:25:26 by gbrunet          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -16,12 +16,6 @@ import PongScene from './PongScene.js';
 import PongAssets from './PongAssets.js';
 import PongTransi from './PongTransi.js';
 
-import LinearSpline from './LinearSpline.js';
-import BallParticles from './BallParticles.js';
-import ImpactParticles from './ImpactParticles.js';
-import BonusParticles from './BonusParticles.js';
-import BallFire from './BallFire.js';
-import Bonus from './Bonus.js';
 import App from './../state/StateMachine.js';
 
 function add(val, add, max) {
@@ -61,7 +55,7 @@ export default class Pong {
 		this.update();
 	}
 
-	initKeys() {
+ initKeys() {
 		this.p1LeftKey = 65;
 		this.p1RightKey = 68;
 		this.p2LeftKey = 37;
@@ -80,10 +74,8 @@ export default class Pong {
 
 		function onDocumentKeyDown(event) {
 			var keyCode = event.which;
-			if (keyCode == this.p1LeftKey && !this.p1Left && !this.assets.p1.AI) {
+			if (keyCode == this.p1LeftKey && !this.p1Left && !this.assets.p1.AI)
 				this.p1Left = true;
-				console.log('sdfsdf')
-			}
 			else if (keyCode == this.p1RightKey && !this.p1Right && !this.assets.p1.AI)
 				this.p1Right = true;
 			else if (keyCode == this.p2LeftKey && !this.p2Left && !this.assets.p2.AI)
@@ -124,7 +116,7 @@ export default class Pong {
 		this.waitScreen = true;
 		this.winScore = 10;
 		this.bg = true;
-		this.scaleFactor = 0.25;
+		this.scaleFactor = 0.75;
 	}
 
 	update() {
@@ -134,115 +126,7 @@ export default class Pong {
 		this.transi.update();
 		this.scene.update();
 		this.assets.update();
-//		this.CheckState();
-//		this.UpdateShaders();
-
+		
 		requestAnimationFrame(this.update.bind(this));
-
-/*		if ((!this.assets.p1.bonus.reversed.on && this.p1Left) || (this.assets.p1.bonus.reversed.on && this.p1Right))
-			this.p1.subSpeed();
-		if ((!this.assets.p1.bonus.reversed.on && this.p1Right) || (this.assets.p1.bonus.reversed.on && this.p1Left))
-			this.p1.addSpeed();
-		if ((!this.assets.p2.bonus.reversed.on && this.p2Left) || (this.assets.p2.bonus.reversed.on && this.p2Right))
-			this.p2.subSpeed();
-		if ((!this.assets.p2.bonus.reversed.on && this.p2Right) || (this.assets.p2.bonus.reversed.on && this.p2Left))
-			this.p2.addSpeed();
-*/	}
-}
-
-class PongOld {
-	constructor(data) {
-		this.InitStates();
-		this.Animate();
-	//	this.ToState(this.states.ready)
-	}
-
-	setConfig(res) {
-		this.p1LeftKey = res.p1Left;
-		this.p1RightKey = res.p1Right;
-		this.p2LeftKey = res.p2Left;
-		this.p2RightKey = res.p2Right;
-		this.ball.initSpeed = res.ballSpeed / 100;
-		this.winScore = res.winScore;
-		this.bonuses = res.bonuses;
-		this.p1.score = res.p1score;
-		this.p2.score = res.p2score;
-		this.p1infos = res.p1;
-		this.p2infos = res.p2;
-	}
-
-	Animate() {
-		this.elapsedTime = performance.now() - this.totalTime;
-		this.totalTime = performance.now()
-		this.CheckState();
-		this.UpdateShaders();
-
-		requestAnimationFrame(this.Animate.bind(this));
-
-		if ((!this.p1.bonus.reversed.on && this.p1Left) || (this.p1.bonus.reversed.on && this.p1Right))
-			this.p1.subSpeed();
-		if ((!this.p1.bonus.reversed.on && this.p1Right) || (this.p1.bonus.reversed.on && this.p1Left))
-			this.p1.addSpeed();
-		if ((!this.p2.bonus.reversed.on && this.p2Left) || (this.p2.bonus.reversed.on && this.p2Right))
-			this.p2.subSpeed();
-		if ((!this.p2.bonus.reversed.on && this.p2Right) || (this.p2.bonus.reversed.on && this.p2Left))
-			this.p2.addSpeed();
-		this.composer.render();
-	}
-
-	UpdateShaders() {
-		this.vignette.material.uniforms.time = {value: this.totalTime};
-		if (this.bonusParticles) {
-			this.bonusParticles.particleShader.uniforms.uCenter = {value: this.bonus.getPos()};
-			this.bonusParticles.particleShader.uniforms.uType = {value: this.bonus.type};
-		}
-		if (this.ballParticles)
-			this.ballParticles.particleShader.uniforms.uTime = {value: this.totalTime};
-		this.bgShader.uniforms.uInfos = {
-			value: {
-				p1Pos: [this.p1.getPos().x, this.p1.getPos().y],
-				p2Pos: [this.p2.getPos().x, this.p2.getPos().y],
-				time: this.totalTime,
-				p1Bonus: this.p1.bonus,
-				p2Bonus: this.p2.bonus,
-			}
-		}
-		this.playerShader.uniforms.uInfos = {
-			value: {
-				p1Pos: [this.p1.getPos().x, this.p1.getPos().y],
-				p2Pos: [this.p2.getPos().x, this.p2.getPos().y],
-				time: this.totalTime,
-				p1Bonus: this.p1.bonus,
-				p2Bonus: this.p2.bonus,
-			}
-		}
-		if (this.assets.bonus) {
-			this.bonus.material.uniforms.uTime = {value: this.totalTime};
-			this.bonus.material.uniforms.uType = {value: this.bonus.type};
-		}
-	}
-
-	Smooth(t) {
-		var sqr = t * t;
-		return (sqr / (2 * (sqr - t) + 1));
-	}
-
-	easeInCubic(t) {
-		return (t * t * t);
-	}
-
-	easeOutCubic(t) {
-		return (1 - Math.pow(1 - t, 3));
-	}
-
-	LerpCamera(initCam, endCam, t) {
-		var sqr = t * t;
-		var smooth = sqr / (2 * (sqr - t) + 1);
-		this.camera.position.x = (1 - smooth) * initCam.p.x + smooth * endCam.p.x;
-		this.camera.position.y = (1 - smooth) * initCam.p.y + smooth * endCam.p.y;
-		this.camera.position.z = (1 - smooth) * initCam.p.z + smooth * endCam.p.z;
-		this.camera.rotation.x = (1 - smooth) * initCam.r.x + smooth * endCam.r.x;
-		this.camera.rotation.y = (1 - smooth) * initCam.r.y + smooth * endCam.r.y;
-		this.camera.rotation.z = (1 - smooth) * initCam.r.z + smooth * endCam.r.z;
 	}
 }

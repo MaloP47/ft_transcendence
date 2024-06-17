@@ -6,7 +6,7 @@
 //   By: gbrunet <gbrunet@student.42.fr>            +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2024/05/24 13:05:45 by gbrunet           #+#    #+#             //
-//   Updated: 2024/05/31 15:20:08 by gbrunet          ###   ########.fr       //
+//   Updated: 2024/06/17 10:11:44 by gbrunet          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -100,6 +100,7 @@ export default class Bonus {
 		if (!this.active){
 			if (this.bonus.scale.x > 0) {
 				this.bonus.scale.x -= this.pong.elapsedTime / 400;
+
 				this.bonus.scale.y -= this.pong.elapsedTime / 400;
 			} else {
 				this.bonus.scale.x = 0;
