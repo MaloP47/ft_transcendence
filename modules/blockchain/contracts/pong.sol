@@ -16,14 +16,14 @@ import "./ownable.sol";
 
 contract Pong is Ownable {
 
-	event	NewTournament(uint tournamentId, uint8 winnerId, uint8 wins, uint8 losses);
+	event	NewTournament(uint tournamentId, uint16 winnerId, uint16 wins, uint16 losses);
 	event	Received(address sender, uint amount);
     event	Withdrawn(address owner, uint amount);
 
 	struct Tournament {
-		uint8	winnerId;
-		uint8	winnerWins;
-		uint8	winnerLosses;
+		uint16	winnerId;
+		uint16	winnerWins;
+		uint16	winnerLosses;
 	}
 
 	Tournament[] public tournaments;
@@ -38,16 +38,16 @@ contract Pong is Ownable {
 		_;
 	}
 
-	function	createTournament(uint8 _winnerId, uint8 _wins, uint8 _losses) public onlyOwner() {
+	function	createTournament(uint16 _winnerId, uint16 _wins, uint16 _losses) public onlyOwner() {
 		tournaments.push(Tournament(_winnerId, _wins, _losses));
 		uint id = tournaments.length - 1;
 		emit NewTournament(id, _winnerId, _wins, _losses);
 	}
 
 	function	getTournament(uint _id) external view hasStarted() returns (
-		uint8	winnerId,
-		uint8	winnerWins,
-		uint8	winnerLosses
+		uint16	winnerId,
+		uint16	winnerWins,
+		uint16	winnerLosses
 	) {
 		require(_id < tournaments.length, "Tournament ID doesn't exist.");
 		Tournament storage tournament = tournaments[_id];
@@ -56,15 +56,15 @@ contract Pong is Ownable {
 		winnerLosses = tournament.winnerLosses;
 	}
 
-	function	getWinnerId(uint _id) external view hasStarted outOfBounds(_id) returns (uint8) {
+	function	getWinnerId(uint _id) external view hasStarted outOfBounds(_id) returns (uint16) {
 		return tournaments[_id].winnerId;
 	}
 
-	function	getWinnerWins(uint _id) external view hasStarted outOfBounds(_id) returns (uint8) {
+	function	getWinnerWins(uint _id) external view hasStarted outOfBounds(_id) returns (uint16) {
 		return tournaments[_id].winnerWins;
 	}
 
-	function	getWinnerLosses(uint _id) external view hasStarted outOfBounds(_id) returns (uint8) {
+	function	getWinnerLosses(uint _id) external view hasStarted outOfBounds(_id) returns (uint16) {
 		return tournaments[_id].winnerLosses;
 	}
 
