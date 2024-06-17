@@ -143,6 +143,6 @@ export default class PongScene {
 		this.camera.updateProjectionMatrix();
 		this.threeJs.setSize(this.pong.WIDTH, this.pong.HEIGHT);
 		this.composer.setSize(this.pong.WIDTH, this.pong.HEIGHT);
-		this.vignette.uniforms['lines'].value = yhis.pong.HEIGHT / 4;
+		this.vignette.uniforms['lines'].value = this.pong.HEIGHT / 4;
 	}
 }

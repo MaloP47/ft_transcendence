@@ -77,15 +77,15 @@ export default class PongTransi {
 		}
 		if (this.time > this.transiTime) {
 			this.transi = "p1Game";
-			this.pong.start = true;
+		//	this.pong.start = true;
 			return ;
 		}
 		this.time += this.pong.elapsedTime;
 		let progress = this.easeOutCubic(Math.min(this.time / this.transiTime, 1));
 		this.pong.scene.vignette.uniforms['amount'].value = 1;
 		if (this.pong.HEIGHT < 800) {
-			this.pong.scene.camera.position.set(0, (1 - progress) * -20 - 13, 20 + (800 - HEIGHT) / 20);
-			this.pong.scene.camera.lookAt(new THREE.Vector3(0, progress * (2 - (HEIGHT / 800) * 4), 0));
+			this.pong.scene.camera.position.set(0, (1 - progress) * -20 - 13, 20 + (800 - this.pong.HEIGHT) / 20);
+			this.pong.scene.camera.lookAt(new THREE.Vector3(0, progress * (2 - (this.pong.HEIGHT / 800) * 4), 0));
 		} else {
 			this.pong.scene.camera.position.set(0, (1 - progress) * -20 - 13, 20 + (1 - progress) * 10);
 			this.pong.scene.camera.lookAt(new THREE.Vector3(0, progress * -2, 0));	
@@ -96,8 +96,8 @@ export default class PongTransi {
 
 	p1Game() {
 		if (this.pong.HEIGHT < 800) {
-			this.pong.scene.camera.position.set(0, -13, 20 + (800 - HEIGHT) / 20);
-			this.pong.scene.camera.lookAt(new THREE.Vector3(0, 2 - (HEIGHT / 800) * 4, 0));
+			this.pong.scene.camera.position.set(0, -13, 20 + (800 - this.pong.HEIGHT) / 20);
+			this.pong.scene.camera.lookAt(new THREE.Vector3(0, 2 - (this.pong.HEIGHT / 800) * 4, 0));
 		} else {
 			this.pong.scene.camera.position.set(0, -13, 20);
 			this.pong.scene.camera.lookAt(new THREE.Vector3(0, -2, 0));	

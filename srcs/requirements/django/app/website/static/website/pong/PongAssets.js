@@ -51,12 +51,14 @@ export default class PongAssets {
 			this.impactParticles.delete();
 			this.impactParticles = new ImpactParticles({pong: this.pong});
 		}
-		if (this.bonus) {
-			this.bonus.reset();
-		}
-		if (this.bonusParticles) {
-			this.bonusParticles.delete();	
-			this.bonusParticles = new BonusParticles({pong: this.pong})
+		if (this.pong.bonus) {
+			if (this.bonus) {
+				this.bonus.reset();
+			}
+			if (this.bonusParticles) {
+				this.bonusParticles.delete();	
+				this.bonusParticles = new BonusParticles({pong: this.pong})
+			}
 		}
 		this.ball = new Ball({pong: this.pong});
 		this.pong.exchange = 0;

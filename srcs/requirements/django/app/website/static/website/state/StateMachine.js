@@ -6,7 +6,7 @@
 //   By: gbrunet <gbrunet@student.42.fr>            +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2024/06/13 11:54:22 by gbrunet           #+#    #+#             //
-//   Updated: 2024/06/14 17:23:38 by gbrunet          ###   ########.fr       //
+//   Updated: 2024/06/17 12:11:36 by gbrunet          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -105,22 +105,16 @@ export default class App {
 					if (document.getElementById("loginForm"))
 						this.hideLoginForm();
 					this.getHomePage("home");
-//					if (this.pong)
-//						this.pong.ToState(this.pong.states.login)
 					break;
 				case "Login":
 					if (document.getElementById("registerForm"))
 						this.hideRegisterForm();
 					this.getLoginForm();
-//					if (this.pong)
-//						this.pong.ToState(this.pong.states.login)
 					break;
 				case "Register":
 					if (document.getElementById("loginForm"))
 						this.hideLoginForm();
 					this.getRegisterForm();
-//					if (this.pong)
-//						this.pong.ToState(this.pong.states.login)
 					break;
 				case "Play1vsAI":
 					if (document.getElementById("registerForm"))
@@ -129,8 +123,6 @@ export default class App {
 						this.hideLoginForm();
 					if (document.getElementById("createGame"))
 						this.hideCreateGame();
-//					if (id == -1 && this.pong)
-//						this.pong.ToState(this.pong.states.login)
 					this.getHomePage("1vsAI", id);
 					break;
 			}
@@ -374,44 +366,17 @@ export default class App {
 						console.log('game is finished...')
 					} else {
 						this.pong.setConfig(res);
-						this.pong.p1.setAI(false);
-						this.pong.p2.setAI(false);
-						this.pong.ToState(this.pong.states.ready);
-						console.log("sdfsdfsdf")
-						setTimeout(()=> {
-							this.animateCountdown(5, res);
-						}, 1000)
+//						this.pong.p1.setAI(false);
+//						this.pong.p2.setAI(false);
+//						this.pong.ToState(this.pong.states.ready);
+//						console.log("sdfsdfsdf")
+//						setTimeout(()=> {
+//							this.animateCountdown(5, res);
+//						}, 1000)
 					}
 				}
 			}
 		});
-	}
-
-	animateCountdown(sec, res) {
-		let countdown = document.getElementById("countdown");
-		if (sec >= 0 && countdown && countdown.innerHTML != sec) {
-			countdown.innerHTML = sec;
-			countdown.classList.remove("countdown");
-			setTimeout(()=>{
-				countdown.classList.add("countdown");
-			}, 15)
-			setTimeout(() => {
-				this.animateCountdown(sec - 1, res);
-			}, 1000)	
-		}
-		if (sec == 0 && countdown) {
-			setTimeout(()=>{
-				this.pong.start = true;
-				this.pong.endRound = false;
-				if (res.ai == 1) {
-					this.pong.p2.setAI(true);
-					this.pong.p2.startAI();
-				} else if (res.ai == 2) {
-					console.log("a faire !!!")
-				}
-				console.log("joue");
-			}, 500);
-		}
 	}
 	
 	hideLocalAiConfigPage() {

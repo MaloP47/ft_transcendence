@@ -6,7 +6,7 @@
 //   By: gbrunet <gbrunet@student.42.fr>            +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2024/05/24 13:13:55 by gbrunet           #+#    #+#             //
-//   Updated: 2024/06/17 10:23:30 by gbrunet          ###   ########.fr       //
+//   Updated: 2024/06/17 11:46:00 by gbrunet          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -124,7 +124,7 @@ export default class Ball {
 					})
 				let p1score = document.getElementById("p1score");
 				if (p1score)
-					p1score.innerHTML = this.pong.p1.score;
+					p1score.innerHTML = this.pong.assets.p1.score;
 			}
 			this.ball.position.y = -0.5;
 		} else if (player == 2) {
@@ -138,13 +138,13 @@ export default class Ball {
 					})
 				let p2score = document.getElementById("p2score");
 				if (p2score)
-					p2score.innerHTML = this.pong.p2.score;
+					p2score.innerHTML = this.pong.assets.p2.score;
 			}
 			this.ball.position.y = 0.5;
 		}
 		if (this.pong.assets.bonus)
 			clearTimeout(this.pong.assets.bonus.nextTimeout);
-		if (this.pong.assets.p1.score >= this.pong.winScore || this.pong.assets.p2.score >= this.pong.winScore) {
+		if (!this.pong.bg && (this.pong.assets.p1.score >= this.pong.winScore || this.pong.assets.p2.score >= this.pong.winScore)) {
 			let endDiv = document.getElementById("countdown");
 			if (endDiv) {
 				if (this.pong.assets.p1.score > this.pong.assets.p2.score) {
