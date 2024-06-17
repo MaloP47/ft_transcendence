@@ -7,3 +7,5 @@ djangorestframework==3.15.1
 channels==3.0.5
 channels-redis==3.3.1
 pillow==10.3.0
+web3==6.19.0
+
