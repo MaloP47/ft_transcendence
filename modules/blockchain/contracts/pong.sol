@@ -76,6 +76,10 @@ contract Pong is Ownable {
         return address(this).balance;
     }
 
+	function	getTournamentLength() external view returns (uint) {
+		return tournaments.length;
+	}
+
     function	withdraw(uint _amount) external onlyOwner {
         require(_amount <= address(this).balance, "Insufficient balance in the contract");
         payable(owner()).transfer(_amount);
