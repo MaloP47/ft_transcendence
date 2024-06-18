@@ -6,7 +6,7 @@
 //   By: gbrunet <gbrunet@student.42.fr>            +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2024/05/24 13:13:55 by gbrunet           #+#    #+#             //
-//   Updated: 2024/06/17 11:46:00 by gbrunet          ###   ########.fr       //
+//   Updated: 2024/06/18 14:24:56 by gbrunet          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -24,7 +24,10 @@ export default class Ball {
 		this.ball = new THREE.Mesh(this.geometry, this.material);
 		this.pong.scene.add(this.ball);
 
-		this.initSpeed = 0.08;
+		if (this.pong.gameInfo)
+			this.initSpeed = this.pong.gameInfo.ballSpeed / 100.0;
+		else
+			this.initSpeed = 0.08;
 		this.speed = this.initSpeed;
 
 		this.prevPos = this.ball.position.clone();
@@ -244,7 +247,7 @@ export default class Ball {
 			if (this.pong.assets.impactParticles)
 				this.pong.assets.impactParticles.AddParticles();
 			this.pong.exchange++;
-			if (this.pong.assets.bonus && this.pong.exchange == 2)
+			if (this.pong.assets.bonus && this.pong.exchange == 2 && this.pong.gameInfo.bonuses)
 				this.pong.assets.bonus.active = true;
 			this.speed = this.initSpeed + Math.min(this.pong.exchange / 300, 0.15);
 		}
