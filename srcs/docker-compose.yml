@@ -32,6 +32,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    expose:
+      - "5432"
 
   nginx:
     container_name: nginx
@@ -111,13 +113,17 @@ services:
     container_name: postgres-exporter
     environment:
       DATA_SOURCE_NAME: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}?sslmode=disable"
+      CONFIG_FILE: /etc/postgres_exporter/postgres_exporter.yml
     ports:
       - "9187:9187"
     networks:
       - transcendence
     depends_on:
       - db
+    volumes:
+      - ./requirements/postgres_exporter/conf/postgres_exporter.yml:/postgres_exporter.yml
     restart: on-failure
+
 
 volumes:
   postgres_data:
