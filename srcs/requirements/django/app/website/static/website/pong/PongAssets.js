@@ -27,7 +27,7 @@ export default class PongAssets {
 	update() {
 		this.p1.update();
 		this.p2.update();
-		if (this.pong.bg || this.pong.start) {
+		if (this.pong.start) {
 			this.ball.update();
 			this.ballFire.update();
 			this.ballParticles.update();
