@@ -15,7 +15,7 @@ from django.shortcuts import render
 from django.contrib.auth import login, logout, authenticate
 from django.template.loader import render_to_string
 from django.views.decorators.csrf import csrf_exempt
-from django.db.models import Exists, F, Subquery, OuterRef
+from django.db.models import Exists, F, Subquery, OuterRef, Q
 from website.models import Game, BlockedUser, User, Message, Room, FriendRequest
 import json
 from datetime import datetime, timedelta
@@ -234,11 +234,13 @@ def homeView(request):
 	if request.method == 'POST':
 		if request.user.is_authenticated:
 			friendRequest = FriendRequest.objects.filter(userTo=request.user).exclude(accepted=True)
+			unfinishedGames = Game.objects.filter(Q(p1=request.user) | Q(p2=request.user)).exclude(scoreToWin__lte=F('p1Score')).exclude(scoreToWin__lte=F('p2Score')).exclude(forfeit__isnull=False)
 		else:
 			friendRequest = []
+			unfinishedGames = []
 		return JsonResponse({
 			'success': True,
-			'html': render_to_string('website/home.html', {"user": request.user, "friendRequest": friendRequest}),
+			'html': render_to_string('website/home.html', {"user": request.user, "friendRequest": friendRequest, "unfinishedGames": unfinishedGames}),
 		});
 
 def chatView(request):

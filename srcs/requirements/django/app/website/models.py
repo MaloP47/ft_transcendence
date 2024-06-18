@@ -33,6 +33,7 @@ class Game(models.Model):
 	date = models.DateTimeField(auto_now_add=True)
 	p1 = models.ForeignKey(User, on_delete=models.DO_NOTHING, blank=True, null=True, related_name="p1")
 	p2 = models.ForeignKey(User, on_delete=models.DO_NOTHING, blank=True, null=True, related_name="p2")
+	forfeit = models.ForeignKey(User, on_delete=models.DO_NOTHING, blank=True, null=True, related_name="forfeit")
 	ai = models.IntegerField(default=0)
 	p1Score = models.IntegerField(default=0)
 	p2Score = models.IntegerField(default=0)

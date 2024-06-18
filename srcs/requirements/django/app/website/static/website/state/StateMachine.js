@@ -6,7 +6,7 @@
 //   By: gbrunet <gbrunet@student.42.fr>            +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2024/06/13 11:54:22 by gbrunet           #+#    #+#             //
-//   Updated: 2024/06/17 12:11:36 by gbrunet          ###   ########.fr       //
+//   Updated: 2024/06/18 15:59:31 by gbrunet          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -917,11 +917,25 @@ export default class App {
 					notif[i].classList.remove("hided")
 				}, 15)
 				let acceptBtn = notif[i].childNodes[1].childNodes[1];
-				acceptBtn.addEventListener("click", this.acceptFriendRequest.bind(this), false);
+				if (acceptBtn.classList.contains("accept"))
+					acceptBtn.addEventListener("click", this.acceptFriendRequest.bind(this), false);
+				else if (acceptBtn.classList.contains("join"))
+					acceptBtn.addEventListener("click", this.joinUnfinishedGame.bind(this), false);
 				let deleteBtn = notif[i].childNodes[1].childNodes[2];
-				deleteBtn.addEventListener("click", this.deleteFriendRequest.bind(this), false);
+				if (deleteBtn.classList.contains("delete"))
+					deleteBtn.addEventListener("click", this.deleteFriendRequest.bind(this), false);
+				else if (deleteBtn.classList.contains("forfeit"))
+					deleteBtn.addEventListener("click", this.forfeitUnfinishedGame.bind(this), false);
 			}
 		}
+	}
+
+	joinUnfinishedGame(e) {
+		console.log("to do")
+	}
+
+	forfeitUnfinishedGame(e) {
+		console.log("to do")	
 	}
 
 	acceptFriendRequest(e) {
