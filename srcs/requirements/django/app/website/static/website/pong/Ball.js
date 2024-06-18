@@ -151,13 +151,13 @@ export default class Ball {
 					if (this.pong.assets.p1.AI) {
 						endDiv.innerHTML = "A.I. wins this game !"
 					} else {
-						endDiv.innerHTML = this.pong.p1infos.username + " wins this game !"
+						endDiv.innerHTML = this.pong.p1Infos.username + " wins this game !"
 					}
 				} else {
 					if (this.pong.assets.p2.AI) {
 						endDiv.innerHTML = "A.I. wins this game !"
 					} else {
-						endDiv.innerHTML = this.pong.p2infos.username + " wins this game !"
+						endDiv.innerHTML = this.pong.p2Infos.username + " wins this game !"
 					}
 				}
 				endDiv.classList.remove("coundown");

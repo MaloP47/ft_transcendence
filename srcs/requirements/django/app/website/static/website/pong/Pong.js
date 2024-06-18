@@ -139,7 +139,6 @@ export default class Pong {
 
 	setConfig(data) {
 		console.log(data);
-		this.pong.
 /*		if (this.transi.transi != "bg") {
 			sleep(500).then(() => {
 				this.transi.toBlack(1000).then(() => {
@@ -161,36 +160,38 @@ export default class Pong {
 		}
 */	}
 
-	preConfig(data) {
-		this.p1LeftKey = data.p1Left;
-		this.p1RightKey = data.p1Right;
-		this.p2LeftKey = data.p2Left;
-		this.p2RightKey = data.p2Right;
+	preConfig() {
+		this.p1LeftKey = this.gameInfo.p1Left;
+		this.p1RightKey = this.gameInfo.p1Right;
+		this.p2LeftKey = this.gameInfo.p2Left;
+		this.p2RightKey = this.gameInfo.p2Right;
 		this.p1Right = false;
 		this.p1Left = false;
 		this.p1Right = false;
 		this.p2Left = false;
 		this.p2Right = false;
-		this.bonus = data.bonuses;
-		this.p1Infos = data.p1;
-		this.p2Infos = data.p2;
-		this.winScore = data.winScore;
+		this.bonus = this.gameInfo.bonuses;
+		this.p1Infos = this.gameInfo.p1;
+		this.p2Infos = this.gameInfo.p2;
+		this.winScore = this.gameInfo.winScore;
 	}
 
 	postConfig(data) {
-		this.assets.ball.initSpeed = data.ballSpeed / 100.0;
-		this.assets.p1.score = data.p1score;
-		this.assets.p2.score = data.p2score;
-		if (data.p1.id == -1)
+		this.assets.ball.initSpeed = this.gameInfo.ballSpeed / 100.0;
+		this.assets.p1.score = this.gameInfo.p1score;
+		this.assets.p2.score = this.gameInfo.p2score;
+		if (this.gameInfo.p1.id == -1)
 			this.assets.p1.AI = true;
-		if (data.p2.id == -1)
+		if (this.gameInfo.p2.id == -1)
 			this.assets.p2.AI = true;
-		sleep(1000).then(() => {
-			this.animateCountdown(5, data);
-		})
+		if (this.countTimeout)
+			clearTimeout(this.countTimeout)
+		this.countTimeout = setTimeout(() => {
+			this.animateCountdown(5);	
+		}, 1000)
 	}
 
-	animateCountdown(sec, res) {
+	animateCountdown(sec) {
 		let countdown = document.getElementById("countdown");
 		if (sec >= 0 && countdown && countdown.innerHTML != sec) {
 			countdown.innerHTML = sec;
@@ -198,16 +199,16 @@ export default class Pong {
 			setTimeout(()=>{
 				countdown.classList.add("countdown");
 			}, 15)
-			setTimeout(() => {
-				this.animateCountdown(sec - 1, res);
+			this.countTimout = setTimeout(() => {
+				this.animateCountdown(sec - 1);
 			}, 1000)	
 		}
 		if (sec == 0 && countdown) {
 			setTimeout(()=>{
 				this.start = true;
 				this.endRound = false;
-				if (res.p2.id == -1) {
-					if (res.ai == 1)
+				if (this.gameInfo.p2.id == -1) {
+					if (this.gameInfo.ai == 1)
 						this.assets.p2.startAI();
 					else if (res.ai == 2)
 						console.log("a faire !!!")

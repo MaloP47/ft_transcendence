@@ -106,7 +106,6 @@ export default class App {
 			document.title = view.title;
 			switch(view.state) {
 				case "Home":
-					this.setPong("bg");
 					if (document.getElementById("registerForm"))
 						this.hideRegisterForm();
 					if (document.getElementById("loginForm"))
@@ -114,13 +113,11 @@ export default class App {
 					this.getHomePage("home");
 					break;
 				case "Login":
-					this.setPong("bg");
 					if (document.getElementById("registerForm"))
 						this.hideRegisterForm();
 					this.getLoginForm();
 					break;
 				case "Register":
-					this.setPong("bg");
 					if (document.getElementById("loginForm"))
 						this.hideLoginForm();
 					this.getRegisterForm();
@@ -311,14 +308,17 @@ export default class App {
 					this.initAddFriendBtn();
 					this.initDeleteFriendBtn();
 					this.updateRooms();
-					if (state == "home")
+					if (state == "home") {
+						this.setPong("bg");
 						this.getCreateGame();
-					else if (state == "1vsAI" && game_id == -1) {
+					} else if (state == "1vsAI" && !this.user.authenticated) {
+						history.replaceState("", "", "/");
+						this.router();
+					} else if (state == "1vsAI" && game_id == -1) {
 						this.setPong("bg");
 						this.getLocalAiConfigPage();
 					}
 					else if (state == "1vsAI" && game_id != -1) {
-						this.setPong("p1Game");
 						this.getLocalAiGame(game_id);
 					}
 					let homeView = document.getElementById("homeView");
@@ -328,15 +328,14 @@ export default class App {
 				}
 			})
 		} else {
-			// need to clean current home view and add what the user want...
-			if (state == "home")
+			if (state == "home") {
+				this.setPong("bg");
 				this.getCreateGame();
-			else if (state == "1vsAI" && game_id == -1) {
+			} else if (state == "1vsAI" && game_id == -1) {
 				this.setPong("bg");
 				this.hideLocalAiGame();
 				this.getLocalAiConfigPage();
 			} else if (state == "1vsAI" && game_id != -1) {
-				this.setPong("p1Game");
 				this.hideLocalAiConfigPage();
 				this.getLocalAiGame(game_id);
 			}
@@ -355,7 +354,13 @@ export default class App {
 		this.getApiResponseJson("/api/game/get/", {id: id}).then((response) => {
 			let res = JSON.parse(response);
 			if (res.success) {
+			console.log(res);
+				if (res.winScore <= res.p1score || res.winScore <= res.p2score)
+					this.setPong("bg")
+				else
+					this.setPong("p1Game");
 				this.pong.game_id = id;
+				this.pong.gameInfo = res;
 				let homeContent = document.getElementById("homeContent");
 				if (document.getElementById("gameOverlay"))
 					return ;
@@ -534,7 +539,9 @@ export default class App {
 				homeContent.innerHTML = res.html;
 				let gameBtns = document.getElementById("createGame");
 				setTimeout(() => {
-					document.getElementById("createGame").classList.remove("hided");
+					let dom = document.getElementById("createGame")
+					if (dom)
+						dom.classList.remove("hided");
 				}, 15);
 			}
 		});

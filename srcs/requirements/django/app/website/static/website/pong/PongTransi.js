@@ -73,6 +73,7 @@ export default class PongTransi {
 	toP1Game(time) {
 		if (time != undefined) {
 			this.initTransi("toP1Game", time);
+			this.pong.preConfig();
 			this.pong.assets.reset();
 			this.pong.bg = false;
 			this.pong.scene.vignette.uniforms['amount'].value = 0;
@@ -80,6 +81,7 @@ export default class PongTransi {
 		}
 		if (this.time > this.transiTime) {
 			this.transi = "p1Game";
+			this.pong.postConfig();
 		//	this.pong.start = true;
 			return ;
 		}
@@ -105,6 +107,12 @@ export default class PongTransi {
 			this.pong.scene.camera.position.set(0, -13, 20);
 			this.pong.scene.camera.lookAt(new THREE.Vector3(0, -2, 0));	
 		}
+	}
+
+	setGameConfig() {
+		console.log(this.pong.gameInfo)
+		
+	
 	}
 
 	initTransi(transi, time) {
