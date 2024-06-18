@@ -226,6 +226,7 @@ export default class App {
 	//----------------------------------------------------------//
 
 	setPong(state) {
+		console.log("alo : "+ state);
 		if (!this.pong)
 			this.pong = new Pong({stateMachine: this, state: state});
 		else
@@ -402,6 +403,9 @@ export default class App {
 //						}, 1000)
 					}
 				}
+			} else {
+				history.replaceState("", "", "/");
+				this.router();
 			}
 		});
 	}

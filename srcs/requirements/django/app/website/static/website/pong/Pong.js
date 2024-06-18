@@ -116,12 +116,54 @@ export default class Pong {
 		this.bg = true;
 		this.scaleFactor = 0.75;
 		this.bonus = true;
+		this.gameInfo = {
+			ai: 1,
+			ballSpeed: 8,
+			bonuses: true,
+			p1: {
+				id: -1,
+				username: ""
+			},
+			p2: {
+				id: -1,
+				username: ""
+			},
+			p1Left: 65,
+			p1Right: 68,
+			p1score: 0,
+			p2Left: 37,
+			p2Right: 39,
+			p2score: 0,
+			winScore: 10,
+		}
 	}
 
 	toState(state) {
-		console.log(state)
-		if (state == "bg")
+		if (state == "bg") {
+			this.gameInfo = {
+				ai: 1,
+				ballSpeed: 8,
+				bonuses: true,
+				p1: {
+					id: -1,
+					username: ""
+				},
+				p2: {
+					id: -1,
+					username: ""
+				},
+				p1Left: 65,
+				p1Right: 68,
+				p1score: 0,
+				p2Left: 37,
+				p2Right: 39,
+				p2score: 0,
+				winScore: 10,
+			}
+			this.start = false;
+			console.log("wesh")
 			this.transi.to("toBg", 1500);
+		}
 		else if (state == "p1Game")
 			this.transi.to("toP1Game", 1000);
 	}

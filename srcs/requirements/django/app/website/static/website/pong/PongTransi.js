@@ -36,6 +36,7 @@ export default class PongTransi {
 	toBg(time) {
 		if (time != undefined) {
 			this.initTransi("toBg", time);
+			this.pong.preConfig();
 			this.pong.scene.vignette.uniforms['amount'].value = 0;
 			this.pong.scene.dot.uniforms['amount'].value = 1;
 			this.pong.assets.p1.AI = true;
@@ -46,6 +47,7 @@ export default class PongTransi {
 		}
 		if (this.time > this.transiTime) {
 			this.transi = "bg";
+			this.pong.postConfig();
 			return ;
 		}
 		this.time += this.pong.elapsedTime;
