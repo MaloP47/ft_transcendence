@@ -10,6 +10,12 @@
 //                                                                            //
 // ************************************************************************** //
 
+import Pong from '../pong/Pong.js';
+
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 export default class App {
 	constructor() {
 		this.preventLinkDefaultBehavior();
@@ -100,6 +106,7 @@ export default class App {
 			document.title = view.title;
 			switch(view.state) {
 				case "Home":
+					this.setPong("bg");
 					if (document.getElementById("registerForm"))
 						this.hideRegisterForm();
 					if (document.getElementById("loginForm"))
@@ -107,11 +114,13 @@ export default class App {
 					this.getHomePage("home");
 					break;
 				case "Login":
+					this.setPong("bg");
 					if (document.getElementById("registerForm"))
 						this.hideRegisterForm();
 					this.getLoginForm();
 					break;
 				case "Register":
+					this.setPong("bg");
 					if (document.getElementById("loginForm"))
 						this.hideLoginForm();
 					this.getRegisterForm();
@@ -219,6 +228,13 @@ export default class App {
 	//						VIEW UPDATE							//
 	//----------------------------------------------------------//
 
+	setPong(state) {
+		if (!this.pong)
+			this.pong = new Pong({stateMachine: this, state: state});
+		else
+			this.pong.toState(state);
+	}
+
 	toggleProfilMenu() {
 		let profilMenu = document.getElementById("profilMenu");
 		if (this.user.authenticated) {
@@ -297,10 +313,14 @@ export default class App {
 					this.updateRooms();
 					if (state == "home")
 						this.getCreateGame();
-					else if (state == "1vsAI" && game_id == -1)
+					else if (state == "1vsAI" && game_id == -1) {
+						this.setPong("bg");
 						this.getLocalAiConfigPage();
-					else if (state == "1vsAI" && game_id != -1)
+					}
+					else if (state == "1vsAI" && game_id != -1) {
+						this.setPong("p1Game");
 						this.getLocalAiGame(game_id);
+					}
 					let homeView = document.getElementById("homeView");
 					setTimeout(() => {
 						homeView.classList.remove("hided");
@@ -312,9 +332,11 @@ export default class App {
 			if (state == "home")
 				this.getCreateGame();
 			else if (state == "1vsAI" && game_id == -1) {
+				this.setPong("bg");
 				this.hideLocalAiGame();
 				this.getLocalAiConfigPage();
 			} else if (state == "1vsAI" && game_id != -1) {
+				this.setPong("p1Game");
 				this.hideLocalAiConfigPage();
 				this.getLocalAiGame(game_id);
 			}
@@ -365,7 +387,7 @@ export default class App {
 						}
 						console.log('game is finished...')
 					} else {
-						this.pong.setConfig(res);
+						this.pong.config = res;
 //						this.pong.p1.setAI(false);
 //						this.pong.p2.setAI(false);
 //						this.pong.ToState(this.pong.states.ready);

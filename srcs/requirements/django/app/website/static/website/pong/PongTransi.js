@@ -17,6 +17,8 @@ export default class PongTransi {
 		}
 		if (this.time > this.transiTime) {
 			this.active = false;
+			this.pong.scene.vignette.uniforms['amount'].value = 0;
+			this.pong.scene.dot.uniforms['amount'].value = 1;
 			return ;
 		}
 		this.time += this.pong.elapsedTime;
@@ -35,6 +37,7 @@ export default class PongTransi {
 		if (time != undefined) {
 			this.initTransi("toBg", time);
 			this.pong.scene.vignette.uniforms['amount'].value = 0;
+			this.pong.scene.dot.uniforms['amount'].value = 1;
 			this.pong.assets.p1.AI = true;
 			this.pong.assets.p2.AI = true;
 			this.pong.assets.p1.startAI();
@@ -109,6 +112,32 @@ export default class PongTransi {
 		this.transi = transi;
 		this.time = 0;
 		this.transiTime = time;
+	}
+
+	to(transi, time) {
+		if (this.transi == transi)
+			return ;
+		if (transi == "toBlack")
+			this.toBlack(time);
+		else if (transi == "toBg" && this.transi != "bg") {
+			if (this.transi != "") {
+				this.toBlack(1000);
+				setTimeout(() => {
+					this.toBg(time);
+				}, 1000)
+			} else
+				this.toBg(time);
+		}
+		else if (transi == "toP1Game" && this.transi != "p1Game") {
+			if (this.transi == "")
+				this.toP1Game(time);
+			else {
+				this.toBlack(1000);
+				setTimeout(() => {
+					this.toP1Game(time);
+				}, 1000)
+			}
+		}
 	}
 
 	easeInCubic(t) {

@@ -34,27 +34,14 @@ function sleep(ms) {
 
 export default class Pong {
 	constructor(data) {
+		this.stateMachine = data.stateMachine;
 		this.initKeys();
 		this.initEvents();
 		this.initGameVariable();
 		this.scene = new PongScene({pong: this});
 		this.assets = new PongAssets({pong: this});
 		this.transi = new PongTransi({pong: this});
-
-		sleep(500).then(() => {
-			let path = String(location.pathname)
-			console.log(path);
-			let id = -1
-			if (path.indexOf("/play1vsAI/") == 0) {
-				id = path.substring(11)
-				path = "/play1vsAI"
-			}
-			console.log(id);
-			if (path == "/path1vsAi" && id != -1)
-				this.transi.toP1Game(1500)
-			else
-				this.transi.toBg(1500)
-		})
+//		this.toState(data.state);
 //		sleep(5000).then(() => {
 //			this.transi.toBlack(1000).then(() => {
 //				this.transi.toP1Game(1000).then(() => {
@@ -131,6 +118,14 @@ export default class Pong {
 		this.bonus = true;
 	}
 
+	toState(state) {
+		console.log(state)
+		if (state == "bg")
+			this.transi.to("toBg", 1500);
+		else if (state == "p1Game")
+			this.transi.to("toP1Game", 1000);
+	}
+
 	update() {
 		this.elapsedTime = performance.now() - this.totalTime;
 		this.totalTime = performance.now()
@@ -144,7 +139,8 @@ export default class Pong {
 
 	setConfig(data) {
 		console.log(data);
-		if (this.transi.transi != "bg") {
+		this.pong.
+/*		if (this.transi.transi != "bg") {
 			sleep(500).then(() => {
 				this.transi.toBlack(1000).then(() => {
 					this.preConfig(data);
@@ -163,7 +159,7 @@ export default class Pong {
 				});
 			});
 		}
-	}
+*/	}
 
 	preConfig(data) {
 		this.p1LeftKey = data.p1Left;
