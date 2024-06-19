@@ -6,7 +6,7 @@
 //   By: gbrunet <gbrunet@student.42.fr>            +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2024/06/13 11:54:22 by gbrunet           #+#    #+#             //
-//   Updated: 2024/06/18 15:59:31 by gbrunet          ###   ########.fr       //
+//   Updated: 2024/06/18 16:00:12 by gbrunet          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -931,11 +931,34 @@ export default class App {
 	}
 
 	joinUnfinishedGame(e) {
-		console.log("to do")
+		let gameType = e.target.dataset.type;
+		let gameId = e.target.dataset.game;
+		if (gameType == 0) // Local 1 vs AI
+			history.pushState("", "", "/play1vsAI/" + gameId);
+		else if (gameType == 1) // Local 1 vs 1
+			history.pushState("", "", "/play1vs1/" + gameId);
+		else if (gameType == 2) // Remote 1 vs 1
+			history.pushState("", "", "/play/" + gameId);
+		let notif = e.target.parentNode.parentNode;
+		notif.classList.add("hided");
+		setTimeout(() => {
+			notif.remove();
+		}, 200)
+		this.router();
 	}
 
 	forfeitUnfinishedGame(e) {
-		console.log("to do")	
+		let gameId = e.target.dataset.game;
+		this.getApiResponseJson("/api/game/forfeit/", {id: gameId}).then((response) => {
+			let res = JSON.parse(response)
+			if (res.success) {
+				let notif = e.target.parentNode.parentNode;
+				notif.classList.add("hided");
+				setTimeout(() => {
+					notif.remove();
+				}, 200)
+			}
+		})
 	}
 
 	acceptFriendRequest(e) {

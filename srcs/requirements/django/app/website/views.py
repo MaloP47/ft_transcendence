@@ -68,12 +68,20 @@ def signinUser(request):
 		'success': False,
 	})
 
+def gameForfeit(request):
+	if request.method == 'POST':
+		data = json.loads(request.POST["data"])
+		game = Game.objects.get(id=data['id'])
+		game.forfeit = request.user
+		game.save()
+		return JsonResponse({
+			'success': True,
+		})
+
 def saveGame(request):
 	if request.method == 'POST':
-		data = json.loads(request.POST["data"]);
+		data = json.loads(request.POST["data"])
 		game = Game.objects.get(id=data['id'])
-		print(data['id'])
-		print(game)
 		game.p1Score = data['p1']
 		game.p2Score = data['p2']
 		game.save()

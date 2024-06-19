@@ -37,6 +37,7 @@ export default class PongTransi {
 	toBg(time) {
 		if (time != undefined) {
 			this.initTransi("toBg", time);
+			this.pong.resetGameInfo();
 			this.pong.assets.reset();
 			this.pong.preConfig();
 			this.pong.scene.vignette.uniforms['amount'].value = 0;

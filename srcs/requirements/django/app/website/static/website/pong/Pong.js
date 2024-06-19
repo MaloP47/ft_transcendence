@@ -116,6 +116,11 @@ export default class Pong {
 		this.bg = true;
 		this.scaleFactor = 0.75;
 		this.bonus = true;
+		this.resetGameInfo();
+	}
+
+	resetGameInfo() {
+		this.bg = true;
 		this.gameInfo = {
 			ai: 1,
 			ballSpeed: 8,
