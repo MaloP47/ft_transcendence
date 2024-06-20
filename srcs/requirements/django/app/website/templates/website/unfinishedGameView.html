@@ -4,8 +4,10 @@
 		{% if g.p1 == user %}
 			{% if g.p2%}
 				{{g.p2}}
-			{% else %}
+			{% elif g.p2Local == "" %}
 				an A.I.
+			{% else %}
+				{{g.p2Local}}
 			{% endif %}
 		{% else %}
 			{% if g.p1%}

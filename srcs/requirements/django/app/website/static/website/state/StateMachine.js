@@ -6,7 +6,7 @@
 //   By: gbrunet <gbrunet@student.42.fr>            +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2024/06/13 11:54:22 by gbrunet           #+#    #+#             //
-//   Updated: 2024/06/20 11:02:18 by gbrunet          ###   ########.fr       //
+//   Updated: 2024/06/20 12:03:01 by gbrunet          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -101,6 +101,9 @@ export default class App {
 		if (path.indexOf("/play1vsAI/") == 0) {
 			id = path.substring(11)
 			path = "/play1vsAI"
+		} else if (path.indexOf("/play1vs1/") == 0) {
+			id = path.substring(10)
+			path = "/play1vs1"
 		}
 		let view = this.routes[path];
 		if (view) {
@@ -375,6 +378,56 @@ export default class App {
 		this.remove("gameOverlay")
 	}
 
+	getLocalGame(id) {
+		console.log(id);
+		this.getApiResponseJson("/api/game/get/", {id: id}).then((response) => {
+			let res = JSON.parse(response);
+			if (res.success) {
+				if (res.winScore <= res.p1score || res.winScore <= res.p2score)
+					this.setPong("bg")
+				else
+					this.setPong("p1Game");
+				this.pong.game_id = id;
+				this.pong.gameInfo = res;
+				let homeContent = document.getElementById("homeContent");
+				if (document.getElementById("gameOverlay"))
+					return ;
+				homeContent.innerHTML += res.html;
+				let gameOverlay = document.getElementById("gameOverlay")
+				if (gameOverlay.dataset.loaded != "true") {
+					gameOverlay.dataset.loaded = "true";
+					document.getElementById("p1score").innerHTML = res.p1score
+					document.getElementById("p2score").innerHTML = res.p2score
+					if (res.p1score >= res.winScore || res.p2score >= res.winScore) {
+						let endDiv = document.getElementById("countdown");
+						if (endDiv) {
+							let p1 = "A.I.";
+							if (res.p1.id != -1)
+								p1 = res.p1.username;
+							let p2 = res.p2Local;
+							if (res.p2.id != -1)
+								p2 = res.p2.username;
+							let gameVs = "<span class='fs-2 text-light-emphasis'>" + p1 + " vs " + p2 + "</span>";
+							if (res.p1score > res.p2score)
+								endDiv.innerHTML = gameVs + "<p style='font-size:5rem; margin-top: -30px'>" + p1 + " wins this game !</p>"
+							else
+								endDiv.innerHTML = gameVs + "<p style='font-size:5rem; margin-top: -30px'>" + p2 + " wins this game !</p>"
+							endDiv.classList.remove("coundown");
+							endDiv.style.fontSize = "5rem"
+							endDiv.classList.add("visible");
+						}
+						console.log('game is finished...')
+					} else {
+						this.pong.config = res;
+					}
+				}
+			} else {
+				history.replaceState("", "", "/");
+				this.router();
+			}
+		});
+	}
+
 	getLocalAiGame(id) {
 		this.getApiResponseJson("/api/game/get/", {id: id}).then((response) => {
 			let res = JSON.parse(response);
@@ -552,6 +605,7 @@ export default class App {
 			rightKey: 68,
 			leftKey2: 37,
 			rightKey2: 39,
+			p2Local: '',
 		}
 		let configView = document.getElementById("config");
 		if (configView.dataset.events != "done") {
@@ -575,16 +629,6 @@ export default class App {
 							config.bonuses = true;
 						else
 							config.bonuses = false;
-					});
-				});
-			}
-			if (document.querySelector('input[name="aiLevel"]')) {
-				document.querySelectorAll('input[name="aiLevel"]').forEach((elem) => {
-					elem.addEventListener("change", function(event) {
-						if (event.target.value == 'normal')
-							config.ai = 1;
-						else
-							config.ai = 2;
 					});
 				});
 			}
@@ -619,13 +663,15 @@ export default class App {
 			})
 			let playBtn = document.getElementById("playBtn")
 			playBtn.addEventListener("click", (e) => {
-				this.getApiResponseJson("/api/game/new/1vsAI/", config).then((response) => {
+				if (config.p2Local == "")
+					config.p2Local = "Local P2"
+				this.getApiResponseJson("/api/game/new/1vs1/", config).then((response) => {
 				let res = JSON.parse(response);
 				if (res.success) {
-						let aiConfig = document.getElementById("aiConfig");
-						aiConfig.classList.add("hided")
-						this.remove("aiConfig")
-						history.pushState("", "", "/play1vsAI/" + res.id);
+						let config = document.getElementById("config");
+						config.classList.add("hided")
+						this.remove("config")
+						history.pushState("", "", "/play1vs1/" + res.id);
 						this.router();
 					}
 				});

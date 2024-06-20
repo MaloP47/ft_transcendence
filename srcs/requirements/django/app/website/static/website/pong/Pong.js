@@ -6,7 +6,7 @@
 //   By: gbrunet <gbrunet@student.42.fr>            +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2024/05/21 13:52:15 by gbrunet           #+#    #+#             //
-//   Updated: 2024/06/20 10:16:10 by gbrunet          ###   ########.fr       //
+//   Updated: 2024/06/20 11:27:05 by gbrunet          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -131,6 +131,7 @@ export default class Pong {
 			p2Right: 39,
 			p2score: 0,
 			winScore: 10,
+			p2Local: '',
 		}
 	}
 
@@ -155,6 +156,7 @@ export default class Pong {
 				p2Right: 39,
 				p2score: 0,
 				winScore: 10,
+				p2Local: '',
 			}
 			this.transi.to("toBg", 1500);
 		}
@@ -187,6 +189,7 @@ export default class Pong {
 		this.p1Infos = this.gameInfo.p1;
 		this.p2Infos = this.gameInfo.p2;
 		this.winScore = this.gameInfo.winScore;
+		this.p2Local = this.gameInfo.p2Local;
 	}
 
 	postConfig() {
@@ -195,7 +198,7 @@ export default class Pong {
 		this.assets.p2.score = this.gameInfo.p2score;
 		if (this.gameInfo.p1.id == -1)
 			this.assets.p1.AI = true;
-		if (this.gameInfo.p2.id == -1)
+		if (this.gameInfo.p2.id == -1 && this.gameInfo.p2Local == "")
 			this.assets.p2.AI = true;
 		if (this.countTimeout)
 			clearTimeout(this.countTimeout)
@@ -222,7 +225,7 @@ export default class Pong {
 			setTimeout(()=>{
 				this.start = true;
 				this.endRound = false;
-				if (this.gameInfo.p2.id == -1) {
+				if (this.gameInfo.p2.id == -1 && this.gameInfo.p2Local == "") {
 					if (this.gameInfo.ai == 1)
 						this.assets.p2.startAI();
 					else if (res.ai == 2)

@@ -6,7 +6,7 @@
 //   By: gbrunet <gbrunet@student.42.fr>            +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2024/05/24 13:13:55 by gbrunet           #+#    #+#             //
-//   Updated: 2024/06/20 10:22:52 by gbrunet          ###   ########.fr       //
+//   Updated: 2024/06/20 12:08:47 by gbrunet          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -154,8 +154,10 @@ export default class Ball {
 				if (!this.pong.assets.p1.AI)
 					p1 = this.pong.p1Infos.username;
 				let p2 = "A.I.";
-				if (!this.pong.assets.p2.AI)
+				if (!this.pong.assets.p2.AI && this.pong.p2Local == '')
 					p2 = this.pong.p2Infos.username;
+				else
+					p2 = this.pong.p2Local;
 				let gameVs = "<span class='fs-2 text-light-emphasis'>" + p1 + " vs " + p2 + "</span>";
 				if (this.pong.assets.p1.score > this.pong.assets.p2.score) {
 					endDiv.innerHTML = gameVs + "<p style='font-size:5rem; margin-top: -30px'>" + p1 + " wins this game !</p>"
