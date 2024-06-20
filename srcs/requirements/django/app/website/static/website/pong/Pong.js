@@ -6,7 +6,7 @@
 //   By: gbrunet <gbrunet@student.42.fr>            +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2024/05/21 13:52:15 by gbrunet           #+#    #+#             //
-//   Updated: 2024/06/17 12:16:02 by gbrunet          ###   ########.fr       //
+//   Updated: 2024/06/20 10:16:10 by gbrunet          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -41,15 +41,6 @@ export default class Pong {
 		this.scene = new PongScene({pong: this});
 		this.assets = new PongAssets({pong: this});
 		this.transi = new PongTransi({pong: this});
-//		this.toState(data.state);
-//		sleep(5000).then(() => {
-//			this.transi.toBlack(1000).then(() => {
-//				this.transi.toP1Game(1000).then(() => {
-//					console.log("fin mon gars")
-//				});
-//			});
-//		})
-
 		this.update();
 	}
 
@@ -165,8 +156,6 @@ export default class Pong {
 				p2score: 0,
 				winScore: 10,
 			}
-			this.start = false;
-			console.log("wesh")
 			this.transi.to("toBg", 1500);
 		}
 		else if (state == "p1Game")
@@ -184,29 +173,6 @@ export default class Pong {
 		requestAnimationFrame(this.update.bind(this));
 	}
 
-	setConfig(data) {
-		console.log(data);
-/*		if (this.transi.transi != "bg") {
-			sleep(500).then(() => {
-				this.transi.toBlack(1000).then(() => {
-					this.preConfig(data);
-					this.transi.toP1Game(1000).then(() => {
-						this.postConfig(data);
-						console.log("lancement de la game")
-					});
-				});
-			});
-		} else {
-			this.transi.toBlack(1000).then(() => {
-				this.preConfig(data);
-				this.transi.toP1Game(1000).then(() => {
-					this.postConfig(data);
-					console.log("lancement de la game")
-				});
-			});
-		}
-*/	}
-
 	preConfig() {
 		this.p1LeftKey = this.gameInfo.p1Left;
 		this.p1RightKey = this.gameInfo.p1Right;
@@ -223,7 +189,7 @@ export default class Pong {
 		this.winScore = this.gameInfo.winScore;
 	}
 
-	postConfig(data) {
+	postConfig() {
 		this.assets.ball.initSpeed = this.gameInfo.ballSpeed / 100.0;
 		this.assets.p1.score = this.gameInfo.p1score;
 		this.assets.p2.score = this.gameInfo.p2score;
@@ -233,9 +199,11 @@ export default class Pong {
 			this.assets.p2.AI = true;
 		if (this.countTimeout)
 			clearTimeout(this.countTimeout)
-		this.countTimeout = setTimeout(() => {
-			this.animateCountdown(5);	
-		}, 1000)
+		if (!(this.gameInfo.p1score >= this.winScore || this.gameInfo.p2score >= this.winScore)) {
+			this.countTimeout = setTimeout(() => {
+				this.animateCountdown(5);	
+			}, 1000)
+		}
 	}
 
 	animateCountdown(sec) {

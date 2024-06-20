@@ -6,7 +6,7 @@
 //   By: gbrunet <gbrunet@student.42.fr>            +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2024/05/24 13:13:55 by gbrunet           #+#    #+#             //
-//   Updated: 2024/06/18 14:24:56 by gbrunet          ###   ########.fr       //
+//   Updated: 2024/06/20 10:22:52 by gbrunet          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -150,18 +150,17 @@ export default class Ball {
 		if (!this.pong.bg && (this.pong.assets.p1.score >= this.pong.winScore || this.pong.assets.p2.score >= this.pong.winScore)) {
 			let endDiv = document.getElementById("countdown");
 			if (endDiv) {
+				let p1 = "A.I.";
+				if (!this.pong.assets.p1.AI)
+					p1 = this.pong.p1Infos.username;
+				let p2 = "A.I.";
+				if (!this.pong.assets.p2.AI)
+					p2 = this.pong.p2Infos.username;
+				let gameVs = "<span class='fs-2 text-light-emphasis'>" + p1 + " vs " + p2 + "</span>";
 				if (this.pong.assets.p1.score > this.pong.assets.p2.score) {
-					if (this.pong.assets.p1.AI) {
-						endDiv.innerHTML = "A.I. wins this game !"
-					} else {
-						endDiv.innerHTML = this.pong.p1Infos.username + " wins this game !"
-					}
+					endDiv.innerHTML = gameVs + "<p style='font-size:5rem; margin-top: -30px'>" + p1 + " wins this game !</p>"
 				} else {
-					if (this.pong.assets.p2.AI) {
-						endDiv.innerHTML = "A.I. wins this game !"
-					} else {
-						endDiv.innerHTML = this.pong.p2Infos.username + " wins this game !"
-					}
+					endDiv.innerHTML = gameVs + "<p style='font-size:5rem; margin-top: -30px'>" + p2 + " wins this game !</p>"
 				}
 				endDiv.classList.remove("coundown");
 				endDiv.style.fontSize = "5rem";
@@ -255,6 +254,7 @@ export default class Ball {
 
 	delete() {
 		this.pong.scene.remove(this.ball);
+		this.pong.assets.ball = undefined;
 	}
 
 	getPos() {return(this.ball.position.clone());}

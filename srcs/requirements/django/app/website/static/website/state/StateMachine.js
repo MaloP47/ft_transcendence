@@ -6,7 +6,7 @@
 //   By: gbrunet <gbrunet@student.42.fr>            +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2024/06/13 11:54:22 by gbrunet           #+#    #+#             //
-//   Updated: 2024/06/18 16:00:12 by gbrunet          ###   ########.fr       //
+//   Updated: 2024/06/20 09:56:36 by gbrunet          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -226,7 +226,6 @@ export default class App {
 	//----------------------------------------------------------//
 
 	setPong(state) {
-		console.log("alo : "+ state);
 		if (!this.pong)
 			this.pong = new Pong({stateMachine: this, state: state});
 		else
@@ -355,7 +354,6 @@ export default class App {
 		this.getApiResponseJson("/api/game/get/", {id: id}).then((response) => {
 			let res = JSON.parse(response);
 			if (res.success) {
-			console.log(res);
 				if (res.winScore <= res.p1score || res.winScore <= res.p2score)
 					this.setPong("bg")
 				else
@@ -374,19 +372,17 @@ export default class App {
 					if (res.p1score >= res.winScore || res.p2score >= res.winScore) {
 						let endDiv = document.getElementById("countdown");
 						if (endDiv) {
-							if (res.p1score > res.p2score) {
-								if (res.p1.id == -1) {
-									endDiv.innerHTML = "A.I. wins this game !"
-								} else {
-									endDiv.innerHTML = res.p1.username + " wins this game !"
-								}
-							} else {
-								if (res.p2.id == -1) {
-									endDiv.innerHTML = "A.I. wins this game !"
-								} else {
-									endDiv.innerHTML = res.p2.username + " wins this game !"
-								}
-							}
+							let p1 = "A.I.";
+							if (res.p1.id != -1)
+								p1 = res.p1.username;
+							let p2 = "A.I.";
+							if (res.p2.id != -1)
+								p2 = res.p2.username;
+							let gameVs = "<span class='fs-2 text-light-emphasis'>" + p1 + " vs " + p2 + "</span>";
+							if (res.p1score > res.p2score)
+								endDiv.innerHTML = gameVs + "<p style='font-size:5rem; margin-top: -30px'>" + p1 + " wins this game !</p>"
+							else
+								endDiv.innerHTML = gameVs + "<p style='font-size:5rem; margin-top: -30px'>" + p2 + " wins this game !</p>"
 							endDiv.classList.remove("coundown");
 							endDiv.style.fontSize = "5rem"
 							endDiv.classList.add("visible");
@@ -394,13 +390,6 @@ export default class App {
 						console.log('game is finished...')
 					} else {
 						this.pong.config = res;
-//						this.pong.p1.setAI(false);
-//						this.pong.p2.setAI(false);
-//						this.pong.ToState(this.pong.states.ready);
-//						console.log("sdfsdfsdf")
-//						setTimeout(()=> {
-//							this.animateCountdown(5, res);
-//						}, 1000)
 					}
 				}
 			} else {
