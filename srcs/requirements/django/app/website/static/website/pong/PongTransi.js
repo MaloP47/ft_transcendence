@@ -41,7 +41,7 @@ export default class PongTransi {
 			this.pong.assets.reset();
 			this.pong.preConfig();
 			this.pong.scene.vignette.uniforms['amount'].value = 0;
-			this.pong.scene.dot.uniforms['amount'].value = 0;
+			this.pong.scene.dot.uniforms['amount'].value = 1;
   			return new Promise(resolve => setTimeout(resolve, time));
 		}
 		if (this.time > this.transiTime) {

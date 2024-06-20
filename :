@@ -1,15 +1,3 @@
-// ************************************************************************** //
-//                                                                            //
-//                                                        :::      ::::::::   //
-//   Player.js                                          :+:      :+:    :+:   //
-//                                                    +:+ +:+         +:+     //
-//   By: gbrunet <gbrunet@student.42.fr>            +#+  +:+       +#+        //
-//                                                +#+#+#+#+#+   +#+           //
-//   Created: 2024/06/20 14:15:18 by gbrunet           #+#    #+#             //
-//   Updated: 2024/06/20 15:10:41 by gbrunet          ###   ########.fr       //
-//                                                                            //
-// ************************************************************************** //
-
 import * as THREE from 'three';
 
 function add(val, add, max) {
@@ -151,10 +139,8 @@ export default class Player {
 		if (!this.AI)
 			return ;
 		this.brainTimeout = setTimeout(this.startAI.bind(this), 1000);
-		if (this.pong.gameInfo.ai == 2)
-			setTimeout(this.betterAI.bind(this), 10);
-		else
-			setTimeout(this.basicAI.bind(this), 10);
+//		this.basicAI();
+		this.betterAI();
 	}
 
 	stopAI() {
@@ -200,6 +186,8 @@ export default class Player {
 	}
 	
 	betterAI() {
+		if (this.bonus.line.on)
+			return ;
 		const ball = this.pong.assets.ball;
 		let pos = ball.getPos();
 		let vel = ball.getVelocity();
@@ -207,37 +195,21 @@ export default class Player {
 		var travelDist = 0;
 		var coef = 1;
 		var mult = 1;
-		if (this.player == 1 && vel.y > 0) {
-			if (this.pong.exchange == 0)
-				return ;
-			travelDist = -this.bar.position.x
-			if (this.bonus.reversed.on)
-				coef = -1;
-			if (this.bonus.frozen.on)
-				mult = 0.3;
-			if (travelDist < 0 && !this.bonus.reversed.on || travelDist > 0 && this.bonus.reversed.on) {
-				this.pong.p1Left = true;
-				setTimeout(() => {this.pong.p1Left = false}, coef * -travelDist / 0.26 * 8.65 * mult);
-			} else {
-				this.pong.p1Right = true;
-				setTimeout(() => {this.pong.p1Right = false}, coef * travelDist / 0.26 * 8.65 * mult);
-			}
+		if (this.player == 1 && vel.y > 0)
 			return ;
-		}
 		if (this.player == 2 && vel.y < 0) {
-			if (this.pong.exchange == 0)
-				return ;
 			travelDist = -this.bar.position.x
+			console.log(travelDist)
 			if (this.bonus.reversed.on)
 				coef = -1;
 			if (this.bonus.frozen.on)
 				mult = 0.3;
-			if (travelDist < 0 && !this.bonus.reversed.on || travelDist > 0 && this.bonus.reversed.on) {
+			if ((travelDist < 0 && !this.bonus.reversed.on || travelDist > 0 && this.bonus.reversed.on) && this.pong.exchange != 0) {
 				this.pong.p2Left = true;
-				setTimeout(() => {this.pong.p2Left = false}, coef * -travelDist / 0.26 * 8.65 * mult);
+				setTimeout(() => {this.pong.p2Left = false}, coef * -travelDist / 0.26 * 8.5 * mult);
 			} else {
 				this.pong.p2Right = true;
-				setTimeout(() => {this.pong.p2Right = false}, coef * travelDist / 0.26 * 8.65 * mult);
+				setTimeout(() => {this.pong.p2Right = false}, coef * travelDist / 0.26 * 8.5 * mult);
 			}
 			return ;
 		}
@@ -250,18 +222,18 @@ export default class Player {
 		if (this.player == 1) {
 			if (travelDist < 0 && !this.bonus.reversed.on || travelDist > 0 && this.bonus.reversed.on) {
 				this.pong.p1Left = true;
-				setTimeout(() => {this.pong.p1Left = false}, coef * -travelDist / 0.26 * 8.65 * mult);
+				setTimeout(() => {this.pong.p1Left = false}, coef * -travelDist / 0.26 * 8.5 * mult);
 			} else {
 				this.pong.p1Right = true;
-				setTimeout(() => {this.pong.p1Right = false}, coef * travelDist / 0.26 * 8.65 * mult);
+				setTimeout(() => {this.pong.p1Right = false}, coef * travelDist / 0.26 * 8.5 * mult);
 			}
 		} else {
 			if (travelDist < 0 && !this.bonus.reversed.on || travelDist > 0 && this.bonus.reversed.on) {
 				this.pong.p2Left = true;
-				setTimeout(() => {this.pong.p2Left = false}, coef * -travelDist / 0.26 * 8.65 * mult);
+				setTimeout(() => {this.pong.p2Left = false}, coef * -travelDist / 0.26 * 8.5 * mult);
 			} else {
 				this.pong.p2Right = true;
-				setTimeout(() => {this.pong.p2Right = false}, coef * travelDist / 0.26 * 8.65 * mult);
+				setTimeout(() => {this.pong.p2Right = false}, coef * travelDist / 0.26 * 8.5 * mult);
 			}
 		}
 	}
