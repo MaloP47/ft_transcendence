@@ -15,12 +15,15 @@ from django.shortcuts import render
 from django.contrib.auth import login, logout, authenticate
 from django.template.loader import render_to_string
 from django.views.decorators.csrf import csrf_exempt
-from django.db.models import Exists, F, Subquery, OuterRef
-from website.models import BlockedUser, User, Message, Room, FriendRequest
+from django.db.models import Exists, F, Subquery, OuterRef, Q
+from website.models import Game, BlockedUser, User, Message, Room, FriendRequest
 import json
 from datetime import datetime, timedelta
 
 def index(request):
+	return render(request, "website/index.html");
+
+def indexGame(request, game_id):
 	return render(request, "website/index.html");
 
 def getUser(request):
@@ -65,6 +68,68 @@ def signinUser(request):
 		'success': False,
 	})
 
+def gameForfeit(request):
+	if request.method == 'POST':
+		data = json.loads(request.POST["data"])
+		game = Game.objects.get(id=data['id'])
+		game.forfeit = request.user
+		game.save()
+		return JsonResponse({
+			'success': True,
+		})
+
+def saveGame(request):
+	if request.method == 'POST':
+		data = json.loads(request.POST["data"])
+		game = Game.objects.get(id=data['id'])
+		game.p1Score = data['p1']
+		game.p2Score = data['p2']
+		game.save()
+		return JsonResponse({
+			'success': True,
+		})
+
+def getGame(request):
+	if request.method == 'POST':
+		data = json.loads(request.POST["data"]);
+		try:
+			game = Game.objects.get(id=data['id'])
+		except:
+			return JsonResponse({'success': False})
+		p1Id = -1
+		p1Username = ""
+		p2Id = -1
+		p2Username = ""
+		if game.p1:
+			p1Id = game.p1.id
+			p1Username = game.p1.username
+		if game.p2:
+			p2Id = game.p2.id
+			p2Username = game.p2.username
+		if game.p1 == request.user or game.p2 == request.user:
+			return JsonResponse({
+				'success': True,
+				'p1': {'id': p1Id, 'username': p1Username},
+				'p2': {'id': p2Id, 'username': p2Username},
+				'ai': game.ai,
+				'p1score': game.p1Score,
+				'p2score': game.p2Score,
+				'winScore': game.scoreToWin,
+				'ballSpeed': game.ballSpeed,
+				'bonuses': game.bonuses,
+				'p1Left': game.p1Left,
+				'p1Right': game.p1Right,
+				'p2Left': game.p2Left,
+				'p2Right': game.p2Right,
+				'date' : game.date,
+				'p2Local': game.p2Local,
+				'html': render_to_string('website/gameOverlay.html'),
+			});
+		else:
+			return JsonResponse({
+				'success': False,
+			})
+
 def searchUser(request):
 	if request.method == 'POST':
 		data = json.loads(request.POST["data"]);
@@ -97,6 +162,26 @@ def addFriend(request):
 		friendRequest.save()
 		return JsonResponse({
 			'success': True,
+		});
+
+def gameNew1vs1(request):
+	if request.method == 'POST':
+		data = json.loads(request.POST["data"]);
+		game = Game(p1=request.user, ai=data['ai'], scoreToWin=data['winScore'], ballSpeed=data['startSpeed'], bonuses=data['bonuses'], p1Left=data['leftKey'], p1Right=data['rightKey'], p2Left=data['leftKey2'], p2Right=data['rightKey2'], p2Local=data['p2Local'], gameType=1)
+		game.save()
+		return JsonResponse({
+			'success': True,
+			'id': game.id,
+		});
+
+def gameNew1vsAi(request):
+	if request.method == 'POST':
+		data = json.loads(request.POST["data"]);
+		game = Game(p1=request.user, ai=data['ai'], scoreToWin=data['winScore'], ballSpeed=data['startSpeed'], bonuses=data['bonuses'], p1Left=data['leftKey'], p1Right=data['rightKey'])
+		game.save()
+		return JsonResponse({
+			'success': True,
+			'id': game.id,
 		});
 
 def deleteFriend(request):
@@ -173,11 +258,13 @@ def homeView(request):
 	if request.method == 'POST':
 		if request.user.is_authenticated:
 			friendRequest = FriendRequest.objects.filter(userTo=request.user).exclude(accepted=True)
+			unfinishedGames = Game.objects.filter(Q(p1=request.user) | Q(p2=request.user)).exclude(scoreToWin__lte=F('p1Score')).exclude(scoreToWin__lte=F('p2Score')).exclude(forfeit__isnull=False)
 		else:
 			friendRequest = []
+			unfinishedGames = []
 		return JsonResponse({
 			'success': True,
-			'html': render_to_string('website/home.html', {"user": request.user, "friendRequest": friendRequest}),
+			'html': render_to_string('website/home.html', {"user": request.user, "friendRequest": friendRequest, "unfinishedGames": unfinishedGames}),
 		});
 
 def chatView(request):
@@ -221,6 +308,13 @@ def localAiConfig(request):
 		return JsonResponse({
 			'success': True,
 			'html': render_to_string('website/localAiConfig.html'),
+		})
+
+def localConfig(request):
+	if request.method == 'POST':
+		return JsonResponse({
+			'success': True,
+			'html': render_to_string('website/localConfig.html'),
 		})
 
 def createGame(request):

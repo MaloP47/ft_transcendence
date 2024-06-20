@@ -28,6 +28,9 @@
 		{% for request in friendRequest %}
 			{% include 'website/friendRequestView.html' with friend=request.userFrom %}
 		{% endfor %}
+		{% for game in unfinishedGames %}
+			{% include 'website/unfinishedGameView.html' with g=game%}
+		{% endfor %}
 	</div>
 </div>
 {% else %}

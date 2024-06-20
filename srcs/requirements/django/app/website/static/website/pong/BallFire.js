@@ -16,8 +16,8 @@ import fireVertexShader from './assets/shaders/fireV.js'
 import fireFragmentShader from './assets/shaders/fireF.js'
 
 export default class BallFire {
-	constructor(params) {
-		this.pong = params.pong;
+	constructor(data) {
+		this.pong = data.pong;
 		this.particleShader = new THREE.ShaderMaterial({
 			vertexShader: fireVertexShader,
 			fragmentShader: fireFragmentShader,
@@ -43,14 +43,14 @@ export default class BallFire {
 	}
 
 	AddParticles() {
-		for (let i = 0; i < (30 + 50 * this.pong.ball.getSpeed()) * this.pong.elapsedTime / 10; i++) {
-			const life = (Math.random() + 0.5) / 2 * this.pong.ball.getSpeed() * 5;
+		for (let i = 0; i < (30 + 50 * this.pong.assets.ball.getSpeed()) * this.pong.elapsedTime / 5; i++) {
+			const life = (Math.random() + 0.5) / 2 * this.pong.assets.ball.getSpeed() * 5;
 			var rdm = new THREE.Vector3(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5);
 			rdm.divideScalar(4);
 			this.ballFire.push({
-				position: this.pong.ball.getPos(),
-				velocity: this.pong.ball.getVelocity().multiplyScalar(-0.55).add(rdm).multiplyScalar(Math.random() + 0.5 * this.pong.elapsedTime / 20),
-				size: Math.random(),
+				position: this.pong.assets.ball.getPos(),
+				velocity: this.pong.assets.ball.getVelocity().multiplyScalar(-0.55).add(rdm).multiplyScalar(Math.random() + 0.5 * this.pong.elapsedTime / 20),
+				size: Math.random() * this.pong.scaleFactor,
 				life: life,
 				age: life,
 			})
@@ -90,12 +90,13 @@ export default class BallFire {
 		}
 	}
 
-	reset() {
+	delete() {
 		this.ballFire = [];
 		this.UpdateGeometry();
+		this.pong.assets.ballFire = undefined;
 	}
 
-	Update() {
+	update() {
 		if (!this.pong.endRound)
 			this.AddParticles();
 		this.UpdateParticles(this.pong.elapsedTime / 1000.0);

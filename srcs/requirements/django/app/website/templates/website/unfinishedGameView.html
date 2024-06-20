@@ -1,0 +1,20 @@
+<div class="d-flex notification hided">
+	<div class="bg-blur-15 p-2 rounded border border-light mb-2" style="margin-left:7px; --bs-border-opacity:0.1">
+		You have an unfinished game with 
+		{% if g.p1 == user %}
+			{% if g.p2%}
+				{{g.p2}}
+			{% elif g.p2Local == "" %}
+				an A.I.
+			{% else %}
+				{{g.p2Local}}
+			{% endif %}
+		{% else %}
+			{% if g.p1%}
+				{{g.p1}}
+			{% else %}
+				an A.I.
+			{% endif %}
+		{% endif %}
+		<button class="join btn btn-primary mx-3" style="--bs-btn-padding-y: .1rem;" data-type="{{g.gameType}}" data-game="{{g.id}}">Join</button><button class="forfeit btn btn-danger" style="--bs-btn-padding-y: .1rem;" data-type="{{g.gameType}}" data-game="{{g.id}}">Forfeit</button></div>
+</div>
