@@ -6,7 +6,7 @@
 //   By: gbrunet <gbrunet@student.42.fr>            +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2024/05/24 13:13:55 by gbrunet           #+#    #+#             //
-//   Updated: 2024/06/20 12:08:47 by gbrunet          ###   ########.fr       //
+//   Updated: 2024/06/20 15:21:28 by gbrunet          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -156,7 +156,7 @@ export default class Ball {
 				let p2 = "A.I.";
 				if (!this.pong.assets.p2.AI && this.pong.p2Local == '')
 					p2 = this.pong.p2Infos.username;
-				else
+				else if (this.pong.p2Local != '')
 					p2 = this.pong.p2Local;
 				let gameVs = "<span class='fs-2 text-light-emphasis'>" + p1 + " vs " + p2 + "</span>";
 				if (this.pong.assets.p1.score > this.pong.assets.p2.score) {
@@ -168,7 +168,6 @@ export default class Ball {
 				endDiv.style.fontSize = "5rem";
 				endDiv.classList.add("visible");
 			}
-			console.log("game finished...")
 		} else {
 			this.nextTimeout = setTimeout(() => {
 				this.initAngle = Math.random() * 90;
@@ -187,6 +186,14 @@ export default class Ball {
 					this.pong.assets.bonus.bonus.position.y = (Math.random() - 0.5) * 4;
 					this.pong.assets.bonus.startTime = 0;
 					this.pong.assets.bonus.type = Math.floor(Math.random() * 5);
+				}
+				if (this.pong.assets.p1.AI) {
+					this.pong.assets.p1.stopAI();
+					this.pong.assets.p1.startAI();
+				}
+				if (this.pong.assets.p2.AI) {
+					this.pong.assets.p2.stopAI();
+					this.pong.assets.p2.startAI();
 				}
 			}, 1000);
 		}

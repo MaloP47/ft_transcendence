@@ -6,7 +6,7 @@
 //   By: gbrunet <gbrunet@student.42.fr>            +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2024/05/21 13:52:15 by gbrunet           #+#    #+#             //
-//   Updated: 2024/06/20 11:27:05 by gbrunet          ###   ########.fr       //
+//   Updated: 2024/06/20 15:04:32 by gbrunet          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -226,10 +226,7 @@ export default class Pong {
 				this.start = true;
 				this.endRound = false;
 				if (this.gameInfo.p2.id == -1 && this.gameInfo.p2Local == "") {
-					if (this.gameInfo.ai == 1)
-						this.assets.p2.startAI();
-					else if (res.ai == 2)
-						console.log("a faire !!!")
+					this.assets.p2.startAI();
 				}
 			}, 500);
 		}

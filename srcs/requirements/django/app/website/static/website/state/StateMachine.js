@@ -6,7 +6,7 @@
 //   By: gbrunet <gbrunet@student.42.fr>            +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2024/06/13 11:54:22 by gbrunet           #+#    #+#             //
-//   Updated: 2024/06/20 12:03:01 by gbrunet          ###   ########.fr       //
+//   Updated: 2024/06/20 15:05:50 by gbrunet          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -379,7 +379,6 @@ export default class App {
 	}
 
 	getLocalGame(id) {
-		console.log(id);
 		this.getApiResponseJson("/api/game/get/", {id: id}).then((response) => {
 			let res = JSON.parse(response);
 			if (res.success) {
