@@ -299,6 +299,13 @@ def localAiConfig(request):
 			'html': render_to_string('website/localAiConfig.html'),
 		})
 
+def localConfig(request):
+	if request.method == 'POST':
+		return JsonResponse({
+			'success': True,
+			'html': render_to_string('website/localConfig.html'),
+		})
+
 def createGame(request):
 	if request.method == 'POST':
 		return JsonResponse({

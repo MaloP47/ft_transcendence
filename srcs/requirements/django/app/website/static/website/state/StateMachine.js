@@ -6,7 +6,7 @@
 //   By: gbrunet <gbrunet@student.42.fr>            +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2024/06/13 11:54:22 by gbrunet           #+#    #+#             //
-//   Updated: 2024/06/20 09:56:36 by gbrunet          ###   ########.fr       //
+//   Updated: 2024/06/20 11:02:18 by gbrunet          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -57,6 +57,7 @@ export default class App {
 			"/login": {title: "Transcendence - Login", state: "Login"},
 			"/register": {title: "Transcendence - Register", state: "Register"},
 			"/play1vsAI": {title: "Transcendence - 1 VS A.I.", state: "Play1vsAI"},
+			"/play1vs1": {title: "Transcendence - 1 VS 1 (local)", state: "Play1vs1"},
 		}
 	}
 
@@ -130,6 +131,15 @@ export default class App {
 					if (document.getElementById("createGame"))
 						this.hideCreateGame();
 					this.getHomePage("1vsAI", id);
+					break;
+				case "Play1vs1":
+					if (document.getElementById("registerForm"))
+						this.hideRegisterForm();
+					if (document.getElementById("loginForm"))
+						this.hideLoginForm();
+					if (document.getElementById("createGame"))
+						this.hideCreateGame();
+					this.getHomePage("1vs1", id);
 					break;
 			}
 		} else {
@@ -317,9 +327,17 @@ export default class App {
 					} else if (state == "1vsAI" && game_id == -1) {
 						this.setPong("bg");
 						this.getLocalAiConfigPage();
-					}
-					else if (state == "1vsAI" && game_id != -1) {
+					} else if (state == "1vsAI" && game_id != -1) {
 						this.getLocalAiGame(game_id);
+					} else if (state == "1vs1" && !this.user.authenticated) {
+						history.replaceState("", "", "/");
+						this.router();
+					} else if (state == "1vs1" && game_id == -1) {
+						this.setPong("bg");
+						this.getLocalConfigPage();
+					}
+					else if (state == "1vs1" && game_id != -1) {
+						this.getLocalGame(game_id);
 					}
 					let homeView = document.getElementById("homeView");
 					setTimeout(() => {
@@ -333,16 +351,23 @@ export default class App {
 				this.getCreateGame();
 			} else if (state == "1vsAI" && game_id == -1) {
 				this.setPong("bg");
-				this.hideLocalAiGame();
+				this.hideLocalGame();
 				this.getLocalAiConfigPage();
 			} else if (state == "1vsAI" && game_id != -1) {
-				this.hideLocalAiConfigPage();
+				this.hideLocalConfigPage();
 				this.getLocalAiGame(game_id);
+			} else if (state == "1vs1" && game_id == -1) {
+				this.setPong("bg");
+				this.hideLocalGame();
+				this.getLocalConfigPage();
+			} else if (state == "1vs1" && game_id != -1) {
+				this.hideLocalConfigPage();
+				this.getLocalGame(game_id);
 			}
 		}
 	}
 
-	hideLocalAiGame() {
+	hideLocalGame() {
 		let gameOverlay = document.getElementById("gameOverlay");
 		if (!gameOverlay)
 			return ;
@@ -399,7 +424,7 @@ export default class App {
 		});
 	}
 	
-	hideLocalAiConfigPage() {
+	hideLocalConfigPage() {
 		let configView = document.getElementById("aiConfig");
 		if (!configView)
 			return ;
@@ -481,6 +506,116 @@ export default class App {
 				rightKey.innerHTML = "_";
 				await this.waitKeypress("rightKey");
 				config.rightKey = rightKey.dataset.code;
+			})
+			let playBtn = document.getElementById("playBtn")
+			playBtn.addEventListener("click", (e) => {
+				this.getApiResponseJson("/api/game/new/1vsAI/", config).then((response) => {
+				let res = JSON.parse(response);
+				if (res.success) {
+						let aiConfig = document.getElementById("aiConfig");
+						aiConfig.classList.add("hided")
+						this.remove("aiConfig")
+						history.pushState("", "", "/play1vsAI/" + res.id);
+						this.router();
+					}
+				});
+			});
+		}
+	}
+
+	getLocalConfigPage() {
+		let homeContent = document.getElementById("homeContent");
+		if (!homeContent)
+			return ;
+		this.getApiResponse("/api/view/localConfig/").then((response) => {
+			let res = JSON.parse(response);
+			if (res.success) {
+				homeContent.innerHTML += res.html;
+				setTimeout(() => {
+					let configView = document.getElementById("config");
+					if (!configView)
+						return ;
+					configView.classList.remove("hided");
+					this.setConfigInteraction();
+				}, 200);
+			}
+		});
+	}
+
+	setConfigInteraction() {
+		let config = {
+			winScore: 10,
+			startSpeed: 8,
+			bonuses: true,
+			ai: 1,
+			leftKey: 65,
+			rightKey: 68,
+			leftKey2: 37,
+			rightKey2: 39,
+		}
+		let configView = document.getElementById("config");
+		if (configView.dataset.events != "done") {
+			configView.dataset.events = "done";
+			let winScore = document.getElementById("winScore");
+			let winScoreText = document.getElementById("winScoreText");
+			winScore.addEventListener('input', (e) => {
+				winScoreText.innerHTML = winScore.value;
+				config.winScore = winScore.value;
+			});
+			let startSpeed = document.getElementById("startSpeed");
+			let startSpeedText = document.getElementById("startSpeedText");
+			startSpeed.addEventListener('input', (e) => {
+				startSpeedText.innerHTML = startSpeed.value;
+				config.startSpeed = startSpeed.value;
+			});
+			if (document.querySelector('input[name="bonuses"]')) {
+				document.querySelectorAll('input[name="bonuses"]').forEach((elem) => {
+					elem.addEventListener("change", function(event) {
+						if (event.target.value == 'on')
+							config.bonuses = true;
+						else
+							config.bonuses = false;
+					});
+				});
+			}
+			if (document.querySelector('input[name="aiLevel"]')) {
+				document.querySelectorAll('input[name="aiLevel"]').forEach((elem) => {
+					elem.addEventListener("change", function(event) {
+						if (event.target.value == 'normal')
+							config.ai = 1;
+						else
+							config.ai = 2;
+					});
+				});
+			}
+			let leftKey = document.getElementById("leftKey");
+			leftKey.addEventListener("click", async (e) => {
+				leftKey.innerHTML = "_";
+				await this.waitKeypress("leftKey");
+				config.leftKey = leftKey.dataset.code;
+			})
+			let rightKey = document.getElementById("rightKey");
+			rightKey.addEventListener("click", async (e) => {
+				rightKey.innerHTML = "_";
+				await this.waitKeypress("rightKey");
+				config.rightKey = rightKey.dataset.code;
+			})
+			if (document.querySelector('input[name="p2Local"]')) {
+				document.querySelector('input[name="p2Local"]').addEventListener("input", function(e) {
+					config.p2Local = e.target.value;
+				});
+			}
+			let leftKey2 = document.getElementById("leftKey2");
+			leftKey2.addEventListener("click", async (e) => {
+				leftKey2.innerHTML = "_";
+				await this.waitKeypress("leftKey2");
+				config.leftKey2 = leftKey2.dataset.code;
+			})
+			let rightKey2 = document.getElementById("rightKey2");
+			rightKey2.addEventListener("click", async (e) => {
+				rightKey2.innerHTML = "_";
+				await this.waitKeypress("rightKey2");
+				config.rightKey2 = rightKey2.dataset.code;
 			})
 			let playBtn = document.getElementById("playBtn")
 			playBtn.addEventListener("click", (e) => {

@@ -23,6 +23,7 @@ urlpatterns = [
 	path('api/view/chatMenu/', views.chatMenu, name="chatMenu"),
 	path('api/view/createGame/', views.createGame, name="createGame"),
 	path('api/view/localAiConfig/', views.localAiConfig, name="localAiConfig"),
+	path('api/view/localConfig/', views.localConfig, name="localConfig"),
 	path('api/view/profilMenu/', views.profilMenu, name="profilMenu"),
 	path('api/view/login/', views.loginForm, name="loginForm"),
 	path('api/view/register/', views.registerForm, name="registerForm"),
@@ -40,4 +41,6 @@ urlpatterns = [
 	path('register', views.index, name="index"),
 	path('play1vsAI', views.index, name="index"),
     path('play1vsAI/<int:game_id>', views.indexGame, name="indexGame"),
+	path('play1vs1', views.index, name="index"),
+    path('play1vs1/<int:game_id>', views.indexGame, name="indexGame"),
 ]
