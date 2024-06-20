@@ -324,6 +324,20 @@ def createGame(request):
 			'html': render_to_string('website/createGame.html'),
 		})
 
+def profile(request):
+	if request.method == 'POST':
+		data = json.loads(request.POST["data"]);
+		perso = True
+		if data['id'] != request.id:
+			perso = False
+			user = User.objects.get(id=data['id'])
+		else:
+			user = request.user
+		return JsonResponse({
+			'success': True,
+			'html': render_to_string('website/profile.html', {"user": user, "perso": perso}),
+	})
+
 def chatUserView(request):
 	if request.method == 'POST' and request.user.is_authenticated:
 		friends = User.objects.filter(id__in=request.user.friends.all()).annotate(connected=Subquery(Exists(User.objects.filter(id=OuterRef("id")).filter(last_login__gt=datetime.now() - timedelta(minutes=15))))).annotate(live=Subquery(Exists(User.objects.filter(id=OuterRef("id")).filter(online=True).filter(last_login__gt=datetime.now() - timedelta(hours=1)))))

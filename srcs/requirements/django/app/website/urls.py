@@ -25,6 +25,7 @@ urlpatterns = [
 	path('api/view/createGame/', views.createGame, name="createGame"),
 	path('api/view/localAiConfig/', views.localAiConfig, name="localAiConfig"),
 	path('api/view/localConfig/', views.localConfig, name="localConfig"),
+	path('api/view/profile/', views.profile, name="profile"),
 	path('api/view/profilMenu/', views.profilMenu, name="profilMenu"),
 	path('api/view/login/', views.loginForm, name="loginForm"),
 	path('api/view/register/', views.registerForm, name="registerForm"),
