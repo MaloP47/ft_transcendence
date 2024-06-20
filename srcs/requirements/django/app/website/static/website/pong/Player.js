@@ -96,36 +96,7 @@ export default class Player {
 		this.updateBonus(this.bonus.frozen, 200, 1);
 		this.updateBonus(this.bonus.line, 100, 10);
 		this.updateBonus(this.bonus.reversed, 200, 1);
-/*		const maxPos = this.maxPos - this.bonus.big.time + this.bonus.small.time / 2;
-		if (this.player == 1) {
-			this.LEFT = this.pong.p1Left;
-			this.RIGHT = this.pong.p1Right;
-		} else {
-			this.LEFT = this.pong.p2Left;
-			this.RIGHT = this.pong.p2Right;
-		}
-		if (!this.LEFT && !this.RIGHT) {
-			if (this.bar.position.x + this.speed * this.pong.elapsedTime / 12 > maxPos && Math.abs(this.speed) > 0.1) {
-				this.bar.position.x = maxPos;
-				this.speed = -this.speed / 1.75;
-			} else if (this.bar.position.x + this.speed * this.pong.elapsedTime / 12 < -maxPos && Math.abs(this.speed) > 0.1) {
-				this.bar.position.x = -maxPos;
-				this.speed = -this.speed / 1.75;
-			}
-			this.bar.position.x = Math.min(maxPos, Math.max(-maxPos, this.bar.position.x + this.speed * this.pong.elapsedTime / 12));
-		} else {
-			console.log('slut')
-			this.bar.position.x = Math.min(maxPos, Math.max(-maxPos, this.bar.position.x + this.speed * this.pong.elapsedTime / 12));
-			if (this.bar.position.x <= -maxPos || this.bar.position.x >= maxPos) {
-				this.speed = 0;
-			}
-		}
-		this.updateSpeed();
-		this.prevPos = this.currentPos.clone();
-		this.currentPos = this.bar.position.clone();
-		this.velcity = this.prevPos.clone();
-		this.velcity.sub(this.currentPos);
-*/	}
+	}
 	
 	getPos() { return(this.bar.position.clone()); }
 	getSpeed() { return(this.speed); }
@@ -168,7 +139,8 @@ export default class Player {
 		if (!this.AI)
 			return ;
 		this.brainTimeout = setTimeout(this.startAI.bind(this), 1000);
-		this.basicAI();
+//		this.basicAI();
+		this.betterAI();
 	}
 
 	stopAI() {
@@ -209,6 +181,59 @@ export default class Player {
 			} else {
 				this.pong.p2Right = true;
 				setTimeout(() => {this.pong.p2Right = false}, coef * (travelDist + (Math.random() - 0.5) * 2) / 0.26 * 12 * mult);
+			}
+		}
+	}
+	
+	betterAI() {
+		if (this.bonus.line.on)
+			return ;
+		const ball = this.pong.assets.ball;
+		let pos = ball.getPos();
+		let vel = ball.getVelocity();
+		let speed = ball.getSpeed();
+		var travelDist = 0;
+		var coef = 1;
+		var mult = 1;
+		if (this.player == 1 && vel.y > 0)
+			return ;
+		if (this.player == 2 && vel.y < 0) {
+			travelDist = -this.bar.position.x
+			console.log(travelDist)
+			if (this.bonus.reversed.on)
+				coef = -1;
+			if (this.bonus.frozen.on)
+				mult = 0.3;
+			if ((travelDist < 0 && !this.bonus.reversed.on || travelDist > 0 && this.bonus.reversed.on) && this.pong.exchange != 0) {
+				this.pong.p2Left = true;
+				setTimeout(() => {this.pong.p2Left = false}, coef * -travelDist / 0.26 * 7 * mult);
+			} else {
+				this.pong.p2Right = true;
+				setTimeout(() => {this.pong.p2Right = false}, coef * travelDist / 0.26 * 7 * mult);
+			}
+			return ;
+		}
+		var target = this.getTargetInfo({x: pos.x, y: pos.y}, {x: pos.x + vel.x, y: pos.y + vel.y});
+		travelDist = target.pos - this.bar.position.x;
+		if (this.bonus.reversed.on)
+			coef = -1;
+		if (this.bonus.frozen.on)
+			mult = 0.3;
+		if (this.player == 1) {
+			if (travelDist < 0 && !this.bonus.reversed.on || travelDist > 0 && this.bonus.reversed.on) {
+				this.pong.p1Left = true;
+				setTimeout(() => {this.pong.p1Left = false}, coef * -travelDist / 0.26 * 8 * mult);
+			} else {
+				this.pong.p1Right = true;
+				setTimeout(() => {this.pong.p1Right = false}, coef * travelDist / 0.26 * 8 * mult);
+			}
+		} else {
+			if (travelDist < 0 && !this.bonus.reversed.on || travelDist > 0 && this.bonus.reversed.on) {
+				this.pong.p2Left = true;
+				setTimeout(() => {this.pong.p2Left = false}, coef * -travelDist / 0.26 * 8 * mult);
+			} else {
+				this.pong.p2Right = true;
+				setTimeout(() => {this.pong.p2Right = false}, coef * travelDist / 0.26 * 8 * mult);
 			}
 		}
 	}
