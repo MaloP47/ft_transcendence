@@ -283,3 +283,6 @@ def messageSetRead(request):
 		return JsonResponse({
 			'success': True,
 		});
+
+def blockchain(request):
+	return render(request, "website/tournamentEndPage.html");
