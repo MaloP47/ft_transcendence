@@ -6,9 +6,15 @@
 //   By: gbrunet <gbrunet@student.42.fr>            +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2024/06/13 11:54:22 by gbrunet           #+#    #+#             //
-//   Updated: 2024/06/13 12:11:26 by gbrunet          ###   ########.fr       //
+//   Updated: 2024/06/20 15:05:50 by gbrunet          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
+
+import Pong from '../pong/Pong.js';
+
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 export default class App {
 	constructor() {
@@ -27,7 +33,6 @@ export default class App {
 			if (e.target.matches("[data-api]")) {
 				e.preventDefault();
 				this.getApiResponse(e.target.dataset.api).then((response) => {
-					console.log('ok')
 					history.pushState("", "", e.target.href);
 					let res = JSON.parse(response)
 					if (res.needUserUpdate) {
@@ -52,6 +57,7 @@ export default class App {
 			"/login": {title: "Transcendence - Login", state: "Login"},
 			"/register": {title: "Transcendence - Register", state: "Register"},
 			"/play1vsAI": {title: "Transcendence - 1 VS A.I.", state: "Play1vsAI"},
+			"/play1vs1": {title: "Transcendence - 1 VS 1 (local)", state: "Play1vs1"},
 		}
 	}
 
@@ -90,7 +96,16 @@ export default class App {
 	}
 
 	router(back) {
-		let view = this.routes[location.pathname];
+		let path = String(location.pathname)
+		let id = -1
+		if (path.indexOf("/play1vsAI/") == 0) {
+			id = path.substring(11)
+			path = "/play1vsAI"
+		} else if (path.indexOf("/play1vs1/") == 0) {
+			id = path.substring(10)
+			path = "/play1vs1"
+		}
+		let view = this.routes[path];
 		if (view) {
 			document.title = view.title;
 			switch(view.state) {
@@ -118,7 +133,16 @@ export default class App {
 						this.hideLoginForm();
 					if (document.getElementById("createGame"))
 						this.hideCreateGame();
-					this.getHomePage("1vsAI");
+					this.getHomePage("1vsAI", id);
+					break;
+				case "Play1vs1":
+					if (document.getElementById("registerForm"))
+						this.hideRegisterForm();
+					if (document.getElementById("loginForm"))
+						this.hideLoginForm();
+					if (document.getElementById("createGame"))
+						this.hideCreateGame();
+					this.getHomePage("1vs1", id);
 					break;
 			}
 		} else {
@@ -214,6 +238,13 @@ export default class App {
 	//						VIEW UPDATE							//
 	//----------------------------------------------------------//
 
+	setPong(state) {
+		if (!this.pong)
+			this.pong = new Pong({stateMachine: this, state: state});
+		else
+			this.pong.toState(state);
+	}
+
 	toggleProfilMenu() {
 		let profilMenu = document.getElementById("profilMenu");
 		if (this.user.authenticated) {
@@ -257,7 +288,7 @@ export default class App {
 		}, 200);
 	}
 
-	getHomePage(state) {
+	getHomePage(state, game_id) {
 		if (this.user.authenticated) {
 			if (this.chatSocket)
 				this.chatSocket.close();
@@ -290,10 +321,27 @@ export default class App {
 					this.initAddFriendBtn();
 					this.initDeleteFriendBtn();
 					this.updateRooms();
-					if (state == "home")
+					if (state == "home") {
+						this.setPong("bg");
 						this.getCreateGame();
-					if (state == "1vsAI")
+					} else if (state == "1vsAI" && !this.user.authenticated) {
+						history.replaceState("", "", "/");
+						this.router();
+					} else if (state == "1vsAI" && game_id == -1) {
+						this.setPong("bg");
 						this.getLocalAiConfigPage();
+					} else if (state == "1vsAI" && game_id != -1) {
+						this.getLocalAiGame(game_id);
+					} else if (state == "1vs1" && !this.user.authenticated) {
+						history.replaceState("", "", "/");
+						this.router();
+					} else if (state == "1vs1" && game_id == -1) {
+						this.setPong("bg");
+						this.getLocalConfigPage();
+					}
+					else if (state == "1vs1" && game_id != -1) {
+						this.getLocalGame(game_id);
+					}
 					let homeView = document.getElementById("homeView");
 					setTimeout(() => {
 						homeView.classList.remove("hided");
@@ -301,12 +349,139 @@ export default class App {
 				}
 			})
 		} else {
-			// need to clean current home view and add what the user want...
-			if (state == "home")
+			if (state == "home") {
+				this.setPong("bg");
 				this.getCreateGame();
-			if (state == "1vsAI")
+			} else if (state == "1vsAI" && game_id == -1) {
+				this.setPong("bg");
+				this.hideLocalGame();
 				this.getLocalAiConfigPage();
+			} else if (state == "1vsAI" && game_id != -1) {
+				this.hideLocalConfigPage();
+				this.getLocalAiGame(game_id);
+			} else if (state == "1vs1" && game_id == -1) {
+				this.setPong("bg");
+				this.hideLocalGame();
+				this.getLocalConfigPage();
+			} else if (state == "1vs1" && game_id != -1) {
+				this.hideLocalConfigPage();
+				this.getLocalGame(game_id);
+			}
 		}
+	}
+
+	hideLocalGame() {
+		let gameOverlay = document.getElementById("gameOverlay");
+		if (!gameOverlay)
+			return ;
+		gameOverlay.classList.add("hided")
+		this.remove("gameOverlay")
+	}
+
+	getLocalGame(id) {
+		this.getApiResponseJson("/api/game/get/", {id: id}).then((response) => {
+			let res = JSON.parse(response);
+			if (res.success) {
+				if (res.winScore <= res.p1score || res.winScore <= res.p2score)
+					this.setPong("bg")
+				else
+					this.setPong("p1Game");
+				this.pong.game_id = id;
+				this.pong.gameInfo = res;
+				let homeContent = document.getElementById("homeContent");
+				if (document.getElementById("gameOverlay"))
+					return ;
+				homeContent.innerHTML += res.html;
+				let gameOverlay = document.getElementById("gameOverlay")
+				if (gameOverlay.dataset.loaded != "true") {
+					gameOverlay.dataset.loaded = "true";
+					document.getElementById("p1score").innerHTML = res.p1score
+					document.getElementById("p2score").innerHTML = res.p2score
+					if (res.p1score >= res.winScore || res.p2score >= res.winScore) {
+						let endDiv = document.getElementById("countdown");
+						if (endDiv) {
+							let p1 = "A.I.";
+							if (res.p1.id != -1)
+								p1 = res.p1.username;
+							let p2 = res.p2Local;
+							if (res.p2.id != -1)
+								p2 = res.p2.username;
+							let gameVs = "<span class='fs-2 text-light-emphasis'>" + p1 + " vs " + p2 + "</span>";
+							if (res.p1score > res.p2score)
+								endDiv.innerHTML = gameVs + "<p style='font-size:5rem; margin-top: -30px'>" + p1 + " wins this game !</p>"
+							else
+								endDiv.innerHTML = gameVs + "<p style='font-size:5rem; margin-top: -30px'>" + p2 + " wins this game !</p>"
+							endDiv.classList.remove("coundown");
+							endDiv.style.fontSize = "5rem"
+							endDiv.classList.add("visible");
+						}
+						console.log('game is finished...')
+					} else {
+						this.pong.config = res;
+					}
+				}
+			} else {
+				history.replaceState("", "", "/");
+				this.router();
+			}
+		});
+	}
+
+	getLocalAiGame(id) {
+		this.getApiResponseJson("/api/game/get/", {id: id}).then((response) => {
+			let res = JSON.parse(response);
+			if (res.success) {
+				if (res.winScore <= res.p1score || res.winScore <= res.p2score)
+					this.setPong("bg")
+				else
+					this.setPong("p1Game");
+				this.pong.game_id = id;
+				this.pong.gameInfo = res;
+				let homeContent = document.getElementById("homeContent");
+				if (document.getElementById("gameOverlay"))
+					return ;
+				homeContent.innerHTML += res.html;
+				let gameOverlay = document.getElementById("gameOverlay")
+				if (gameOverlay.dataset.loaded != "true") {
+					gameOverlay.dataset.loaded = "true";
+					document.getElementById("p1score").innerHTML = res.p1score
+					document.getElementById("p2score").innerHTML = res.p2score
+					if (res.p1score >= res.winScore || res.p2score >= res.winScore) {
+						let endDiv = document.getElementById("countdown");
+						if (endDiv) {
+							let p1 = "A.I.";
+							if (res.p1.id != -1)
+								p1 = res.p1.username;
+							let p2 = "A.I.";
+							if (res.p2.id != -1)
+								p2 = res.p2.username;
+							let gameVs = "<span class='fs-2 text-light-emphasis'>" + p1 + " vs " + p2 + "</span>";
+							if (res.p1score > res.p2score)
+								endDiv.innerHTML = gameVs + "<p style='font-size:5rem; margin-top: -30px'>" + p1 + " wins this game !</p>"
+							else
+								endDiv.innerHTML = gameVs + "<p style='font-size:5rem; margin-top: -30px'>" + p2 + " wins this game !</p>"
+							endDiv.classList.remove("coundown");
+							endDiv.style.fontSize = "5rem"
+							endDiv.classList.add("visible");
+						}
+						console.log('game is finished...')
+					} else {
+						this.pong.config = res;
+					}
+				}
+			} else {
+				history.replaceState("", "", "/");
+				this.router();
+			}
+		});
+	}
+	
+	hideLocalConfigPage() {
+		let configView = document.getElementById("aiConfig");
+		if (!configView)
+			return ;
+		configView.classList.add("hided")
+		this.remove("aiConfig")
 	}
 
 	getLocalAiConfigPage() {
@@ -319,6 +494,8 @@ export default class App {
 				homeContent.innerHTML += res.html;
 				setTimeout(() => {
 					let configView = document.getElementById("aiConfig");
+					if (!configView)
+						return ;
 					configView.classList.remove("hided");
 					this.setAiConfigInteraction();
 				}, 200);
@@ -327,44 +504,178 @@ export default class App {
 	}
 
 	setAiConfigInteraction() {
-		let winScore = document.getElementById("winScore");
-		let winScoreText = document.getElementById("winScoreText");
-		winScore.addEventListener('input', (e) => {
-			winScoreText.innerHTML = winScore.value;
-		});
-		let startSpeed = document.getElementById("startSpeed");
-		let startSpeedText = document.getElementById("startSpeedText");
-		startSpeed.addEventListener('input', (e) => {
-			startSpeedText.innerHTML = startSpeed.value;
-		});
-		if (document.querySelector('input[name="bonuses"]')) {
-			document.querySelectorAll('input[name="bonuses"]').forEach((elem) => {
-				elem.addEventListener("change", function(event) {
-					console.log(event.target.value);
+		let config = {
+			winScore: 10,
+			startSpeed: 8,
+			bonuses: true,
+			ai: 1,
+			leftKey: 65,
+			rightKey: 68,
+		}
+		let configView = document.getElementById("aiConfig");
+		if (configView.dataset.events != "done") {
+			configView.dataset.events = "done";
+			let winScore = document.getElementById("winScore");
+			let winScoreText = document.getElementById("winScoreText");
+			winScore.addEventListener('input', (e) => {
+				winScoreText.innerHTML = winScore.value;
+				config.winScore = winScore.value;
+			});
+			let startSpeed = document.getElementById("startSpeed");
+			let startSpeedText = document.getElementById("startSpeedText");
+			startSpeed.addEventListener('input', (e) => {
+				startSpeedText.innerHTML = startSpeed.value;
+				config.startSpeed = startSpeed.value;
+			});
+			if (document.querySelector('input[name="bonuses"]')) {
+				document.querySelectorAll('input[name="bonuses"]').forEach((elem) => {
+					elem.addEventListener("change", function(event) {
+						if (event.target.value == 'on')
+							config.bonuses = true;
+						else
+							config.bonuses = false;
+					});
+				});
+			}
+			if (document.querySelector('input[name="aiLevel"]')) {
+				document.querySelectorAll('input[name="aiLevel"]').forEach((elem) => {
+					elem.addEventListener("change", function(event) {
+						if (event.target.value == 'normal')
+							config.ai = 1;
+						else
+							config.ai = 2;
+					});
+				});
+			}
+			let leftKey = document.getElementById("leftKey");
+			leftKey.addEventListener("click", async (e) => {
+				leftKey.innerHTML = "_";
+				await this.waitKeypress("leftKey");
+				config.leftKey = leftKey.dataset.code;
+			})
+			let rightKey = document.getElementById("rightKey");
+			rightKey.addEventListener("click", async (e) => {
+				rightKey.innerHTML = "_";
+				await this.waitKeypress("rightKey");
+				config.rightKey = rightKey.dataset.code;
+			})
+			let playBtn = document.getElementById("playBtn")
+			playBtn.addEventListener("click", (e) => {
+				this.getApiResponseJson("/api/game/new/1vsAI/", config).then((response) => {
+				let res = JSON.parse(response);
+				if (res.success) {
+						let aiConfig = document.getElementById("aiConfig");
+						aiConfig.classList.add("hided")
+						this.remove("aiConfig")
+						history.pushState("", "", "/play1vsAI/" + res.id);
+						this.router();
+					}
 				});
 			});
 		}
-		if (document.querySelector('input[name="aiLevel"]')) {
-			document.querySelectorAll('input[name="aiLevel"]').forEach((elem) => {
-				elem.addEventListener("change", function(event) {
-					console.log(event.target.value);
+	}
+
+	getLocalConfigPage() {
+		let homeContent = document.getElementById("homeContent");
+		if (!homeContent)
+			return ;
+		this.getApiResponse("/api/view/localConfig/").then((response) => {
+			let res = JSON.parse(response);
+			if (res.success) {
+				homeContent.innerHTML += res.html;
+				setTimeout(() => {
+					let configView = document.getElementById("config");
+					if (!configView)
+						return ;
+					configView.classList.remove("hided");
+					this.setConfigInteraction();
+				}, 200);
+			}
+		});
+	}
+
+	setConfigInteraction() {
+		let config = {
+			winScore: 10,
+			startSpeed: 8,
+			bonuses: true,
+			ai: 1,
+			leftKey: 65,
+			rightKey: 68,
+			leftKey2: 37,
+			rightKey2: 39,
+			p2Local: '',
+		}
+		let configView = document.getElementById("config");
+		if (configView.dataset.events != "done") {
+			configView.dataset.events = "done";
+			let winScore = document.getElementById("winScore");
+			let winScoreText = document.getElementById("winScoreText");
+			winScore.addEventListener('input', (e) => {
+				winScoreText.innerHTML = winScore.value;
+				config.winScore = winScore.value;
+			});
+			let startSpeed = document.getElementById("startSpeed");
+			let startSpeedText = document.getElementById("startSpeedText");
+			startSpeed.addEventListener('input', (e) => {
+				startSpeedText.innerHTML = startSpeed.value;
+				config.startSpeed = startSpeed.value;
+			});
+			if (document.querySelector('input[name="bonuses"]')) {
+				document.querySelectorAll('input[name="bonuses"]').forEach((elem) => {
+					elem.addEventListener("change", function(event) {
+						if (event.target.value == 'on')
+							config.bonuses = true;
+						else
+							config.bonuses = false;
+					});
+				});
+			}
+			let leftKey = document.getElementById("leftKey");
+			leftKey.addEventListener("click", async (e) => {
+				leftKey.innerHTML = "_";
+				await this.waitKeypress("leftKey");
+				config.leftKey = leftKey.dataset.code;
+			})
+			let rightKey = document.getElementById("rightKey");
+			rightKey.addEventListener("click", async (e) => {
+				rightKey.innerHTML = "_";
+				await this.waitKeypress("rightKey");
+				config.rightKey = rightKey.dataset.code;
+			})
+			if (document.querySelector('input[name="p2Local"]')) {
+				document.querySelector('input[name="p2Local"]').addEventListener("input", function(e) {
+					config.p2Local = e.target.value;
+				});
+			}
+			let leftKey2 = document.getElementById("leftKey2");
+			leftKey2.addEventListener("click", async (e) => {
+				leftKey2.innerHTML = "_";
+				await this.waitKeypress("leftKey2");
+				config.leftKey2 = leftKey2.dataset.code;
+			})
+			let rightKey2 = document.getElementById("rightKey2");
+			rightKey2.addEventListener("click", async (e) => {
+				rightKey2.innerHTML = "_";
+				await this.waitKeypress("rightKey2");
+				config.rightKey2 = rightKey2.dataset.code;
+			})
+			let playBtn = document.getElementById("playBtn")
+			playBtn.addEventListener("click", (e) => {
+				if (config.p2Local == "")
+					config.p2Local = "Local P2"
+				this.getApiResponseJson("/api/game/new/1vs1/", config).then((response) => {
+				let res = JSON.parse(response);
+				if (res.success) {
+						let config = document.getElementById("config");
+						config.classList.add("hided")
+						this.remove("config")
+						history.pushState("", "", "/play1vs1/" + res.id);
+						this.router();
+					}
 				});
 			});
 		}
-		let leftKey = document.getElementById("leftKey");
-		leftKey.addEventListener("click", async (e) => {
-			leftKey.innerHTML = "_";
-			await this.waitKeypress("leftKey");
-		})
-		let rightKey = document.getElementById("rightKey");
-		rightKey.addEventListener("click", async (e) => {
-			rightKey.innerHTML = "_";
-			await this.waitKeypress("rightKey");
-		})
-		let playBtn = document.getElementById("playBtn")
-		playBtn.addEventListener("click", (e) => {
-			console.log("PLAY CLICKED DUDE !");
-		});
 	}
 
 	waitKeypress(id) {
@@ -383,6 +694,7 @@ export default class App {
 						btn.innerHTML = "→";
 					else if (e.keyCode == 40)
 						btn.innerHTML = "↓";
+					btn.dataset.code = e.keyCode;
 					document.removeEventListener('keydown', onKeyHandler);
 					resolve();
 				}
@@ -400,7 +712,9 @@ export default class App {
 				homeContent.innerHTML = res.html;
 				let gameBtns = document.getElementById("createGame");
 				setTimeout(() => {
-					gameBtns.classList.remove("hided");
+					let dom = document.getElementById("createGame")
+					if (dom)
+						dom.classList.remove("hided");
 				}, 15);
 			}
 		});
@@ -772,11 +1086,48 @@ export default class App {
 					notif[i].classList.remove("hided")
 				}, 15)
 				let acceptBtn = notif[i].childNodes[1].childNodes[1];
-				acceptBtn.addEventListener("click", this.acceptFriendRequest.bind(this), false);
+				if (acceptBtn.classList.contains("accept"))
+					acceptBtn.addEventListener("click", this.acceptFriendRequest.bind(this), false);
+				else if (acceptBtn.classList.contains("join"))
+					acceptBtn.addEventListener("click", this.joinUnfinishedGame.bind(this), false);
 				let deleteBtn = notif[i].childNodes[1].childNodes[2];
-				deleteBtn.addEventListener("click", this.deleteFriendRequest.bind(this), false);
+				if (deleteBtn.classList.contains("delete"))
+					deleteBtn.addEventListener("click", this.deleteFriendRequest.bind(this), false);
+				else if (deleteBtn.classList.contains("forfeit"))
+					deleteBtn.addEventListener("click", this.forfeitUnfinishedGame.bind(this), false);
 			}
 		}
+	}
+
+	joinUnfinishedGame(e) {
+		let gameType = e.target.dataset.type;
+		let gameId = e.target.dataset.game;
+		if (gameType == 0) // Local 1 vs AI
+			history.pushState("", "", "/play1vsAI/" + gameId);
+		else if (gameType == 1) // Local 1 vs 1
+			history.pushState("", "", "/play1vs1/" + gameId);
+		else if (gameType == 2) // Remote 1 vs 1
+			history.pushState("", "", "/play/" + gameId);
+		let notif = e.target.parentNode.parentNode;
+		notif.classList.add("hided");
+		setTimeout(() => {
+			notif.remove();
+		}, 200)
+		this.router();
+	}
+
+	forfeitUnfinishedGame(e) {
+		let gameId = e.target.dataset.game;
+		this.getApiResponseJson("/api/game/forfeit/", {id: gameId}).then((response) => {
+			let res = JSON.parse(response)
+			if (res.success) {
+				let notif = e.target.parentNode.parentNode;
+				notif.classList.add("hided");
+				setTimeout(() => {
+					notif.remove();
+				}, 200)
+			}
+		})
 	}
 
 	acceptFriendRequest(e) {

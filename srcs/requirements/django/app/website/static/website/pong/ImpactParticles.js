@@ -47,9 +47,9 @@ export default class ImpactParticles {
 			const life = (Math.random() + 0.5) * 0.25;
 			var vel = new THREE.Vector3(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5);
 			this.impactParticles.push({
-				position: this.pong.ball.getPos(),
+				position: this.pong.assets.ball.getPos(),
 				velocity: vel.multiplyScalar(0.3),
-				size: Math.random() * 0.75,
+				size: Math.random() * 0.75 * this.pong.scaleFactor,
 				life: life,
 				age: life,
 			})
@@ -88,13 +88,13 @@ export default class ImpactParticles {
 		}
 	}
 
-	reset() {
+	delete() {
 		this.impactParticles = [];
 		this.UpdateGeometry();
+		this.pong.assets.impactParticles = undefined;
 	}
 
-	Update() {
-//		this.AddParticles();
+	update() {
 		this.UpdateParticles(this.pong.elapsedTime / 1000.0);
 		this.UpdateGeometry();
 	}

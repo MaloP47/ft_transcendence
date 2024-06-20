@@ -6,7 +6,7 @@
 /*   By: gbrunet <gbrunet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/07 09:37:34 by gbrunet           #+#    #+#             */
-/*   Updated: 2024/06/11 10:45:04 by gbrunet          ###   ########.fr       */
+/*   Updated: 2024/06/20 09:45:39 by gbrunet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -160,6 +160,10 @@ body {
 	border: 2px rgba(255, 255, 255, 0.35) solid;
 }
 
+.visible {
+	opacity: 1 !important;
+}
+
 .hided {
 	opacity: 0;
 }
@@ -179,6 +183,21 @@ body {
 
 .trXp100 {
 	transform: translate(0, 100px);
+}
+
+#countdown {
+	opacity: 0;
+	transition: 200ms;
+}
+
+.countdown {
+	animation: zoom-opacity 1s 1;
+}
+
+@keyframes zoom-opacity {
+	0% { transform: scale(0) }
+	50% { opacity:1 }
+	100% { transform: scale(1); opacity:0 }
 }
 
 .shake {

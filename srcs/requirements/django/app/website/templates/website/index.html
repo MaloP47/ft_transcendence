@@ -16,6 +16,7 @@
 		}
 		</script>
 	</head>
+	{% csrf_token %}
 	<body class="bg-black text-light">
 		{% include "website/canvas.html" %}
 		<div id="topContent" class="position-fixed w-100 h-100">

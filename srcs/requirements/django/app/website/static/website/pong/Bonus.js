@@ -6,7 +6,7 @@
 //   By: gbrunet <gbrunet@student.42.fr>            +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2024/05/24 13:05:45 by gbrunet           #+#    #+#             //
-//   Updated: 2024/05/31 15:20:08 by gbrunet          ###   ########.fr       //
+//   Updated: 2024/06/17 10:11:44 by gbrunet          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -15,8 +15,8 @@ import bonusVertexShader from './assets/shaders/bonusV.js'
 import bonusFragmentShader from './assets/shaders/bonusF.js'
 
 export default class Bonus {
-	constructor(params) {
-		this.pong = params.pong;
+	constructor(data) {
+		this.pong = data.pong;
 		this.geometry = new THREE.PlaneGeometry(3.5, 3.5);
 		this.material = new THREE.ShaderMaterial({
 			vertexShader: bonusVertexShader,
@@ -71,15 +71,15 @@ export default class Bonus {
 			if (this.pong.endRound)
 				return;
 			if (this.type == 0)
-				this.setBonus(this.pong.p1.bonus.big, this.pong.p2.bonus.big)
+				this.setBonus(this.pong.assets.p1.bonus.big, this.pong.assets.p2.bonus.big)
 			else if (this.type == 1)
-				this.setBonus(this.pong.p1.bonus.small, this.pong.p2.bonus.small)
+				this.setBonus(this.pong.assets.p1.bonus.small, this.pong.assets.p2.bonus.small)
 			else if (this.type == 2)
-				this.setBonus(this.pong.p1.bonus.line, this.pong.p2.bonus.line)
+				this.setBonus(this.pong.assets.p1.bonus.line, this.pong.assets.p2.bonus.line)
 			else if (this.type == 3)
-				this.setBonus(this.pong.p1.bonus.frozen, this.pong.p2.bonus.frozen)
+				this.setBonus(this.pong.assets.p1.bonus.frozen, this.pong.assets.p2.bonus.frozen)
 			else if (this.type == 4)
-				this.setBonus(this.pong.p1.bonus.reversed, this.pong.p2.bonus.reversed)
+				this.setBonus(this.pong.assets.p1.bonus.reversed, this.pong.assets.p2.bonus.reversed)
 			this.nextTimeout = setTimeout(() => {
 				this.bonus.position.x = (Math.random() - 0.5) * 12;
 				this.bonus.position.y = (Math.random() - 0.5) * 4;
@@ -96,10 +96,11 @@ export default class Bonus {
 		}
 	}
 
-	Update() {
+	update() {
 		if (!this.active){
 			if (this.bonus.scale.x > 0) {
 				this.bonus.scale.x -= this.pong.elapsedTime / 400;
+
 				this.bonus.scale.y -= this.pong.elapsedTime / 400;
 			} else {
 				this.bonus.scale.x = 0;

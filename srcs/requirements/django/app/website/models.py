@@ -27,3 +27,22 @@ class FriendRequest(models.Model):
 	userFrom = models.ForeignKey(User, related_name="user_from", on_delete=models.DO_NOTHING)
 	userTo = models.ForeignKey(User, related_name="user_to",  on_delete=models.DO_NOTHING)
 	accepted = models.BooleanField(default=False)
+
+class Game(models.Model):
+	id = models.AutoField(primary_key=True)
+	date = models.DateTimeField(auto_now_add=True)
+	p1 = models.ForeignKey(User, on_delete=models.DO_NOTHING, blank=True, null=True, related_name="p1")
+	p2 = models.ForeignKey(User, on_delete=models.DO_NOTHING, blank=True, null=True, related_name="p2")
+	p2Local = models.TextField(default="", blank=True)
+	forfeit = models.ForeignKey(User, on_delete=models.DO_NOTHING, blank=True, null=True, related_name="forfeit")
+	ai = models.IntegerField(default=0)
+	p1Score = models.IntegerField(default=0)
+	p2Score = models.IntegerField(default=0)
+	scoreToWin = models.IntegerField(default=10)
+	ballSpeed = models.FloatField(default=8)
+	bonuses = models.BooleanField(default=True)
+	p1Left = models.IntegerField(default=65)
+	p1Right = models.IntegerField(default=68)
+	p2Left = models.IntegerField(default=37)
+	p2Right = models.IntegerField(default=39)
+	gameType = models.IntegerField(default=0) # 0->local vs AI // 1->local 1 vs 1 // 2->remote 1 vs 1
