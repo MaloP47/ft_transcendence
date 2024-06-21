@@ -6,24 +6,34 @@
 	"schemaVersion": 16,
 	"version": 0,
 	"panels": [
-	{
-		"datasource": "Prometheus",
-		"type": "graph",
-		"title": "Prometheus Data",
-		"targets": [
 		{
-			"expr": "up",
-			"legendFormat": "instance {{instance}}",
-			"refId": "A"
+			"datasource": "Prometheus",
+			"type": "graph",
+			"title": "Conteneurs Status",
+			"targets": [
+				{
+					"expr": "up",
+					"legendFormat": "Instance {{instance}}",
+					"refId": "A"
+				},
+				{
+					"expr": "nginx_up",
+					"legendFormat": "Instance Nginx:443",
+					"refId": "B"
+				},
+				{
+					"expr": "pg_up",
+					"legendFormat": "Instance Postgres:5432",
+					"refId": "C"
+				}
+			],
+			"gridPos": {
+				"h": 8,
+				"w": 12,
+				"x": 0,
+				"y": 0
+			},
+			"id": 1
 		}
-		],
-		"gridPos": {
-		"h": 8,
-		"w": 12,
-		"x": 0,
-		"y": 0
-		},
-		"id": 1
-	}
 	]
 }
