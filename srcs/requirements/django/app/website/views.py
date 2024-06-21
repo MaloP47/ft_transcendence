@@ -380,3 +380,5 @@ def messageSetRead(request):
 
 def blockchain(request):
 	return render(request, "website/tournamentEndPage.html");
+
+	
