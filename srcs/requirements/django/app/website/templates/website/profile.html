@@ -21,11 +21,36 @@
 			<thead>
 				<tr>
 					<th style="width: 30%" scope="col">Game type</th>
-					<th scope="col">Win</th>
-					<th scope="col">Loss</th>
+					<th style="width: 23%" scope="col">Win</th>
+					<th style="width: 23%" scope="col">Loss</th>
+					<th style="width: 24%" scope="col">Total</th>
 				</tr>
 			</thead>
 			<tbody>
+				<tr>
+					<td>1 vs A.I.</th>
+					<td>{{aiWin}}</th>
+					<td>{{aiLoss}}</th>
+					<td>{{aiTot}}</th>
+				</tr>
+				<tr>
+					<td>1 vs A.I. (forfeit)</th>
+					<td>{{aiWinForfeit}}</th>
+					<td>{{aiLossForfeit}}</th>
+					<td>{{aiForfeitTot}}</th>
+				</tr>
+				<tr>
+					<td>1 vs 1</th>
+					<td>{{v1Win}}</th>
+					<td>{{v1Loss}}</th>
+					<td>{{v1Tot}}</th>
+				</tr>
+				<tr>
+					<td>1 vs 1 (forfeit)</th>
+					<td>{{v1WinForfeit}}</th>
+					<td>{{v1LossForfeit}}</th>
+					<td>{{v1ForfeitTot}}</th>
+				</tr>
 			</tbody>
 		</table>
 		<h3>Historic</h3>
@@ -33,31 +58,60 @@
 			<thead>
 				<tr>
 					<th style="width: 30%" scope="col">Date</th>
-					<th scope="col">Opponent</th>
-					<th scope="col">Score</th>
+					<th style="width: 23%" scope="col">Opponent</th>
+					<th style="width: 23%" scope="col">Score to win</th>
+					<th style="width: 24%" scope="col">Score</th>
 				</tr>
 			</thead>
 			<tbody>
 				{% for g in singleGames %}
-				<tr>
-					<td>{{g.date}}</td>
-					{% if g.p1 != user%}
-						{% if g.p1 == None %}
-							<td>A.I.</td>
+				{% if g.p1Score >= g.scoreToWin or g.p2Score >= g.scoreToWin  or g.forfeit != None %}
+					<tr>
+						<td>{{g.date}}</td>
+						{% if g.p1 != user %}
+							{% if g.p1 == None %}
+								<td>A.I.</td>
+							{% else %}
+								<td>{{g.p1}}</td>
+							{% endif %}
 						{% else %}
-							<td>{{g.p1}}</td>
+							{% if g.p2 == None and g.p2Local != '' %}
+								<td>{{g.p2Local}}</td>
+							{% elif g.p2 == None %}
+								<td>A.I.</td>
+							{% else %}
+								<td>{{g.p2}}</td>
+							{% endif %}
 						{% endif %}
-					{% else %}
-						{% if g.p2 == None and g.p2Local != '' %}
-							<td>{{g.p2Local}}</td>
-						{% elif g.p2 == None %}
-							<td>A.I.</td>
+						<td>{{g.scoreToWin}}</td>
+						{% if g.forfeit != None %}
+							{% if g.forfeit == user %}
+						<td class="text-danger">
+							{% else %}
+						<td class="text-success">
+							{% endif %}
 						{% else %}
-							<td>{{g.p2}}</td>
+							{% if g.p1Score >= g.scoreToWin %}
+								{% if g.p1 == user %}
+						<td class="text-success">
+								{% else %}
+						<td class="text-danger">
+								{% endif %}
+							{% else %}
+								{% if g.p2 == user %}
+						<td class="text-success">
+								{% else %}
+						<td class="text-danger">
+								{% endif %}
+							{% endif %}
 						{% endif %}
+							{{g.p1Score}} - {{g.p2Score}}
+							{% if g.forfeit %}
+								(forfeit)
+							{% endif %}
+						</td>
+					</tr>
 					{% endif %}
-					<td>{{g.p1Score}} - {{g.p2Score}}</td>
-				</tr>
 				{% endfor %}
 			</tbody>
 		</table>

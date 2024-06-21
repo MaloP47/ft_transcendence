@@ -1,3 +1,15 @@
+# **************************************************************************** #
+#                                                                              #
+#                                                         :::      ::::::::    #
+#    views.py                                           :+:      :+:    :+:    #
+#                                                     +:+ +:+         +:+      #
+#    By: gbrunet <gbrunet@student.42.fr>            +#+  +:+       +#+         #
+#                                                 +#+#+#+#+#+   +#+            #
+#    Created: 2024/06/21 14:50:33 by gbrunet           #+#    #+#              #
+#    Updated: 2024/06/21 14:51:49 by gbrunet          ###   ########.fr        #
+#                                                                              #
+# **************************************************************************** #
+
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.contrib.auth import login, logout, authenticate
@@ -321,10 +333,41 @@ def profile(request, user_id):
 			user = User.objects.get(id=user_id)
 		else:
 			user = request.user
-		singleGames = Game.objects.filter(Q(p1=user) | Q(p2=user))
+		singleGames = Game.objects.filter(Q(p1=user) | Q(p2=user)).order_by('-date')
+		p1vsAiWinCount = Game.objects.filter(p1=user, p2=None, p2Local='').filter(p1Score__gte=F('scoreToWin')).count()
+		p1vsAiLossCount = Game.objects.filter(p1=user, p2=None, p2Local='').filter(p2Score__gte=F('scoreToWin')).count()
+		p1vsAiWinForfeitCount = Game.objects.filter(p1=user, p2=None, p2Local='').filter(~Q(forfeit=user) & ~Q(forfeit=None)).count()
+		p1vsAiLossForfeitCount = Game.objects.filter(p1=user, p2=None, p2Local='').filter(forfeit=user).count()
+
+		p1vs1WinCount = Game.objects.filter(p1=user).filter(~Q(p2=None) | ~Q(p2Local='')).filter(p1Score__gte=F('scoreToWin')).count()
+		p1vs1LossCount = Game.objects.filter(p1=user).filter(~Q(p2=None) | ~Q(p2Local='')).filter(p2Score__gte=F('scoreToWin')).count()
+		p1vs1WinForfeitCount = Game.objects.filter(p1=user).filter(~Q(p2=None) | ~Q(p2Local='')).filter(~Q(forfeit=user) & ~Q(forfeit=None)).count()
+		p1vs1LossForfeitCount = Game.objects.filter(p1=user).filter(~Q(p2=None) | ~Q(p2Local='')).filter(forfeit=user).count()
+
+		p2vs1WinCount = Game.objects.filter(p2=user).filter(p2Score__gte=F('scoreToWin')).count()
+		p2vs1LossCount = Game.objects.filter(p2=user).filter(p1Score__gte=F('scoreToWin')).count()
+		p2vs1WinForfeitCount = Game.objects.filter(p2=user).filter(~Q(forfeit=user) & ~Q(forfeit=None)).count()
+		p2vs1LossForfeitCount = Game.objects.filter(p2=user).filter(forfeit=user).count()
 		return JsonResponse({
 			'success': True,
-			'html': render_to_string('website/profile.html', {"user": user, "perso": perso, "singleGames": singleGames,  "form": editProfileForm({"username": user.username})}),
+			'html': render_to_string('website/profile.html', {
+				"user": user,
+				"perso": perso,
+				"singleGames": singleGames,
+				"aiWin": p1vsAiWinCount,
+				"aiLoss": p1vsAiLossCount,
+				"aiTot": p1vsAiWinCount + p1vsAiLossCount,
+				"aiWinForfeit": p1vsAiWinForfeitCount,
+				"aiLossForfeit": p1vsAiLossForfeitCount,
+				"aiForfeitTot": p1vsAiWinForfeitCount + p1vsAiLossForfeitCount,
+				"v1Win": p1vs1WinCount + p2vs1WinCount,
+				"v1Loss": p1vs1LossCount + p2vs1LossCount,
+				"v1Tot": p1vs1WinCount + p2vs1WinCount + p1vs1LossCount + p2vs1LossCount,
+				"v1WinForfeit": p1vs1WinForfeitCount + p2vs1WinForfeitCount,
+				"v1LossForfeit": p1vs1LossForfeitCount + p2vs1LossForfeitCount,
+				"v1ForfeitTot": p1vs1WinForfeitCount + p2vs1WinForfeitCount + p1vs1LossForfeitCount + p2vs1LossForfeitCount,
+				"form": editProfileForm({"username": user.username})
+			}),
 	})
 
 def chatUserView(request):
