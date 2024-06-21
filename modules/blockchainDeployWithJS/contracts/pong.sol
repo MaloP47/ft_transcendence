@@ -85,3 +85,4 @@ contract Pong is Ownable {
         payable(owner()).transfer(_amount);
         emit Withdrawn(owner(), _amount);
     }
+}
