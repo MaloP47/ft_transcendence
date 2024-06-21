@@ -23,7 +23,7 @@ from datetime import datetime, timedelta
 def index(request):
 	return render(request, "website/index.html");
 
-def indexGame(request, game_id):
+def indexId(request, id):
 	return render(request, "website/index.html");
 
 def getUser(request):
@@ -324,13 +324,13 @@ def createGame(request):
 			'html': render_to_string('website/createGame.html'),
 		})
 
-def profile(request):
+def profile(request, user_id):
+	print(user_id)
 	if request.method == 'POST':
-		data = json.loads(request.POST["data"]);
 		perso = True
-		if data['id'] != request.id:
+		if user_id != request.user.id:
 			perso = False
-			user = User.objects.get(id=data['id'])
+			user = User.objects.get(id=user_id)
 		else:
 			user = request.user
 		return JsonResponse({

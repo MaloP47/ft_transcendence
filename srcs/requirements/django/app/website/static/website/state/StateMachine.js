@@ -6,7 +6,7 @@
 //   By: gbrunet <gbrunet@student.42.fr>            +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2024/06/13 11:54:22 by gbrunet           #+#    #+#             //
-//   Updated: 2024/06/20 15:05:50 by gbrunet          ###   ########.fr       //
+//   Updated: 2024/06/21 10:10:46 by gbrunet          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -58,6 +58,7 @@ export default class App {
 			"/register": {title: "Transcendence - Register", state: "Register"},
 			"/play1vsAI": {title: "Transcendence - 1 VS A.I.", state: "Play1vsAI"},
 			"/play1vs1": {title: "Transcendence - 1 VS 1 (local)", state: "Play1vs1"},
+			"/profile": {title: "Transcendence - Profile", state: "Profile"},
 		}
 	}
 
@@ -104,6 +105,9 @@ export default class App {
 		} else if (path.indexOf("/play1vs1/") == 0) {
 			id = path.substring(10)
 			path = "/play1vs1"
+		} else if (path.indexOf("/profile/") == 0) {
+			id = path.substring(9)
+			path = "/profile"
 		}
 		let view = this.routes[path];
 		if (view) {
@@ -144,6 +148,14 @@ export default class App {
 						this.hideCreateGame();
 					this.getHomePage("1vs1", id);
 					break;
+				case "Profile":
+					if (document.getElementById("registerForm"))
+						this.hideRegisterForm();
+					if (document.getElementById("loginForm"))
+						this.hideLoginForm();
+					if (document.getElementById("createGame"))
+						this.hideCreateGame();
+					this.getHomePage("profile", id);
 			}
 		} else {
 			history.replaceState("", "", "/");
@@ -288,7 +300,7 @@ export default class App {
 		}, 200);
 	}
 
-	getHomePage(state, game_id) {
+	getHomePage(state, id) {
 		if (this.user.authenticated) {
 			if (this.chatSocket)
 				this.chatSocket.close();
@@ -327,20 +339,22 @@ export default class App {
 					} else if (state == "1vsAI" && !this.user.authenticated) {
 						history.replaceState("", "", "/");
 						this.router();
-					} else if (state == "1vsAI" && game_id == -1) {
+					} else if (state == "1vsAI" && id == -1) {
 						this.setPong("bg");
 						this.getLocalAiConfigPage();
-					} else if (state == "1vsAI" && game_id != -1) {
-						this.getLocalAiGame(game_id);
+					} else if (state == "1vsAI" && id != -1) {
+						this.getLocalAiGame(id);
 					} else if (state == "1vs1" && !this.user.authenticated) {
 						history.replaceState("", "", "/");
 						this.router();
-					} else if (state == "1vs1" && game_id == -1) {
+					} else if (state == "1vs1" && id == -1) {
 						this.setPong("bg");
 						this.getLocalConfigPage();
-					}
-					else if (state == "1vs1" && game_id != -1) {
-						this.getLocalGame(game_id);
+					} else if (state == "1vs1" && id != -1) {
+						this.getLocalGame(id);
+					} else if (state == "profile") {
+						this.setPong("bg");
+						this.getProfile(id);
 					}
 					let homeView = document.getElementById("homeView");
 					setTimeout(() => {
@@ -351,23 +365,58 @@ export default class App {
 		} else {
 			if (state == "home") {
 				this.setPong("bg");
+				this.hideProfile();
 				this.getCreateGame();
-			} else if (state == "1vsAI" && game_id == -1) {
+			} else if (state == "1vsAI" && id == -1) {
 				this.setPong("bg");
 				this.hideLocalGame();
+				this.hideProfile();
 				this.getLocalAiConfigPage();
-			} else if (state == "1vsAI" && game_id != -1) {
+			} else if (state == "1vsAI" && id != -1) {
 				this.hideLocalConfigPage();
-				this.getLocalAiGame(game_id);
-			} else if (state == "1vs1" && game_id == -1) {
+				this.hideProfile();
+				this.getLocalAiGame(id);
+			} else if (state == "1vs1" && id == -1) {
 				this.setPong("bg");
 				this.hideLocalGame();
+				this.hideProfile();
 				this.getLocalConfigPage();
-			} else if (state == "1vs1" && game_id != -1) {
+			} else if (state == "1vs1" && id != -1) {
 				this.hideLocalConfigPage();
-				this.getLocalGame(game_id);
+				this.hideProfile();
+				this.getLocalGame(id);
+			} else if (state == "profile") {
+				this.setPong("bg");
+				this.getProfile(id);
 			}
 		}
+	}
+
+	hideProfile() {
+		let profileView = document.getElementById("profile");
+		if (!profileView)
+			return ;
+		profileView.classList.add("hided")
+		this.remove("profile")
+	}
+
+	getProfile(id) {
+		let homeContent = document.getElementById("homeContent");
+		if (!homeContent)
+			return ;
+		this.getApiResponseJson("/api/view/profile/" + id,).then((response) => {
+			let res = JSON.parse(response);
+			if (res.success) {
+				homeContent.innerHTML = res.html;
+				let profileView = document.getElementById("profile");
+				if (!profileView)
+					return ;
+				setTimeout(() => {
+					profileView.classList.remove("hided");
+				}, 15)
+				//this.setAiConfigInteraction();
+			}
+		})
 	}
 
 	hideLocalGame() {

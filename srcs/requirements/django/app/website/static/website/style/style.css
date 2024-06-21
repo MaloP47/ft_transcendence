@@ -6,7 +6,7 @@
 /*   By: gbrunet <gbrunet@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/07 09:37:34 by gbrunet           #+#    #+#             */
-/*   Updated: 2024/06/20 09:45:39 by gbrunet          ###   ########.fr       */
+/*   Updated: 2024/06/21 10:06:44 by gbrunet          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,6 +32,10 @@ body {
 }
 
 #chatMenu {
+	transition: opacity 200ms;
+}
+
+#profile {
 	transition: opacity 200ms;
 }
 
