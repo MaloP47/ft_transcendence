@@ -91,13 +91,13 @@
 		},
 		"targets": [
 		{
-			"expr": "rate(grafana_instance_start[1m])",
+			"expr": "rate(grafana_alerting_alerts[1m])",
 			"interval": "",
-			"legendFormat": "Instance Starts",
+			"legendFormat": "Alertings Rate",
 			"refId": "A"
 		}
 		],
-		"title": "Instance Starts Rate",
+		"title": "Alertings Rate",
 		"type": "timeseries"
 	},
 	{

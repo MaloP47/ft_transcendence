@@ -118,7 +118,7 @@
 		},
 		"targets": [
 		{
-			"expr": "pg_stat_database_blocks_hit / (pg_stat_database_blocks_hit + pg_stat_database_blocks_read)",
+			"expr": "pg_stat_database_blks_hit / (pg_stat_database_blks_hit + pg_stat_database_blks_read)",
 			"interval": "",
 			"legendFormat": "Cache Hit Ratio",
 			"refId": "A"

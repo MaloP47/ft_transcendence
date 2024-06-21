@@ -64,13 +64,13 @@
 		},
 		"targets": [
 		{
-			"expr": "avg(rate(django_http_request_duration_seconds_sum[5m]))",
+			"expr": "avg(rate(django_http_requests_total_by_transport_total[5m]))",
 			"interval": "",
-			"legendFormat": "Average Request Duration",
+			"legendFormat": "Requests Total Transport",
 			"refId": "A"
 		}
 		],
-		"title": "Average Request Duration",
+		"title": "Requests Total Transport",
 		"type": "timeseries"
 	},
 	{
@@ -118,13 +118,13 @@
 		},
 		"targets": [
 		{
-			"expr": "sum(rate(django_db_execute_duration_seconds_sum[5m]))",
+			"expr": "sum(rate(django_http_requests_latency_seconds_by_view_method_sum[5m]))",
 			"interval": "",
-			"legendFormat": "Database Queries Rate",
+			"legendFormat": "Requests Latency View Method",
 			"refId": "A"
 		}
 		],
-		"title": "Database Queries Rate",
+		"title":  "Requests Latency View Method",
 		"type": "timeseries"
 	}
 	],
