@@ -1,15 +1,3 @@
-# **************************************************************************** #
-#																			   #
-#														  :::	   ::::::::    #
-#	 views.py											:+:		 :+:	:+:    #
-#													  +:+ +:+		  +:+	   #
-#	 By: gbrunet <gbrunet@student.42.fr>			+#+  +:+	   +#+		   #
-#												  +#+#+#+#+#+	+#+			   #
-#	 Created: 2024/06/12 14:48:57 by gbrunet		   #+#	  #+#			   #
-#	 Updated: 2024/06/12 14:59:45 by gbrunet		  ###	########.fr		   #
-#																			   #
-# **************************************************************************** #
-
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.contrib.auth import login, logout, authenticate
@@ -19,6 +7,7 @@ from django.db.models import Exists, F, Subquery, OuterRef, Q
 from website.models import Game, BlockedUser, User, Message, Room, FriendRequest
 import json
 from datetime import datetime, timedelta
+from .forms import editProfileForm
 
 def index(request):
 	return render(request, "website/index.html");
@@ -325,7 +314,6 @@ def createGame(request):
 		})
 
 def profile(request, user_id):
-	print(user_id)
 	if request.method == 'POST':
 		perso = True
 		if user_id != request.user.id:
@@ -333,9 +321,10 @@ def profile(request, user_id):
 			user = User.objects.get(id=user_id)
 		else:
 			user = request.user
+		singleGames = Game.objects.filter(Q(p1=user) | Q(p2=user))
 		return JsonResponse({
 			'success': True,
-			'html': render_to_string('website/profile.html', {"user": user, "perso": perso}),
+			'html': render_to_string('website/profile.html', {"user": user, "perso": perso, "singleGames": singleGames,  "form": editProfileForm({"username": user.username})}),
 	})
 
 def chatUserView(request):

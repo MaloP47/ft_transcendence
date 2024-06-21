@@ -1,13 +1,66 @@
 <div id="profile" class="d-flex hided flex-column justify-content-center align-items-center position-fixed w-100" style="z-index:300">
-	<div class="p-3 px-4 bg-blur-5 rounded border border-light d-flex flex-column align-items-center position-fixed overflow-auto" style="--bs-border-opacity:0.25;max-height:calc(100% - 150px);">
+	<div class="p-3 px-4 bg-blur-5 rounded border border-light d-flex flex-column align-items-center position-fixed overflow-auto" style="--bs-border-opacity:0.25;max-height:calc(100% - 150px); min-width: calc(100% - 300px)">
 	{% if perso %}
-		SALUT<br/>
-		SALUT<br/>
-		SALUT<br/>
-		SALUT<br/>
-		SALUT<br/>
-		SALUT<br/>
-		SALUT<br/>
+		<h2>{{user.username}}</h2>
+		<div class="rounded rounded-circle m-2 mb-3 border border-white flex-shrink-0" style="background-image: url('{{user.profilPicture.url}}'); background-size: cover; --bs-border-opacity:0.2; width:150px; height:150px;"></div>
+		{{form.profile_picture}}
+		<div class="input-group mb-3" style="width:400px">
+			<span class="input-group-text">Username</span>
+			{{form.username}}
+		</div>
+		<div class="input-group mb-3" style="width:400px">
+			<span class="input-group-text">Password</span>
+			{{form.password}}
+		</div>
+		<div class="input-group mb-3" style="width:400px">
+			<span class="input-group-text">Confirm</span>
+			{{form.confirm_password}}
+		</div>
+		<h3>Statistics</h3>
+		<table class="table table-dark table-striped table-hover table-sm">
+			<thead>
+				<tr>
+					<th style="width: 30%" scope="col">Game type</th>
+					<th scope="col">Win</th>
+					<th scope="col">Loss</th>
+				</tr>
+			</thead>
+			<tbody>
+			</tbody>
+		</table>
+		<h3>Historic</h3>
+		<table class="table table-dark table-striped table-hover table-sm">
+			<thead>
+				<tr>
+					<th style="width: 30%" scope="col">Date</th>
+					<th scope="col">Opponent</th>
+					<th scope="col">Score</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for g in singleGames %}
+				<tr>
+					<td>{{g.date}}</td>
+					{% if g.p1 != user%}
+						{% if g.p1 == None %}
+							<td>A.I.</td>
+						{% else %}
+							<td>{{g.p1}}</td>
+						{% endif %}
+					{% else %}
+						{% if g.p2 == None and g.p2Local != '' %}
+							<td>{{g.p2Local}}</td>
+						{% elif g.p2 == None %}
+							<td>A.I.</td>
+						{% else %}
+							<td>{{g.p2}}</td>
+						{% endif %}
+					{% endif %}
+					<td>{{g.p1Score}} - {{g.p2Score}}</td>
+				</tr>
+				{% endfor %}
+			</tbody>
+		</table>
 	{% else %}
 	{{perso}}
 	{% endif %}
