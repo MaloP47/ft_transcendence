@@ -3,21 +3,25 @@
 		Incorrect username or password.
 	</div>
 	<div class="register rounded p-4 border border-light" style="--bs-border-opacity:0.1; width:350px">
-		<center><h1>REGISTER</h1></center>
+		<center><h1>REGISTATION</h1></center>
 		<form id="registerFormForm">
 			<div class="input-group input-group-lg mb-3">
-				<span class="input-group-text text-bg-dark border border-light" id="username" style="--bs-bg-opacity: .5; --bs-border-opacity: .1;">username</span>
-				<input type="text" class="form-control text-bg-dark border border-light border-start-0 roboto" style="--bs-bg-opacity: .5; --bs-border-opacity: .1;" name="username" id="registerFormUsername">
+				<div class="input-group input-group-lg mb-3">
+					<span class="input-group-text text-bg-dark border border-light" id="username" style="--bs-bg-opacity: .5; --bs-border-opacity: .1;">Username</span>
+					<input type="text" class="form-control text-bg-dark border border-light border-start-0 roboto" style="--bs-bg-opacity: .5; --bs-border-opacity: .1;" name="username" id="registerFormUsername">
+				</div>
+				<span class="input-group-text text-bg-dark border border-light" id="username" style="--bs-bg-opacity: .5; --bs-border-opacity: .1;">Email address</span>
+				<input type="text" class="form-control text-bg-dark border border-light border-start-0 roboto" style="--bs-bg-opacity: .5; --bs-border-opacity: .1;" name="username" id="registerFormEmail">
 			</div>
 			<div class="input-group input-group-lg mb-3">
-				<span class="input-group-text text-bg-dark border border-light" id="username" style="--bs-bg-opacity: .5; --bs-border-opacity: .1;">password</span>
+				<span class="input-group-text text-bg-dark border border-light" id="username" style="--bs-bg-opacity: .5; --bs-border-opacity: .1;">Password</span>
 				<input type="password" class="form-control text-bg-dark border border-light border-start-0" style="--bs-bg-opacity: .5; --bs-border-opacity: .1;" name="password" id="registerFormPassword">
 			</div>
 			<div class="input-group input-group-lg mb-3">
-				<span class="input-group-text text-bg-dark border border-light" id="username" style="--bs-bg-opacity: .5; --bs-border-opacity: .1;"> repeat password</span>
-				<input type="password" class="form-control text-bg-dark border border-light border-start-0" style="--bs-bg-opacity: .5; --bs-border-opacity: .1;" name="password" id="registerFormPassword">
+				<span class="input-group-text text-bg-dark border border-light" id="username" style="--bs-bg-opacity: .5; --bs-border-opacity: .1;">Repeat password</span>
+				<input type="password" class="form-control text-bg-dark border border-light border-start-0" style="--bs-bg-opacity: .5; --bs-border-opacity: .1;" name="password" id="registerFormPasswordConfirm">
 			</div>
-			<button class="w-100 btn btn-primary btn-block mb-4 mt-3" href="" id="registerFormSubmitBtn">Sign in</button>
+			<button class="w-100 btn btn-primary btn-block mb-4 mt-3" href="" id="registerFormSubmitBtn">Register</button>
 			<div class="text-center">
 				<p>Already a member? <a href="/login" data-link>Login</a></p>
 			</div>

@@ -1,14 +1,14 @@
-// ************************************************************************** //
-//                                                                            //
-//                                                        :::      ::::::::   //
-//   StateMachine.js                                    :+:      :+:    :+:   //
-//                                                    +:+ +:+         +:+     //
-//   By: gbrunet <gbrunet@student.42.fr>            +#+  +:+       +#+        //
-//                                                +#+#+#+#+#+   +#+           //
-//   Created: 2024/06/13 11:54:22 by gbrunet           #+#    #+#             //
-//   Updated: 2024/06/18 15:59:31 by gbrunet          ###   ########.fr       //
-//                                                                            //
-// ************************************************************************** //
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   StateMachine.js                                    :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: renstein <renstein@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/06/13 11:54:22 by gbrunet           #+#    #+#             */
+/*   Updated: 2024/06/21 18:32:59 by renstein         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
 import Pong from '../pong/Pong.js';
 
@@ -67,7 +67,7 @@ export default class App {
 			id: undefined,
 		};
 	}
-	
+
 	updateUser() {
 		let prev = this.user.authenticated;
 		if (this.getCookie('csrftoken') == null) {
@@ -409,7 +409,7 @@ export default class App {
 			}
 		});
 	}
-	
+
 	hideLocalAiConfigPage() {
 		let configView = document.getElementById("aiConfig");
 		if (!configView)
@@ -578,7 +578,7 @@ export default class App {
 			chatMenu.style.pointerEvents = "none";
 			menuBack.classList.add("hided");
 			menuBack.classList.add("pe-none");
-		});	
+		});
 	}
 
 	updateRooms() {
@@ -935,7 +935,7 @@ export default class App {
 	}
 
 	forfeitUnfinishedGame(e) {
-		console.log("to do")	
+		console.log("to do")
 	}
 
 	acceptFriendRequest(e) {
@@ -1124,28 +1124,89 @@ export default class App {
 		}
 	}
 
-	// a faire
 	getRegisterForm() {
-		let registerForm = document.getElementById("registerForm");
 		this.getApiResponse("/api/view/register/").then((response) => {
 			let res = JSON.parse(response);
 			if (res.success) {
 				let topContent = document.getElementById("topContent");
 				topContent.innerHTML = res.html;
-				let loginForm = document.getElementById("registerForm");
-				loginForm.classList.add("trXm100");
+				let registerForm = document.getElementById("registerForm");
+				registerForm.classList.add("trXm100");
 				let form = document.getElementById("registerFormForm");
-				document.getElementById("registerFormSubmitBtn").addEventListener("click", e => {
-					e.preventDefault();
-					let formData = new FormData(form);
-				});
+				let formBtn = document.getElementById("registerFormSubmitBtn");
+				if (formBtn) {
+					document.getElementById("registerFormSubmitBtn").addEventListener("click", e => {
+						e.preventDefault();
+						let formData = new FormData(form);
+						if (document.getElementById("registerFormPassword").value !== document.getElementById("registerFormPasswordConfirm").value) {
+							let registerFormAlert = document.getElementById("registerFormAlert");
+							registerFormAlert.textContent = "Passwords do not match";
+							registerFormAlert.classList.remove("hided");
+							setTimeout(() => {
+								registerFormAlert.classList.add("hided");
+							}, 5000);
+							return;
+						}
+						console.log("Sending form data to server...");
+						this.getApiResponse("api/user/signin/", formData).then((response) => {
+							let res = JSON.parse(response);
+							if (res.success) {
+								console.log("Registration successful");
+								console.log("login", formData);
+
+								history.pushState("", "", "/");
+								this.router();
+								this.updateUser();
+							} else {
+								console.log("Registration failed:", res.message);
+								registerForm.classList.add("shake");
+								document.getElementById("registerFormPassword").value = "";
+								document.getElementById("registerFormPasswordConfirm").value = "";
+								let registerFormAlert = document.getElementById("registerFormAlert");
+								registerFormAlert.textContent = res.message;
+								registerFormAlert.classList.remove("hided");
+								setTimeout(() => {
+									registerForm.classList.remove("shake");
+								}, 500);
+								setTimeout(() => {
+									registerFormAlert.classList.add("hided");
+								}, 5000);
+							}
+						});
+					});
+				}
 				setTimeout(() => {
-					loginForm.classList.remove("hided");
-					loginForm.classList.remove("trXm100");
+					registerForm.classList.remove("hided");
+					registerForm.classList.remove("trXm100");
 				}, 15);
 			}
-		})
+		});
 	}
+
+
+	// a faire
+	// getRegisterForm() {
+
+	// 	let registerForm = document.getElementById("registerForm");
+	// 	this.getApiResponse("/api/view/register/").then((response) => {
+	// 		let res = JSON.parse(response);
+	// 		if (res.success) {
+	// 			let topContent = document.getElementById("topContent");
+	// 			topContent.innerHTML = res.html;
+	// 			let loginForm = document.getElementById("registerForm");
+	// 			loginForm.classList.add("trXm100");
+	// 			let form = document.getElementById("registerFormForm");
+	// 			document.getElementById("registerFormSubmitBtn").addEventListener("click", e => {
+	// 				e.preventDefault();
+	// 				let formData = new FormData(form);
+	// 			});
+	// 			setTimeout(() => {
+	// 				loginForm.classList.remove("hided");
+	// 				loginForm.classList.remove("trXm100");
+	// 			}, 15);
+	// 		}
+	// 	})
+	// }
 
 	//----------------------------------------------------------//
 	//						 SINGLETON							//
