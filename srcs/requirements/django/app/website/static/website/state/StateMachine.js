@@ -6,7 +6,7 @@
 /*   By: renstein <renstein@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/13 11:54:22 by gbrunet           #+#    #+#             */
-/*   Updated: 2024/06/21 18:32:59 by renstein         ###   ########.fr       */
+/*   Updated: 2024/06/24 13:32:49 by renstein         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -1148,11 +1148,11 @@ export default class App {
 							return;
 						}
 						console.log("Sending form data to server...");
-						this.getApiResponse("api/user/signin/", formData).then((response) => {
+						this.getApiResponse("api/view/register/", formData).then((response) => {
 							let res = JSON.parse(response);
 							if (res.success) {
 								console.log("Registration successful");
-								console.log("login", formData);
+								console.log("login", formData.values());
 
 								history.pushState("", "", "/");
 								this.router();
