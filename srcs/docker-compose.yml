@@ -1,5 +1,7 @@
 services:
   django:
+    env_file:
+      - .env
     container_name: django
     build: ./requirements/django/
     expose:
