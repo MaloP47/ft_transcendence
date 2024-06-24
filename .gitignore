@@ -2,3 +2,5 @@
 srcs/requirements/django/app/debug.log
 
 .env
+
+blockchain/node_modules
