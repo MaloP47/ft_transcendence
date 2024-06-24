@@ -1125,6 +1125,7 @@ export default class App {
 	}
 
 	getRegisterForm() {
+		console.log("sddsdsdsd")
 		this.getApiResponse("/api/view/register/").then((response) => {
 			let res = JSON.parse(response);
 			if (res.success) {
@@ -1148,13 +1149,12 @@ export default class App {
 							return;
 						}
 						console.log("Sending form data to server...");
-						this.getApiResponse("api/view/register/", formData).then((response) => {
+						this.getApiResponse("api/user/register/", formData).then((response) => {
 							let res = JSON.parse(response);
 							if (res.success) {
 								console.log("Registration successful");
 								console.log("login", formData.values());
-
-								history.pushState("", "", "/");
+								history.pushState("", "", "/login");
 								this.router();
 								this.updateUser();
 							} else {

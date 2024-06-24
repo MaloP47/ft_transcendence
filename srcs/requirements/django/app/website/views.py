@@ -230,6 +230,18 @@ def registerForm(request):
 			'html': render_to_string('website/register.html'),
 		});
 
+def registerUser(request):
+	if request.method == 'POST':
+		print(request.POST["username"])
+		print(request.POST["mail"])
+		print(request.POST["password"])
+		print(request.POST["password_confirm"])
+		User.objects.create_user(username=request.POST["username"], email=request.POST["mail"], password=request.POST["password"])
+		authenticate(username=request.POST["username"], password=request.POST["password"])
+	return JsonResponse({
+		'success': True,
+	})
+
 def homeView(request):
 	if request.method == 'POST':
 		if request.user.is_authenticated:
