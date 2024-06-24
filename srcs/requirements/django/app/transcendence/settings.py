@@ -22,7 +22,6 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
-from dotenv import load_dotenv
 from pathlib import Path
 import os
 
@@ -189,7 +188,6 @@ LOGGING = {
         },
     },
 }
-
 
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
