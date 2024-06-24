@@ -24,3 +24,11 @@ WARNING: POSTGRES_HOST_AUTH_METHOD has been set to "trust". This will allow
          a password, even if POSTGRES_PASSWORD is set. See PostgreSQL
          documentation about "trust":
 
+# TODO (noa)
+### Project Structure
+- [ ] Move things out of `srcs/`
+- [ ] rename requirements to services or containers, meaning make changes to docker-compose.yml file
+### Prometheus
+- [x] check out rule files
+- [ ] `evaluation_interval`? difference with `scrap_interval`
+- [x] check out /metrics endpoint
