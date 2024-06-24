@@ -6,7 +6,7 @@
 /*   By: renstein <renstein@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/13 11:54:22 by gbrunet           #+#    #+#             */
-/*   Updated: 2024/06/24 13:32:49 by renstein         ###   ########.fr       */
+/*   Updated: 2024/06/24 17:16:12 by renstein         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -1124,11 +1124,29 @@ export default class App {
 		}
 	}
 
+	togglePassword() {
+		console.log('register.js loaded');
+
+		const togglePasswordButtons = document.querySelectorAll('.toggle-password');
+		togglePasswordButtons.forEach(button => {
+			button.addEventListener('click', function () {
+				const passwordField = this.previousElementSibling;
+				const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
+				passwordField.setAttribute('type', type);
+
+				const icon = this.querySelector('i');
+				icon.classList.toggle('bi-eye-slash');
+				icon.classList.toggle('bi-eye');
+			});
+		});
+	}
+
 	getRegisterForm() {
-		console.log("sddsdsdsd")
+
 		this.getApiResponse("/api/view/register/").then((response) => {
 			let res = JSON.parse(response);
 			if (res.success) {
+
 				let topContent = document.getElementById("topContent");
 				topContent.innerHTML = res.html;
 				let registerForm = document.getElementById("registerForm");
@@ -1141,19 +1159,22 @@ export default class App {
 						let formData = new FormData(form);
 						if (document.getElementById("registerFormPassword").value !== document.getElementById("registerFormPasswordConfirm").value) {
 							let registerFormAlert = document.getElementById("registerFormAlert");
+							registerForm.classList.add("shake");
+							document.getElementById("registerFormPassword").value = "";
+							document.getElementById("registerFormPasswordConfirm").value = "";
 							registerFormAlert.textContent = "Passwords do not match";
 							registerFormAlert.classList.remove("hided");
 							setTimeout(() => {
+								registerForm.classList.remove("shake");
+							}, 500);
+							setTimeout(() => {
 								registerFormAlert.classList.add("hided");
-							}, 5000);
+							}, 5000);;
 							return;
 						}
-						console.log("Sending form data to server...");
 						this.getApiResponse("api/user/register/", formData).then((response) => {
 							let res = JSON.parse(response);
 							if (res.success) {
-								console.log("Registration successful");
-								console.log("login", formData.values());
 								history.pushState("", "", "/login");
 								this.router();
 								this.updateUser();
@@ -1179,10 +1200,23 @@ export default class App {
 					registerForm.classList.remove("hided");
 					registerForm.classList.remove("trXm100");
 				}, 15);
+				console.log('register.js loaded');
+
+				const togglePasswordButtons = document.querySelectorAll('.toggle-password');
+				togglePasswordButtons.forEach(button => {
+					button.addEventListener('click', function () {
+						const passwordField = this.previousElementSibling;
+						const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
+						passwordField.setAttribute('type', type);
+
+						// const icon = this.querySelector('i');
+						// icon.classList.toggle('bi-eye-slash');
+						// icon.classList.toggle('bi-eye');
+					});
+				});
 			}
 		});
 	}
-
 
 	// a faire
 	// getRegisterForm() {
