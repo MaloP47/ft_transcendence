@@ -9,9 +9,9 @@ services:
       - ./requirements/django/app:/code
     networks:
       transcendence:
-        aliases:
-          - django
-    restart: on-failure
+        #        aliases:
+        #          - django
+    restart: unless-stopped
     depends_on:
       db:
         condition: service_healthy
@@ -23,20 +23,25 @@ services:
     image: postgres:alpine3.20
     volumes:
       - postgres_data:/var/lib/postgresql/data/
+    expose:
+      - "5432"
     networks:
       - transcendence
     env_file: .env
-    restart: on-failure
+    restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
       interval: 10s
       timeout: 5s
       retries: 5
-    expose:
-      - "5432"
 
   nginx:
     container_name: nginx
+    build:
+      context: requirements/nginx
+      dockerfile: Dockerfile
+    volumes:
+      - ./requirements/nginx/conf:/etc/nginx/conf.d
     ports:
       - "1443:443"
       - "1080:80"
@@ -47,82 +52,91 @@ services:
     depends_on:
       - django
       - grafana
-    build:
-      context: requirements/nginx
-      dockerfile: Dockerfile
-    volumes:
-      - ./requirements/nginx/conf:/etc/nginx/conf.d
-    restart: on-failure
-
-  nginx-exporter:
-    image: nginx/nginx-prometheus-exporter:0.10.0
-    container_name: nginx-exporter
-    ports:
-      - "9113:9113"
-    command: [ "-nginx.scrape-uri", "https://nginx:443/stub_status", "-nginx.ssl-verify=false" ]
-    depends_on:
-      - nginx
-    networks:
-      - transcendence
+    restart: unless-stopped
 
   rabbitmq:
-    image: rabbitmq:3.12.14-alpine
     container_name: rabbitmq
+    image: rabbitmq:3.12.14-alpine
+    volumes:
+      - ./requirements/conf/rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
+      - ./requirements/conf/rabbitmq/definitions.json:/etc/rabbitmq/definitions.json
     ports:
       - "5672:5672"
       - "15672:15672"
     networks:
       - transcendence
-    restart: on-failure
-    volumes:
-      - ./requirements/conf/rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
-      - ./requirements/conf/rabbitmq/definitions.json:/etc/rabbitmq/definitions.json
     healthcheck:
       test: ["CMD-SHELL", "rabbitmqctl status"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      interval: 4s
+      timeout: 2s
+      retries: 10
+      start_period: 3s
+    restart: unless-stopped
 
-  grafana:
-    image: grafana/grafana:9.5.19
-    container_name: grafana
-    ports:
-      - "3000:3000"
-    env_file: .env
-    volumes:
-      - ./requirements/grafana/conf/datasource.yml:/etc/grafana/provisioning/datasources/datasource.yml
-      - ./requirements/grafana/conf/dashboard.yml:/etc/grafana/provisioning/dashboards/dashboard.yml
-      - ./requirements/grafana/conf/dashboards:/etc/grafana/provisioning/dashboards
-    networks:
-      - transcendence
-    restart: on-failure
-
+  # ----------------------------- #
+  #          Monitoring           #
+  # ----------------------------- #
+  # Scraper 
   prometheus:
-    image: prom/prometheus:v2.45.4
     container_name: prometheus
+    image: prom/prometheus:v2.45.4
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.retention.time=24h
     ports:
       - "9090:9090"
     volumes:
       - ./requirements/prometheus/conf/prometheus.yml:/etc/prometheus/prometheus.yml
     networks:
       - transcendence
-    restart: on-failure
+    restart: unless-stopped
 
+  # Interface
+  grafana:
+    image: grafana/grafana:9.5.19
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    networks:
+      - transcendence
+    volumes:
+      - ./requirements/grafana/conf/datasource.yml:/etc/grafana/provisioning/datasources/datasource.yml
+      - ./requirements/grafana/conf/dashboard.yml:/etc/grafana/provisioning/dashboards/dashboard.yml
+      - ./requirements/grafana/conf/dashboards:/etc/grafana/provisioning/dashboards
+    env_file: .env
+    restart: unless-stopped
+
+  # Exporters
   postgres-exporter:
-    image: prometheuscommunity/postgres-exporter:latest
     container_name: postgres-exporter
+    image: prometheuscommunity/postgres-exporter:latest
     environment:
       DATA_SOURCE_NAME: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}?sslmode=disable"
       CONFIG_FILE: /etc/postgres_exporter/postgres_exporter.yml
+    volumes:
+      - ./requirements/postgres_exporter/conf/postgres_exporter.yml:/postgres_exporter.yml
     ports:
       - "9187:9187"
     networks:
       - transcendence
     depends_on:
       - db
-    volumes:
-      - ./requirements/postgres_exporter/conf/postgres_exporter.yml:/postgres_exporter.yml
-    restart: on-failure
+    restart: unless-stopped
+
+  nginx-exporter:
+    container_name: nginx-exporter
+    image: nginx/nginx-prometheus-exporter:0.10.0
+    command: [ "-nginx.scrape-uri", "https://nginx:443/stub_status", "-nginx.ssl-verify=false" ]
+    ports:
+      - "9113:9113"
+    networks:
+      - transcendence
+    depends_on:
+      - nginx
+    restart: unless-stopped
+  # ----------------------------- #
+  #          Monitoring           #
+  # ----------------------------- #
 
 
 volumes:
@@ -132,4 +146,4 @@ volumes:
 
 networks:
   transcendence:
-    driver: bridge
+    #    driver: bridge

@@ -24,8 +24,7 @@ _THIN = \e[2m
 
 _END = \033[0m
 
-.PHONY : all stop re clean
-
+.PHONY : all stop clean flcean migrate makemigrations craetesuperuser list help re rere
 all:
 	@echo "$(_GREEN)Building and running Transcendence...$(_END)"
 	docker compose -f ./srcs/docker-compose.yml up -d --build
