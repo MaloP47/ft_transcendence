@@ -6,7 +6,7 @@
 /*   By: renstein <renstein@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/13 11:54:22 by gbrunet           #+#    #+#             */
-/*   Updated: 2024/06/24 17:16:12 by renstein         ###   ########.fr       */
+/*   Updated: 2024/06/24 18:48:30 by renstein         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -1124,23 +1124,6 @@ export default class App {
 		}
 	}
 
-	togglePassword() {
-		console.log('register.js loaded');
-
-		const togglePasswordButtons = document.querySelectorAll('.toggle-password');
-		togglePasswordButtons.forEach(button => {
-			button.addEventListener('click', function () {
-				const passwordField = this.previousElementSibling;
-				const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
-				passwordField.setAttribute('type', type);
-
-				const icon = this.querySelector('i');
-				icon.classList.toggle('bi-eye-slash');
-				icon.classList.toggle('bi-eye');
-			});
-		});
-	}
-
 	getRegisterForm() {
 
 		this.getApiResponse("/api/view/register/").then((response) => {
@@ -1208,10 +1191,9 @@ export default class App {
 						const passwordField = this.previousElementSibling;
 						const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
 						passwordField.setAttribute('type', type);
-
-						// const icon = this.querySelector('i');
-						// icon.classList.toggle('bi-eye-slash');
-						// icon.classList.toggle('bi-eye');
+						const icon = this.querySelector('i');
+						icon.classList.toggle('bi-eye-slash');
+						icon.classList.toggle('bi-eye');
 					});
 				});
 			}

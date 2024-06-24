@@ -1,12 +1,3 @@
-{% comment %} <head>
-    <meta charset="utf-8" />
-    <title>Transcendence</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="{% static 'website/bootstrap/bootstrap.min.css' %}">
-    <link rel="stylesheet" href="{% static 'website/style/style.css' %}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.0/font/bootstrap-icons.min.css">
-</head {% endcomment %}
-
 <div id="registerForm" class="h-100 d-flex flex-column align-items-center justify-content-center position-absolute w-100 hided">
 	<div id="registerFormAlert" class="alert alert-danger mb-2 hided">
 		Incorrect username or password.
@@ -15,7 +6,7 @@
 		<center><h1>REGISTRATION</h1></center>
 
 		<form id="registerFormForm">
-			
+
 			<div class="input-group input-group-lg mb-3">
 				<span class="input-group-text text-bg-dark border border-light" id="username" style="--bs-bg-opacity: .5; --bs-border-opacity: .1;">Username</span>
 				<input type="text" class="form-control text-bg-dark border border-light border-start-0 roboto" style="--bs-bg-opacity: .5; --bs-border-opacity: .1;" name="username" id="registerFormUsername">
@@ -42,7 +33,6 @@
 			<div class="text-center">
 				<p>Already a member? <a href="/login" data-link>Login</a></p>
 			</div>
-			{% comment %} <script src="{% static 'website/bootstrap/bootstrap.bundle.min.js' %}" crossorigin="anonymous"></script> {% endcomment %}
 		</form>
 	</div>
 </div>
