@@ -162,13 +162,9 @@
 	"templating": {
 	"list": []
 	},
-	"time": {
-	"from": "2024-06-24T12:59:51.994Z",
-	"to": "2024-06-24T13:39:36.708Z"
-	},
 	"timepicker": {},
 	"timezone": "browser",
-	"title": "Performances",
+	"title": "Performances CPU",
 	"uid": "cb6fbe17-fa42-4773-b91e-67ca1277e95c",
 	"version": 10,
 	"weekStart": ""
