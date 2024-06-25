@@ -403,10 +403,13 @@ def createTournament(request):
                 return JsonResponse({'success': False, 'status': 'error', 'message': 'Missing parameters'})
 
             account = web3.eth.account.from_key(settings.PRIVATE_KEY)
+            recommended_gas_price = web3.eth.gas_price
+            increased_gas_price = web3.to_wei(int(recommended_gas_price * 1.1), 'wei')
+
             transaction = contract.functions.createTournament(winner_id, wins, losses).build_transaction({
                 'chainId': 11155111,
                 'gas': 2000000,
-                'gasPrice': web3.to_wei('50', 'gwei'),
+                'gasPrice': recommended_gas_price,
                 'nonce': web3.eth.get_transaction_count(account.address),
             })
             signed_txn = web3.eth.account.sign_transaction(transaction, private_key=settings.PRIVATE_KEY)

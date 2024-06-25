@@ -31,9 +31,9 @@ export default class App {
 		let test = document.getElementById("btnTest").addEventListener("click", () => {
 			this.getApiResponseJson("/api/view/tournamentEnd/", {
 				'tournament_id': 12,
-				'winner_id': 55,
-				'wins': 3,
-				'losses': 0,
+				'winner_id': 47,
+				'wins': 7,
+				'losses': 3,
 			}).then((response) => {
 				let res = JSON.parse(response);
 				if (res.success) {
