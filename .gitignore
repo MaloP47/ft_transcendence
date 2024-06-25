@@ -38,3 +38,6 @@ Session.vim
 
 # Private files
 *.env
+
+# Log files
+*.log

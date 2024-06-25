@@ -1,12 +1,12 @@
 services:
   django:
     container_name: django
-    build: ./requirements/django/
+    build: ./services/django/
     expose:
       - "8000"
     command: ["python", "manage.py", "runserver", "0.0.0.0:8000"]
     volumes:
-      - ./requirements/django/app:/code
+      - ./services/django/app:/code
     networks:
       transcendence:
         #        aliases:
@@ -38,10 +38,10 @@ services:
   nginx:
     container_name: nginx
     build:
-      context: requirements/nginx
+      context: services/nginx
       dockerfile: Dockerfile
     volumes:
-      - ./requirements/nginx/conf:/etc/nginx/conf.d
+      - ./services/nginx/conf:/etc/nginx/conf.d
     ports:
       - "1443:443"
       - "1080:80"
@@ -58,8 +58,8 @@ services:
     container_name: rabbitmq
     image: rabbitmq:3.12.14-alpine
     volumes:
-      - ./requirements/conf/rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
-      - ./requirements/conf/rabbitmq/definitions.json:/etc/rabbitmq/definitions.json
+      - ./services/conf/rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
+      - ./services/conf/rabbitmq/definitions.json:/etc/rabbitmq/definitions.json
     ports:
       - "5672:5672"
       - "15672:15672"
@@ -86,7 +86,7 @@ services:
     ports:
       - "9090:9090"
     volumes:
-      - ./requirements/prometheus/conf/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./services/prometheus/conf/prometheus.yml:/etc/prometheus/prometheus.yml
     networks:
       - transcendence
     restart: unless-stopped
@@ -100,9 +100,9 @@ services:
     networks:
       - transcendence
     volumes:
-      - ./requirements/grafana/conf/datasource.yml:/etc/grafana/provisioning/datasources/datasource.yml
-      - ./requirements/grafana/conf/dashboard.yml:/etc/grafana/provisioning/dashboards/dashboard.yml
-      - ./requirements/grafana/conf/dashboards:/etc/grafana/provisioning/dashboards
+      - ./services/grafana/conf/datasource.yml:/etc/grafana/provisioning/datasources/datasource.yml
+      - ./services/grafana/conf/dashboard.yml:/etc/grafana/provisioning/dashboards/dashboard.yml
+      - ./services/grafana/conf/dashboards:/etc/grafana/provisioning/dashboards
     env_file: .env
     restart: unless-stopped
 
@@ -114,7 +114,7 @@ services:
       DATA_SOURCE_NAME: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}?sslmode=disable"
       CONFIG_FILE: /etc/postgres_exporter/postgres_exporter.yml
     volumes:
-      - ./requirements/postgres_exporter/conf/postgres_exporter.yml:/postgres_exporter.yml
+      - ./services/postgres_exporter/conf/postgres_exporter.yml:/postgres_exporter.yml
     ports:
       - "9187:9187"
     networks:

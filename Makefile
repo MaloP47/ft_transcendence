@@ -26,7 +26,7 @@ _THIN = \e[2m
 _END = \033[0m
 
 ifndef VERBOSE
-	define MAKEFLAGS += --no-print-directory
+	MAKEFLAGS += --no-print-directory
 endif
 ### Formatting ###
 
@@ -63,14 +63,14 @@ fclean: down
 	# same here as in 'clean'
 
 migrate:
-	docker compose -f ./srcs/docker-compose.yml exec django python manage.py migrate
+	docker compose exec django python manage.py migrate
 
 makemigrations:
-	docker compose -f ./srcs/docker-compose.yml exec django python manage.py makemigrations website
-	docker compose -f ./srcs/docker-compose.yml exec django python manage.py makemigrations chat
+	docker compose exec django python manage.py makemigrations website
+	docker compose exec django python manage.py makemigrations chat
 
 createsuperuser:
-	docker compose -f ./srcs/docker-compose.yml exec django python manage.py createsuperuser
+	docker compose exec django python manage.py createsuperuser
 
 list:
 	@docker compose ps -a
