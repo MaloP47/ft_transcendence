@@ -43,3 +43,6 @@ WARNING: POSTGRES_HOST_AUTH_METHOD has been set to "trust". This will allow
 - [ ] database migration command
     - [ ] move into Dockerfile setup? or mounted bash script
     - [ ] wait for postgres to be up for migrations? 
+
+# Changelog
+- Moved rabbitmq volumes, i think it was an error in the path
