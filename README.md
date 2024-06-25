@@ -25,6 +25,8 @@ WARNING: POSTGRES_HOST_AUTH_METHOD has been set to "trust". This will allow
          documentation about "trust":
 
 # TODO (noa)
+- Questions for team:
+    - [ ] why choose specific version of grafana instead of `latest`
 ### Project Structure
 - [ ] Move things out of `srcs/`
 - [ ] rename requirements to services or containers, meaning make changes to docker-compose.yml file
@@ -35,9 +37,9 @@ WARNING: POSTGRES_HOST_AUTH_METHOD has been set to "trust". This will allow
     - [ ] remove django migrations and put it in startup script in container or dockerfile
 ### Prometheus
 - [x] check out rule files
-- [ ] `evaluation_interval`? difference with `scrap_interval`
+- [x] `evaluation_interval`? difference with `scrap_interval`
 - [x] check out /metrics endpoint
 ### Django
 - [ ] database migration command
-    - [ ] move into Dockerfile setup?
+    - [ ] move into Dockerfile setup? or mounted bash script
     - [ ] wait for postgres to be up for migrations? 
