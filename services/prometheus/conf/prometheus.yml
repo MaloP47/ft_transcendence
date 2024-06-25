@@ -1,8 +1,8 @@
 global:
   scrape_interval:      2s
-  evaluation_interval:  2s
+  evaluation_interval:  4s
 
-rule_files:
+#rule_files:
 #  - "first.rules"
 #  - "second.rules"
 

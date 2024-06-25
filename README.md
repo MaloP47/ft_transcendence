@@ -39,10 +39,13 @@ WARNING: POSTGRES_HOST_AUTH_METHOD has been set to "trust". This will allow
 - [x] check out rule files
 - [x] `evaluation_interval`? difference with `scrap_interval`
 - [x] check out /metrics endpoint
+- [ ] config file permissions aren't working, check userid and groupid solutions
 ### Django
 - [ ] database migration command
     - [ ] move into Dockerfile setup? or mounted bash script
     - [ ] wait for postgres to be up for migrations? 
+### Rabbitmq
+- [ ] config file creates container error and exits
 
 # Changelog
 - Moved rabbitmq volumes, i think it was an error in the path

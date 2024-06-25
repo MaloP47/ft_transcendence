@@ -9,8 +9,6 @@ services:
       - ./services/django/app:/code
     networks:
       transcendence:
-        #        aliases:
-        #          - django
     restart: unless-stopped
     depends_on:
       db:
@@ -57,9 +55,9 @@ services:
   rabbitmq:
     container_name: rabbitmq
     image: rabbitmq:3.12.14-alpine
-    volumes:
-      - ./services/rabbitmq/conf/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
-      - ./services/rabbitmq/conf/definitions.json:/etc/rabbitmq/definitions.json
+    #volumes:
+    #      - ./services/rabbitmq/conf/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
+      #      - ./services/rabbitmq/conf/definitions.json:/etc/rabbitmq/definitions.json
     ports:
       - "5672:5672"
       - "15672:15672"
@@ -85,6 +83,7 @@ services:
       - --storage.tsdb.retention.time=24h
     ports:
       - "9090:9090"
+    user: nobody
     volumes:
       - ./services/prometheus/conf/prometheus.yml:/etc/prometheus/prometheus.yml
     networks:
@@ -146,4 +145,3 @@ volumes:
 
 networks:
   transcendence:
-    #    driver: bridge

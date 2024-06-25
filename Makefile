@@ -36,13 +36,13 @@ all up:
 	@printf "$(_GREEN)Building and running Transcendence...$(_END)\n"
 	docker compose up -d --build
 	sleep 2;
-	make makemigrations --no-print-directory
+	make makemigrations
 	# Needing to make migrations like this probably makes project invalid
 	# because of the "start project with only `docker compose up` rule
 	# from evaluation sheet
 	# Look into moving this inside a Dockerfile
 	sleep 2;
-	make migrate --no-print-directory
+	make migrate
 	# same here
 
 down:
