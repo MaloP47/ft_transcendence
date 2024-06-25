@@ -10,6 +10,7 @@
 #                                                                              #
 # **************************************************************************** #
 
+### Formatting ###
 _BLACK = \033[0;30m
 _RED = \033[0;31m
 _GREEN = \033[0;32m
@@ -24,31 +25,42 @@ _THIN = \e[2m
 
 _END = \033[0m
 
-.PHONY : all stop clean flcean migrate makemigrations craetesuperuser list help re rere
-all:
-	@echo "$(_GREEN)Building and running Transcendence...$(_END)"
-	docker compose -f ./srcs/docker-compose.yml up -d --build
+ifndef VERBOSE
+	define MAKEFLAGS += --no-print-directory
+endif
+### Formatting ###
+
+.PHONY : all up stop clean flcean migrate makemigrations craetesuperuser list help re rere
+
+all up:
+	@printf "$(_GREEN)Building and running Transcendence...$(_END)\n"
+	docker compose up -d --build
 	sleep 2;
 	make makemigrations --no-print-directory
+	# Needing to make migrations like this probably makes project invalid
+	# because of the "start project with only `docker compose up` rule
+	# from evaluation sheet
+	# Look into moving this inside a Dockerfile
 	sleep 2;
 	make migrate --no-print-directory
+	# same here
 
-stop:
-	@echo "$(_YELLOW)Stoping Transcendence...$(_END)"
-	docker compose -f ./srcs/docker-compose.yml down
+down:
+	@printf "$(_YELLOW)Stopping Transcendence...$(_END)\n"
+	docker compose down
 
-clean:
-	make stop --no-print-directory
-	@echo "$(_YELLOW)Removing all unused containers...$(_END)"
+clean: down
+	@printf "$(_YELLOW)Removing all unused containers...$(_END)\n"
 	docker system prune -f
 	docker volume prune -f
+	# Look into docker compose system cleaning functions instead of docker alone
 
 
-fclean:
-	make stop --no-print-directory
-	@echo "$(_YELLOW)Removing all unused containers...$(_END)"
+fclean: down
+	@printf "$(_YELLOW)Removing all unused containers...$(_END)\n"
 	docker system prune -af
 	docker volume prune -af
+	# same here as in 'clean'
 
 migrate:
 	docker compose -f ./srcs/docker-compose.yml exec django python manage.py migrate
@@ -61,20 +73,16 @@ createsuperuser:
 	docker compose -f ./srcs/docker-compose.yml exec django python manage.py createsuperuser
 
 list:
-	@docker ps
+	@docker compose ps -a
 
 help:
-	@echo "$(_CYAN)make / make all       $(_THIN)=> build and run transcendence$(_END)"
-	@echo "$(_CYAN)make stop             $(_THIN)=> stop transcendence$(_END)"
-	@echo "$(_CYAN)make clean            $(_THIN)=> $(_RED)WARNING$(_CYAN) $(_THIN)stop transcendence and remove ALL containers and volumes$(_END)"
-	@echo "$(_CYAN)make list             $(_THIN)=> list all running container$(_END)"
-	@echo "$(_CYAN)make migrate          $(_THIN)=> migrate db for django$(_END)"
-	@echo "$(_CYAN)make createsuperuser  $(_THIN)=> create a superuser for django$(_END)"
+	@printf "$(_CYAN)make / make all       $(_THIN)=> build and run transcendence$(_END)\n"
+	@printf "$(_CYAN)make down             $(_THIN)=> stop transcendence$(_END)\n"
+	@printf "$(_CYAN)make clean            $(_THIN)=> $(_RED)WARNING$(_CYAN) $(_THIN)stop transcendence and remove ALL containers and volumes$(_END)\n"
+	@printf "$(_CYAN)make list             $(_THIN)=> list all running container$(_END)\n"
+	@printf "$(_CYAN)make migrate          $(_THIN)=> migrate db for django$(_END)\n"
+	@printf "$(_CYAN)make createsuperuser  $(_THIN)=> create a superuser for django$(_END)\n"
 
-re:
-	make clean --no-print-directory
-	make all --no-print-directory
+re: clean all
 
-rere:
-	make fclean --no-print-directory
-	make all --no-print-directory
+rere: fclean all

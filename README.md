@@ -28,7 +28,16 @@ WARNING: POSTGRES_HOST_AUTH_METHOD has been set to "trust". This will allow
 ### Project Structure
 - [ ] Move things out of `srcs/`
 - [ ] rename requirements to services or containers, meaning make changes to docker-compose.yml file
+- Makefile
+    - [x] changing `echo` for `printf` (for POSIX portability)
+    - [x] find better solution to --no-print-directory to put rules in deps instead
+    - [ ] use docker compose to clean containers instead of normal docker
+    - [ ] remove django migrations and put it in startup script in container or dockerfile
 ### Prometheus
 - [x] check out rule files
 - [ ] `evaluation_interval`? difference with `scrap_interval`
 - [x] check out /metrics endpoint
+### Django
+- [ ] database migration command
+    - [ ] move into Dockerfile setup?
+    - [ ] wait for postgres to be up for migrations? 
