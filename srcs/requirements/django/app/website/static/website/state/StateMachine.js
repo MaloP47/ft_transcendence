@@ -26,6 +26,24 @@ export default class App {
 		this.initUser();
 		this.updateUser();
 		this.router();
+
+
+		let test = document.getElementById("btnTest").addEventListener("click", () => {
+			this.getApiResponseJson("/api/view/tournamentEnd/", {
+				'tournament_id': 12,
+				'winner_id': 55,
+				'wins': 3,
+				'losses': 0,
+			}).then((response) => {
+				let res = JSON.parse(response);
+				if (res.success) {
+					alert(res.message);
+				} else {
+					alert("marche pas")
+					alert(res.message);
+				}
+			});
+		})
 	}
 
 	preventLinkDefaultBehavior() {
