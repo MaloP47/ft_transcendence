@@ -230,17 +230,58 @@ def registerForm(request):
 			'html': render_to_string('website/register.html'),
 		});
 
+# def registerUser(request):
+# 	if request.method == 'POST':
+# 		print(request.POST["username"])
+# 		print(request.POST["mail"])
+# 		print(request.POST["password"])
+# 		print(request.POST["password_confirm"])
+# 		User.objects.create_user(username=request.POST["username"], email=request.POST["mail"], password=request.POST["password"])
+# 		authenticate(username=request.POST["username"], password=request.POST["password"])
+# 	return JsonResponse({
+# 		'success': True,
+# 	})
 def registerUser(request):
-	if request.method == 'POST':
-		print(request.POST["username"])
-		print(request.POST["mail"])
-		print(request.POST["password"])
-		print(request.POST["password_confirm"])
-		User.objects.create_user(username=request.POST["username"], email=request.POST["mail"], password=request.POST["password"])
-		authenticate(username=request.POST["username"], password=request.POST["password"])
-	return JsonResponse({
-		'success': True,
-	})
+    if request.method == 'POST':
+        username = request.POST.get("username")
+        email = request.POST.get("mail")
+        password = request.POST.get("password")
+        password_confirm = request.POST.get("password_confirm")
+
+        if password != password_confirm:
+            return JsonResponse({
+                'success': False,
+                'message': 'Passwords do not match'
+            })
+        if User.objects.filter(username=username).exists():
+            return JsonResponse({
+                'success': False,
+                'message': 'Username already exists'
+            })
+        if User.objects.filter(email=email).exists():
+            return JsonResponse({
+                'success': False,
+                'message': 'Email already exists'
+            })
+        try:
+            user = User.objects.create_user(username=username, email=email, password=password)
+            user = authenticate(username=username, password=password)
+            if user is not None:
+                return JsonResponse({
+                    'success': True,
+                })
+            else:
+                return JsonResponse({
+                    'success': False,
+                    'message': 'Authentication failed'
+                })
+        except ValidationError as e:
+            return JsonResponse({
+                'success': False,
+                'message': str(e)
+            })
+
+
 
 def homeView(request):
 	if request.method == 'POST':
@@ -263,7 +304,7 @@ def chatView(request):
 		friendId = 0
 		if (data['room'] == "Public"):
 			messages = Message.objects.filter(room__publicRoom=True).filter(date__gte=datetime.now() - timedelta(hours=2)).order_by("date").annotate(block=Subquery(Exists(BlockedUser.objects.filter(userFrom=request.user, userBlocked__id=OuterRef("user_id")))))
-		else: 
+		else:
 			messages = Message.objects.filter(room__id=data['room']).order_by("date")
 			room = Room.objects.get(id=data['room'])
 			roomId = room.id

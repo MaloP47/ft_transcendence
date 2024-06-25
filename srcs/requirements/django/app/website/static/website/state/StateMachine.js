@@ -6,7 +6,7 @@
 /*   By: renstein <renstein@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/13 11:54:22 by gbrunet           #+#    #+#             */
-/*   Updated: 2024/06/24 18:48:30 by renstein         ###   ########.fr       */
+/*   Updated: 2024/06/25 14:04:52 by renstein         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -1102,7 +1102,7 @@ export default class App {
 								}, 500);
 								setTimeout(() => {
 									loginFormAlert.classList.add("hided");
-								}, 5000);
+								}, 500);
 							}
 						})
 					})
@@ -1140,21 +1140,6 @@ export default class App {
 					document.getElementById("registerFormSubmitBtn").addEventListener("click", e => {
 						e.preventDefault();
 						let formData = new FormData(form);
-						if (document.getElementById("registerFormPassword").value !== document.getElementById("registerFormPasswordConfirm").value) {
-							let registerFormAlert = document.getElementById("registerFormAlert");
-							registerForm.classList.add("shake");
-							document.getElementById("registerFormPassword").value = "";
-							document.getElementById("registerFormPasswordConfirm").value = "";
-							registerFormAlert.textContent = "Passwords do not match";
-							registerFormAlert.classList.remove("hided");
-							setTimeout(() => {
-								registerForm.classList.remove("shake");
-							}, 500);
-							setTimeout(() => {
-								registerFormAlert.classList.add("hided");
-							}, 5000);;
-							return;
-						}
 						this.getApiResponse("api/user/register/", formData).then((response) => {
 							let res = JSON.parse(response);
 							if (res.success) {
@@ -1162,13 +1147,13 @@ export default class App {
 								this.router();
 								this.updateUser();
 							} else {
-								console.log("Registration failed:", res.message);
 								registerForm.classList.add("shake");
 								document.getElementById("registerFormPassword").value = "";
 								document.getElementById("registerFormPasswordConfirm").value = "";
 								let registerFormAlert = document.getElementById("registerFormAlert");
 								registerFormAlert.textContent = res.message;
 								registerFormAlert.classList.remove("hided");
+
 								setTimeout(() => {
 									registerForm.classList.remove("shake");
 								}, 500);
@@ -1183,7 +1168,6 @@ export default class App {
 					registerForm.classList.remove("hided");
 					registerForm.classList.remove("trXm100");
 				}, 15);
-				console.log('register.js loaded');
 
 				const togglePasswordButtons = document.querySelectorAll('.toggle-password');
 				togglePasswordButtons.forEach(button => {
