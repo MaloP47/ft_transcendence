@@ -7,7 +7,7 @@
 		"enable": true,
 		"hide": true,
 		"iconColor": "rgba(0, 211, 255, 1)",
-		"name": "Annotations & Alerts",
+		"name": "Annotations & Alerts", 
 		"type": "dashboard"
 		}
 	]
@@ -219,7 +219,7 @@
 	]
 	},
 	"timezone": "",
-	"title": "Memory Dashboard",
+	"title": "Performance Memory",
 	"uid": null,
 	"version": 1
 }
