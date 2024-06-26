@@ -19,6 +19,11 @@ from django.db.models import Exists, F, Subquery, OuterRef, Q
 from website.models import Game, BlockedUser, User, Message, Room, FriendRequest
 import json
 from datetime import datetime, timedelta
+#userCreationForm
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth import get_user_model
+from website.forms import CustomUserCreationForm
+
 
 def index(request):
 	return render(request, "website/index.html");
@@ -230,6 +235,23 @@ def registerForm(request):
 			'html': render_to_string('website/register.html'),
 		});
 
+
+
+def registerUser(request):
+    if request.method == 'POST':
+        userTest = CustomUserCreationForm(request.POST)
+        if userTest.is_valid():
+            user = userTest.save()
+            user = authenticate(username=user.username, password=request.POST['password'])
+            if user is not None:
+                login(request, user)
+                return JsonResponse({'success': True})
+            else:
+                return JsonResponse({'success': False, 'message': 'Authentication failed'})
+        else:
+            return JsonResponse({'success': False, 'message': userTest.errors.as_json()})
+    return JsonResponse({'success': False, 'message': 'Invalid request method'})
+
 # def registerUser(request):
 # 	if request.method == 'POST':
 # 		print(request.POST["username"])
@@ -241,45 +263,62 @@ def registerForm(request):
 # 	return JsonResponse({
 # 		'success': True,
 # 	})
-def registerUser(request):
-    if request.method == 'POST':
-        username = request.POST.get("username")
-        email = request.POST.get("mail")
-        password = request.POST.get("password")
-        password_confirm = request.POST.get("password_confirm")
 
-        if password != password_confirm:
-            return JsonResponse({
-                'success': False,
-                'message': 'Passwords do not match'
-            })
-        if User.objects.filter(username=username).exists():
-            return JsonResponse({
-                'success': False,
-                'message': 'Username already exists'
-            })
-        if User.objects.filter(email=email).exists():
-            return JsonResponse({
-                'success': False,
-                'message': 'Email already exists'
-            })
-        try:
-            user = User.objects.create_user(username=username, email=email, password=password)
-            user = authenticate(username=username, password=password)
-            if user is not None:
-                return JsonResponse({
-                    'success': True,
-                })
-            else:
-                return JsonResponse({
-                    'success': False,
-                    'message': 'Authentication failed'
-                })
-        except ValidationError as e:
-            return JsonResponse({
-                'success': False,
-                'message': str(e)
-            })
+
+# def registerUser(request):
+#     if request.method == 'POST':
+#         # default UserForm start
+#         userTest = CustomUserCreationForm(request.POST)
+#         try:
+#             if not userTest.is_valid():
+#                 return JsonResponse({
+#                     'success': False,
+#                     'message': 'Invalid form FUCK IT'
+#             })
+#         except AttributeError as e:
+#             return JsonResponse({
+#                     'success': False,
+#                     'message': f'{User.__class__.__name__}  INVALIDE {e} \n FUCK IT'
+#             })
+        # default UserForm end
+
+        # username = request.POST.get("username")
+        # email = request.POST.get("mail")
+        # password = request.POST.get("password")
+        # password_confirm = request.POST.get("password_confirm")
+
+        # if password != password_confirm:
+        #     return JsonResponse({
+        #         'success': False,
+        #         'message': 'Passwords do not match'
+        #     })
+        # if User.objects.filter(username=username).exists():
+        #     return JsonResponse({
+        #         'success': False,
+        #         'message': 'Username already exists'
+        #     })
+        # if User.objects.filter(email=email).exists():
+        #     return JsonResponse({
+        #         'success': False,
+        #         'message': 'Email already exists'
+        #     })
+        # try:
+        #     user = User.objects.create_user(username=username, email=email, password=password)
+        #     user = authenticate(username=username, password=password)
+        #     if user is not None:
+        #         return JsonResponse({
+        #             'success': True,
+        #         })
+        #     else:
+        #         return JsonResponse({
+        #             'success': False,
+        #             'message': 'Authentication failed'
+        #         })
+        # except ValidationError as e:
+        #     return JsonResponse({
+        #         'success': False,
+        #         'message': str(e)
+        #     })
 
 
 
