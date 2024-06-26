@@ -1,0 +1,18 @@
+global:
+  resolve_timeout: 5m
+
+route:
+  receiver: 'discord-webhook'
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 3h
+
+receivers:
+- name: 'discord-webhook'
+  webhook_configs:
+  - url: 'https://discord.com/api/webhooks/1251195705301667872/KCoPeQygUtFXvGd-8g6_i7G16lnJ7414di6uaYVygTbgyBNSl4wyqdw8-zWNgGgqDwBQ'
+    send_resolved: true
+    # message: '{{ .CommonAnnotations.summary }}'
+    http_config:
+      follow_redirects: true
+      enable_http2: true

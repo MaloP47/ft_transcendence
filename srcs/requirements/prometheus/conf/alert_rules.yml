@@ -1,0 +1,35 @@
+groups:
+- name: instance_down
+  rules:
+  - alert: InstanceDown
+    expr: up == 0
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      title: "Instance down"
+      summary: "Instance down"
+      description: "An instance is down (instance {{ $labels.instance }})"
+      message: "An instance is down (instance {{ $labels.instance }})"
+
+  - alert: NginxInstanceDown
+    expr: nginx_up == 0
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      title: "Nginx instance down"
+      summary: "Nginx instance down"
+      description: "Nginx instance is down (instance {{ $labels.instance }})"
+      message: "Nginx instance is down (instance {{ $labels.instance }})"
+
+  - alert: PgInstanceDown
+    expr: pg_up == 0
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      title: "PostgreSQL instance down"
+      summary: "PostgreSQL instance down"
+      description: "PostgreSQL instance is down (instance {{ $labels.instance }})"
+      message: "PostgreSQL instance is down (instance {{ $labels.instance }})"

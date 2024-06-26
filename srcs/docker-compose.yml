@@ -87,6 +87,21 @@ services:
       - "9090:9090"
     volumes:
       - ./requirements/prometheus/conf/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./requirements/prometheus/conf/alert_rules.yml:/etc/prometheus/alert_rules.yml
+    networks:
+      - transcendence
+    restart: unless-stopped
+
+  alertmanager:
+    image: prom/alertmanager:latest
+    container_name: alertmanager
+    volumes:
+      - ./requirements/alertmanager/conf/alertmanager.yml:/etc/alertmanager/alertmanager.yml
+    # command:
+    #   - '--config.file=/etc/alertmanager/alertmanager.yml'
+    ports:
+      - '9093:9093'
+    env_file: .env
     networks:
       - transcendence
     restart: unless-stopped
