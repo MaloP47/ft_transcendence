@@ -382,6 +382,10 @@ def messageSetRead(request):
 
 web3 = Web3(Web3.HTTPProvider(settings.API_URL))
 
+	##----------------------------------------------------------//
+	##						BLOCKCHAIN							//
+	##----------------------------------------------------------//
+
 try:
     contract = web3.eth.contract(address=settings.CONTRACT_ADDRESS, abi=settings.CONTRACT_ABI)
 except Exception as e:
@@ -419,3 +423,5 @@ def createTournament(request):
             return JsonResponse({'success': False, 'status': 'error', 'message': str(e)})
 
     return JsonResponse({'success': False, 'status': 'error', 'message': 'Invalid request method'})
+
+def	viewTournament

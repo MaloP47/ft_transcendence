@@ -28,7 +28,7 @@ export default class App {
 		this.router();
 
 
-		let test = document.getElementById("btnTest").addEventListener("click", () => {
+		let test = document.getElementById("btnTestMint").addEventListener("click", () => {
 			this.getApiResponseJson("/api/view/tournamentEnd/", {
 				'tournament_id': 12,
 				'winner_id': 47,
