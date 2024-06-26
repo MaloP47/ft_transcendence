@@ -10,8 +10,8 @@
 # Etherscan email					: mpeulet@student.42.fr
 # Etherscan	password				: Transcendence123?
 
-# Pong contract address 		    : 0x553C1C0E1330BF926b1a0D61AeF8b6d24857F162
-# Etherscan Sepolia				    : https://sepolia.etherscan.io/address/"Pong contract address" OU "0xBeb1962c5d207424e587FbC388d80B8a4d5e70E2B pour voir le wallet utilise"
+# Pong contract address 		    : 0x2971a35217A1c844C18aF535FbeC63d8A097760F
+# Etherscan Sepolia				    : https://sepolia.etherscan.io/address/"Pong contract address" OU "0xBeb1962c5d207424e587FbC388d80B8a4d5e70E2 pour voir le wallet utilise"
 
 # Wallet public key					: 0xBeb1962c5d207424e587FbC388d80B8a4d5e70E2B
 # !!! Wallet private key !!!	   	: 5ee873e48ba7a30ae43422df6de93bc3cfb82286e5f7d93643f71dab071c4c59
@@ -20,8 +20,7 @@
 # API_URL 		= "https://eth-sepolia.g.alchemy.com/v2/Xx3MW05XhmxnbTAroETL4lXJUIfnmSXe"
 # PRIVATE_KEY	= "5ee873e48ba7a30ae43422df6de93bc3cfb82286e5f7d93643f71dab071c4c59"
 
-API_URL = "https://eth-sepolia.g.alchemy.com/v2/Xx3MW05XhmxnbTAroETL4lXJUIfnmSXe"
+API_URL = "https://eth-sepolia.g.alchemy.com/v2/4uryTCcwOBqa6dyrL9ajVJiTblBGXYgW"
 PRIVATE_KEY = "5ee873e48ba7a30ae43422df6de93bc3cfb82286e5f7d93643f71dab071c4c59"
-API_KEY = "Xx3MW05XhmxnbTAroETL4lXJUIfnmSXe"
-CONTRACT_ADDRESS = "0x553C1C0E1330BF926b1a0D61AeF8b6d24857F162"
-ETHERSCAN_API_KEY = "GH2NK9Q2AXJP5FU5JFTNGQWHGZC4JN9ZUM"
+API_KEY = "4uryTCcwOBqa6dyrL9ajVJiTblBGXYgW"
+CONTRACT_ADDRESS = "0x2971a35217A1c844C18aF535FbeC63d8A097760F"
