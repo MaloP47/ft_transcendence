@@ -1,0 +1,11 @@
+contactPoints:
+    - orgId: 1
+      name: discord
+      receivers:
+        - uid: my_contact_email_point_uid
+          type: discord
+          settings:
+            url: https://discord.com/api/webhooks/1251195705301667872/KCoPeQygUtFXvGd-8g6_i7G16lnJ7414di6uaYVygTbgyBNSl4wyqdw8-zWNgGgqDwBQ
+            message: |
+              {{ template "default.message" . }}
+

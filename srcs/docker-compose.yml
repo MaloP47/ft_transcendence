@@ -118,6 +118,8 @@ services:
       - ./requirements/grafana/conf/datasource.yml:/etc/grafana/provisioning/datasources/datasource.yml
       - ./requirements/grafana/conf/dashboard.yml:/etc/grafana/provisioning/dashboards/dashboard.yml
       - ./requirements/grafana/conf/dashboards:/etc/grafana/provisioning/dashboards
+      - ./requirements/grafana/conf/grafana.ini:/etc/grafana/grafana.ini
+      - ./requirements/grafana/conf/notification.yml:/etc/grafana/provisioning/alerting/notification.yml
     env_file: .env
     restart: unless-stopped
 
