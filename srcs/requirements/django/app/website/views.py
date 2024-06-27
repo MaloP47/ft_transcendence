@@ -239,7 +239,7 @@ def registerForm(request):
 @csrf_exempt
 def registerUser(request):
 	if request.method == 'POST':
-		user_form = CustomUserCreationForm(request.POST)
+		user_form = CustomUserCreationForm(request.POST, request.FILES)
 		if user_form.is_valid():
 			user = user_form.save()
 			user = authenticate(username=request.POST["username"], password=request.POST["password1"])
