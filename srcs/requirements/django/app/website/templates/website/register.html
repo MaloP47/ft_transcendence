@@ -6,24 +6,25 @@
 		<center><h1>REGISTRATION</h1></center>
 
 		<form id="registerFormForm">
+			{% csrf_token %}
 			<div class="input-group input-group-lg mb-3">
 				<span class="input-group-text text-bg-dark border border-light " id="username" style=" --bs-bg-opacity: .5; --bs-border-opacity: .1;width:140px">Username</span>
 				<input type="text" class="form-control text-bg-dark border border-light border-start-0 roboto" style="--bs-bg-opacity: .5; --bs-border-opacity: .1;" name="username" id="registerFormUsername">
 			</div>
 			<div class="input-group input-group-lg mb-3">
 				<span class="input-group-text text-bg-dark border border-light" id="username" style="--bs-bg-opacity: .5; --bs-border-opacity: .1;width:140px">Email address</span>
-				<input type="text" class="form-control text-bg-dark border border-light border-start-0 roboto" style="--bs-bg-opacity: .5; --bs-border-opacity: .1;" name="mail" id="registerFormEmail">
+				<input type="text" class="form-control text-bg-dark border border-light border-start-0 roboto" style="--bs-bg-opacity: .5; --bs-border-opacity: .1;" name="email" id="registerFormEmail">
 			</div>
 			<div class="input-group input-group-lg mb-3">
 				<span class="input-group-text text-bg-dark border border-light" style="--bs-bg-opacity: .5; --bs-border-opacity: .1;width:140px">Password</span>
-				<input type="password" class="form-control text-bg-dark border border-light border-start-0" style="--bs-bg-opacity: .5; --bs-border-opacity: .1;" name="password" id="registerFormPassword" required>
+				<input type="password" class="form-control text-bg-dark border border-light border-start-0" style="--bs-bg-opacity: .5; --bs-border-opacity: .1;" name="password1" id="registerFormPassword" required>
 				<button class="btn btn-outline-secondary toggle-password" type="button">
 					<i class="bi bi-eye-slash"></i>
 				</button>
 			</div>
 			<div class="input-group input-group-lg mb-3">
 				<span class="input-group-text text-bg-dark border border-light" id="username" style=" --bs-bg-opacity: .5; --bs-border-opacity: .1;width:140px">Repeat password</span>
-				<input type="password" class="form-control text-bg-dark border border-light border-start-0" style="--bs-bg-opacity: .5; --bs-border-opacity: .1;" name="password_confirm" id="registerFormPasswordConfirm">
+				<input type="password" class="form-control text-bg-dark border border-light border-start-0" style="--bs-bg-opacity: .5; --bs-border-opacity: .1;" name="password2" id="registerFormPasswordConfirm">
 				<button class="btn btn-outline-secondary toggle-password" type="button">
 					<i class="bi bi-eye-slash"></i>
 				</button>

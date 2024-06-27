@@ -6,7 +6,7 @@
 /*   By: renstein <renstein@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/13 11:54:22 by gbrunet           #+#    #+#             */
-/*   Updated: 2024/06/25 14:04:52 by renstein         ###   ########.fr       */
+/*   Updated: 2024/06/27 19:46:30 by renstein         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -1153,7 +1153,6 @@ export default class App {
 								let registerFormAlert = document.getElementById("registerFormAlert");
 								registerFormAlert.textContent = res.message;
 								registerFormAlert.classList.remove("hided");
-
 								setTimeout(() => {
 									registerForm.classList.remove("shake");
 								}, 500);
