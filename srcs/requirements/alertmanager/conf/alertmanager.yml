@@ -1,18 +1,35 @@
 global:
   resolve_timeout: 5m
 
+# route:
+#   receiver: 'discord'
+#   group_by: ['alertname']
+#   group_wait: 30s
+#   group_interval: 5m
+#   repeat_interval: 3h
+
+# receivers:
+#   - name: 'discord'
+#     webhook_configs:
+#       - url: 'https://discord.com/api/webhooks/1251195705301667872/KCoPeQygUtFXvGd-8g6_i7G16lnJ7414di6uaYVygTbgyBNSl4wyqdw8-zWNgGgqDwBQ'
+#         send_resolved: true
+
+# inhibit_rules:
+#   - source_match:
+#       severity: 'critical'
+#     target_match:
+#       severity: 'critical'
+#     equal: ['alertname', 'dev', 'instance']
+
+
 route:
-  receiver: 'discord-webhook'
-  group_wait: 30s
-  group_interval: 5m
-  repeat_interval: 3h
+  receiver: 'discord'
+  group_by: ['alertname']
+  group_wait: 1s
+  group_interval: 1s
 
 receivers:
-- name: 'discord-webhook'
-  webhook_configs:
-  - url: 'https://discord.com/api/webhooks/1251195705301667872/KCoPeQygUtFXvGd-8g6_i7G16lnJ7414di6uaYVygTbgyBNSl4wyqdw8-zWNgGgqDwBQ'
-    send_resolved: true
-    # message: '{{ .CommonAnnotations.summary }}'
-    http_config:
-      follow_redirects: true
-      enable_http2: true
+  - name: 'discord'
+    webhook_configs:
+      - url: 'http://discord-alerts:9094'
+

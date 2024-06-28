@@ -93,18 +93,28 @@ services:
     restart: unless-stopped
 
   alertmanager:
-    image: prom/alertmanager:latest
+    image: prom/alertmanager:v0.23.0
     container_name: alertmanager
     volumes:
       - ./requirements/alertmanager/conf/alertmanager.yml:/etc/alertmanager/alertmanager.yml
-    # command:
-    #   - '--config.file=/etc/alertmanager/alertmanager.yml'
+    command:
+      - '--config.file=/etc/alertmanager/alertmanager.yml'
     ports:
       - '9093:9093'
     env_file: .env
     networks:
       - transcendence
     restart: unless-stopped
+
+  discord-alerts:
+    image: benjojo/alertmanager-discord:latest
+    container_name: discord-alerts
+    restart: unless-stopped
+    ports:
+      - 9094:9094
+    env_file: .env
+    networks:
+      - transcendence
 
   # Interface
   grafana:

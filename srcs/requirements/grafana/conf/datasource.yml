@@ -6,3 +6,9 @@ datasources:
     access: proxy
     url: http://prometheus:9090
     isDefault: true
+  - name: Alertmanager
+    type: prometheus
+    access: proxy
+    url: http://alertmanager:9093
+    isDefault: false
+  
