@@ -22,6 +22,15 @@ scrape_configs:
     static_configs:
       - targets: ['postgres-exporter:9187']
 
+  - job_name: 'alertmanager'
+    static_configs:
+      - targets: ['alertmanager:9093']
+  
+  - job_name: 'discord-alerts'
+    static_configs:
+      - targets: ['discord-alerts:9094']
+
+
 rule_files:
   - 'alert_rules.yml'
 
