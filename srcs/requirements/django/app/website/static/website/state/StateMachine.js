@@ -6,7 +6,7 @@
 /*   By: renstein <renstein@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/13 11:54:22 by gbrunet           #+#    #+#             */
-/*   Updated: 2024/06/27 23:36:48 by renstein         ###   ########.fr       */
+/*   Updated: 2024/06/28 19:19:56 by renstein         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -1201,14 +1201,38 @@ export default class App {
 	addProfilePictureChangeListener() {
 		let profilePictureInput = document.getElementById("registerFormProfilePicture");
 		let previewProfilePicture = document.getElementById("previewProfilePicture");
+		let registerFormAlert = document.getElementById("registerFormAlert");
 
 		profilePictureInput.addEventListener("change", function () {
 			if (this.files && this.files[0]) {
+				let file = this.files[0];
+
+				// Reset alert and preview
+				registerFormAlert.classList.add('hided');
+				registerFormAlert.textContent = '';
+				previewProfilePicture.innerHTML = '';
+
+				// File validation
+				const fileSizeLimit = 2 * 1024 * 1024; // 2MB
+				const allowedFileTypes = ['image/jpeg', 'image/png'];
+
+				if (!allowedFileTypes.includes(file.type)) {
+					registerFormAlert.textContent = 'Unsupported file type. Please upload an image file (JPEG, PNG).';
+					registerFormAlert.classList.remove('hided');
+					return;
+				}
+
+				if (file.size > fileSizeLimit) {
+					registerFormAlert.textContent = 'File size exceeds 2MB. Please upload a smaller image.';
+					registerFormAlert.classList.remove('hided');
+					return;
+				}
+
 				let reader = new FileReader();
 				reader.onload = function (e) {
 					previewProfilePicture.innerHTML = `<img src="${e.target.result}" class="img-fluid rounded rounded-circle border border-white" style="width: 150px; height: 150px;">`;
 				};
-				reader.readAsDataURL(this.files[0]);
+				reader.readAsDataURL(file);
 			}
 		});
 	}
