@@ -20,8 +20,6 @@ class CustomUserCreationForm(UserCreationForm):
     def save(self, commit=True):
         CustomUser = super(CustomUserCreationForm, self).save(commit=False)
         CustomUser.email = self.cleaned_data['email']
-        
-        # Проверяем, что 'profilPicture' был передан в форму перед сохранением
         if 'profilPicture' in self.cleaned_data:
             CustomUser.profilPicture = self.cleaned_data['profilPicture']
 

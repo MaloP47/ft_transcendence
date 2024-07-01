@@ -6,7 +6,7 @@
 /*   By: renstein <renstein@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/13 11:54:22 by gbrunet           #+#    #+#             */
-/*   Updated: 2024/06/28 19:19:56 by renstein         ###   ########.fr       */
+/*   Updated: 2024/07/01 19:23:56 by renstein         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -1236,30 +1236,6 @@ export default class App {
 			}
 		});
 	}
-
-	// a faire
-	// getRegisterForm() {
-
-	// 	let registerForm = document.getElementById("registerForm");
-	// 	this.getApiResponse("/api/view/register/").then((response) => {
-	// 		let res = JSON.parse(response);
-	// 		if (res.success) {
-	// 			let topContent = document.getElementById("topContent");
-	// 			topContent.innerHTML = res.html;
-	// 			let loginForm = document.getElementById("registerForm");
-	// 			loginForm.classList.add("trXm100");
-	// 			let form = document.getElementById("registerFormForm");
-	// 			document.getElementById("registerFormSubmitBtn").addEventListener("click", e => {
-	// 				e.preventDefault();
-	// 				let formData = new FormData(form);
-	// 			});
-	// 			setTimeout(() => {
-	// 				loginForm.classList.remove("hided");
-	// 				loginForm.classList.remove("trXm100");
-	// 			}, 15);
-	// 		}
-	// 	})
-	// }
 
 	//----------------------------------------------------------//
 	//						 SINGLETON							//
