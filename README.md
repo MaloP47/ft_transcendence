@@ -41,6 +41,7 @@ Put here changes that will impact project mates
 - [x] check out /metrics endpoint
 - [ ] config file permissions aren't working, check userid and groupid solutions
 - [ ] grafana marked down for some reason, check scrape config
+- [ ] change alert rules, install blackbox_exporter
 ### Django
 - [ ] database migration command
     - [ ] move into Dockerfile setup? or mounted bash script
@@ -53,7 +54,7 @@ Put here changes that will impact project mates
 ### postgres_exporter
 - [x] Error loading config" err="Error opening config file \"postgres_exporter.yml\": open postgres_exporter.yml: no such file or directory"
 ### filebeat
-- [ ] move var-log to a proper volume, maybe `data` folder in project root dir (daddy gpt says so)
+- [x] move var-log to a proper volume, maybe `data` folder in project root dir (daddy gpt says so)
 ### alertmanager
 - [ ] find better way of putting webhooks into config file without exposing it
     - env variables are bad, so is ARG in dockerfile
