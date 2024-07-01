@@ -29,9 +29,10 @@ services:
       - "5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
-      interval: 10s
-      timeout: 5s
+      interval: 4s
+      timeout: 2s
       retries: 5
+      start_period: 2s
     env_file: .env
     restart: unless-stopped
 
@@ -69,7 +70,7 @@ services:
       interval: 3s
       timeout: 1s
       retries: 10
-      start_period: 1s
+      start_period: 2s
     restart: unless-stopped
 
   # ----------------------------- #
@@ -89,19 +90,6 @@ services:
       - ./services/prometheus/conf/alerts.rules.yml:/etc/prometheus/alerts.rules.yml
     networks:
       - transcendence
-    restart: unless-stopped
-
-  # Alerts
-  alertmanager:
-    container_name: alertmanager
-    build:
-      context: services/alertmanager
-      args:
-        - WEBHOOK_URL=${WEBHOOK_URL}
-    networks:
-      - transcendence
-    ports:
-      - '9093:9093'
     restart: unless-stopped
 
   # Interface
@@ -149,6 +137,28 @@ services:
     ports:
       - "9113:9113"
     restart: unless-stopped
+
+  # Alerts
+  alertmanager:
+    container_name: alertmanager
+    image: prom/alertmanager:v0.27.0
+    volumes:
+      - ./services/alertmanager/conf/alertmanager.yml:/etc/alertmanager/alertmanager.yml
+    networks:
+      - transcendence
+    ports:
+      - '9093:9093'
+    restart: unless-stopped
+
+  discord-alerts:
+    image: benjojo/alertmanager-discord:latest
+    container_name: discord-alerts
+    restart: unless-stopped
+    ports:
+      - 9094:9094
+    env_file: .env
+    networks:
+      - transcendence
 
   # ELK
   elasticsearch:
