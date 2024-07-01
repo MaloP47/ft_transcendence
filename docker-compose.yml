@@ -1,54 +1,52 @@
 services:
   django:
     container_name: django
-    build: ./requirements/django/
-    expose:
-      - "8000"
+    build: services/django/
     command: ["python", "manage.py", "runserver", "0.0.0.0:8000"]
     volumes:
-      - ./requirements/django/app:/code
-      - ./requirements/var-log/django:/var/log/django
+      - ./services/django/app:/code
+      - logs_django:/var/log/django
     networks:
       - transcendence
-    restart: unless-stopped
+    expose:
+      - "8000"
     depends_on:
       db:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
+    restart: unless-stopped
 
   db:
     container_name: postgres
     image: postgres:alpine3.20
     volumes:
       - postgres_data:/var/lib/postgresql/data/
-      - ./requirements/var-log/postgresql:/var/log/postgresql
-    expose:
-      - "5432"
+      - logs_postgresql:/var/log/postgresql
     networks:
       - transcendence
-    env_file: .env
-    restart: unless-stopped
+    expose:
+      - "5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
       interval: 10s
       timeout: 5s
       retries: 5
-
+    env_file: .env
+    restart: unless-stopped
 
   nginx:
     container_name: nginx
     build:
-      context: requirements/nginx
-      dockerfile: Dockerfile
+      context: services/nginx
     volumes:
-      - ./requirements/nginx/conf:/etc/nginx/conf.d
-      - ./requirements/var-log/nginx:/var/log/nginx
+      - ./services/nginx/conf:/etc/nginx/conf.d
+      - logs_nginx:/var/log/nginx
+    networks:
+      - transcendence
     ports:
       - "1443:443"
       - "1080:80"
-    networks:
-      - transcendence
     depends_on:
       - django
       - grafana
@@ -58,20 +56,20 @@ services:
     container_name: rabbitmq
     image: rabbitmq:3.12.14-alpine
     volumes:
-      - ./requirements/conf/rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
-      - ./requirements/conf/rabbitmq/definitions.json:/etc/rabbitmq/definitions.json
-      - ./requirements/var-log/rabbitmq:/var/log/rabbitmq
+      - ./services/rabbitmq/conf/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
+      - ./services/rabbitmq/conf/definitions.json:/etc/rabbitmq/definitions.json
+      - logs_rabbitmq:/var/log/rabbitmq/
+    networks:
+      - transcendence
     ports:
       - "5672:5672"
       - "15672:15672"
-    networks:
-      - transcendence
     healthcheck:
       test: ["CMD-SHELL", "rabbitmqctl status"]
-      interval: 4s
-      timeout: 2s
+      interval: 3s
+      timeout: 1s
       retries: 10
-      start_period: 3s
+      start_period: 1s
     restart: unless-stopped
 
   # ----------------------------- #
@@ -80,69 +78,58 @@ services:
   # Scraper 
   prometheus:
     container_name: prometheus
-    image: prom/prometheus:v2.45.4
+    image: prom/prometheus:v2.53.0
     command:
       - --config.file=/etc/prometheus/prometheus.yml
       - --storage.tsdb.retention.time=24h
     ports:
       - "9090:9090"
     volumes:
-      - ./requirements/prometheus/conf/prometheus.yml:/etc/prometheus/prometheus.yml
-      - ./requirements/prometheus/conf/alert_rules.yml:/etc/prometheus/alert_rules.yml
+      - ./services/prometheus/conf/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./services/prometheus/conf/alerts.rules.yml:/etc/prometheus/alerts.rules.yml
     networks:
       - transcendence
     restart: unless-stopped
 
+  # Alerts
   alertmanager:
-    image: prom/alertmanager:v0.23.0
     container_name: alertmanager
-    volumes:
-      - ./requirements/alertmanager/conf/alertmanager.yml:/etc/alertmanager/alertmanager.yml
-    command:
-      - '--config.file=/etc/alertmanager/alertmanager.yml'
+    build:
+      context: services/alertmanager
+      args:
+        - WEBHOOK_URL=${WEBHOOK_URL}
+    networks:
+      - transcendence
     ports:
       - '9093:9093'
-    env_file: .env
-    networks:
-      - transcendence
     restart: unless-stopped
-
-  discord-alerts:
-    image: benjojo/alertmanager-discord:latest
-    container_name: discord-alerts
-    restart: unless-stopped
-    ports:
-      - 9094:9094
-    env_file: .env
-    networks:
-      - transcendence
 
   # Interface
   grafana:
-    image: grafana/grafana:9.5.19
     container_name: grafana
-    ports:
-      - "3000:3000"
+    image: grafana/grafana:11.1.0
     networks:
       - transcendence
+    ports:
+      - "3000:3000"
     volumes:
-      - ./requirements/grafana/conf/datasource.yml:/etc/grafana/provisioning/datasources/datasource.yml
-      - ./requirements/grafana/conf/dashboard.yml:/etc/grafana/provisioning/dashboards/dashboard.yml
-      - ./requirements/grafana/conf/dashboards:/etc/grafana/provisioning/dashboards
-      - ./requirements/grafana/conf/grafana.ini:/etc/grafana/grafana.ini
-      - ./requirements/grafana/conf/notification.yml:/etc/grafana/provisioning/alerting/notification.yml
+      - ./services/grafana/conf/datasource.yml:/etc/grafana/provisioning/datasources/datasource.yml
+      - ./services/grafana/conf/dashboard.yml:/etc/grafana/provisioning/dashboards/dashboard.yml
+      - ./services/grafana/conf/dashboards:/etc/grafana/provisioning/dashboards
+      - ./services/grafana/conf/grafana.ini:/etc/grafana/grafana.ini
+      - ./services/grafana/conf/notification.yml:/etc/grafana/provisioning/alerting/notification.yml
     env_file: .env
     restart: unless-stopped
 
   # Exporters
   postgres-exporter:
     container_name: postgres-exporter
-    image: prometheuscommunity/postgres-exporter:latest
+    image: prometheuscommunity/postgres-exporter:v0.15.0
     environment:
       DATA_SOURCE_NAME: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}?sslmode=disable"
       CONFIG_FILE: /etc/postgres_exporter/postgres_exporter.yml
     volumes:
-      - ./requirements/postgres_exporter/conf/postgres_exporter.yml:/postgres_exporter.yml
+      - ./services/postgres_exporter/conf/postgres_exporter.yml:/postgres_exporter.yml
     ports:
       - "9187:9187"
     networks:
@@ -153,16 +140,17 @@ services:
 
   nginx-exporter:
     container_name: nginx-exporter
-    image: nginx/nginx-prometheus-exporter:0.10.0
-    command: [ "-nginx.scrape-uri", "https://nginx:443/stub_status", "-nginx.ssl-verify=false" ]
-    ports:
-      - "9113:9113"
+    image: nginx/nginx-prometheus-exporter:1.2.0
+    command: [  "--nginx.scrape-uri", "https://nginx:443/stub_status",
+                "--no-nginx.ssl-verify",
+                "--nginx.timeout=1s"]
     networks:
       - transcendence
-    depends_on:
-      - nginx
+    ports:
+      - "9113:9113"
     restart: unless-stopped
 
+  # ELK
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.17.10
     container_name: elasticsearch
@@ -182,11 +170,11 @@ services:
     image: docker.elastic.co/logstash/logstash:7.17.10
     container_name: logstash
     volumes:
-      - ./requirements/logstash/conf/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
-    ports:
-      - "5044:5044"
+      - ./services/logstash/conf/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
     networks:
       - transcendence
+    ports:
+      - "5044:5044"
     depends_on:
       - elasticsearch
     restart: unless-stopped
@@ -196,10 +184,10 @@ services:
     container_name: kibana
     environment:
       - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
-    ports:
-      - "5601:5601"
     networks:
       - transcendence
+    ports:
+      - "5601:5601"
     depends_on:
       - elasticsearch
     restart: unless-stopped
@@ -207,22 +195,30 @@ services:
   filebeat:
     image: docker.elastic.co/beats/filebeat:7.17.10
     container_name: filebeat
-    user: root
     volumes:
-      - ./requirements/filebeat/conf/filebeat.yml:/usr/share/filebeat/filebeat.yml
-      - ./requirements/var-log:/var/log
+      - ./services/filebeat/conf/filebeat.yml:/usr/share/filebeat/filebeat.yml
     networks:
       - transcendence
     depends_on:
       - logstash
     restart: unless-stopped
+  # ----------------------------- #
+  #          Monitoring           #
+  # ----------------------------- #
 
 volumes:
   postgres_data:
   grafana_data:
   prometheus_data:
   elasticsearch_data:
-  var-log:
+  logs_django:
+  logs_nginx:
+  logs_postgresql:
+  logs_rabbitmq:
 
 networks:
   transcendence:
+
+    #secrets:
+    #  file_env:
+    #    file: .env

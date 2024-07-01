@@ -3,7 +3,7 @@ groups:
   rules:
   - alert: InstanceDown
     expr: up == 0
-    for: 1m
+    for: 10s
     labels:
       severity: critical
     annotations:
@@ -14,7 +14,7 @@ groups:
 
   - alert: NginxInstanceDown
     expr: nginx_up == 0
-    for: 1m
+    for: 10s
     labels:
       severity: critical
     annotations:
@@ -25,7 +25,7 @@ groups:
 
   - alert: PgInstanceDown
     expr: pg_up == 0
-    for: 1m
+    for: 10s
     labels:
       severity: critical
     annotations:
