@@ -19,7 +19,6 @@ RUN openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
 RUN addgroup -S www-data || true && adduser -S www-data -G www-data || true
 RUN mkdir -p /var/run/nginx
 COPY conf/nginx.conf /etc/nginx/nginx.conf
-COPY conf/index.html /var/www/html/
 RUN mkdir -p /var/www/html
 RUN chmod 755 /var/www/html
 RUN chown -R www-data:www-data /var/www/html

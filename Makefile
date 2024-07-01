@@ -35,31 +35,33 @@ endif
 all up:
 	@printf "$(_GREEN)Building and running Transcendence...$(_END)\n"
 	docker compose up -d --build
-	sleep 2;
-	make makemigrations
-	# Needing to make migrations like this probably makes project invalid
-	# because of the "start project with only `docker compose up` rule
-	# from evaluation sheet
-	# Look into moving this inside a Dockerfile
-	sleep 2;
-	make migrate
-	# same here
+	##sleep 2;
+	##make makemigrations
+	### Needing to make migrations like this probably makes project invalid
+	### because of the "start project with only `docker compose up` rule
+	### from evaluation sheet
+	### Look into moving this inside a Dockerfile
+	##sleep 2;
+	##make migrate
+	### same here
 
-down:
+down stop:
 	@printf "$(_YELLOW)Stopping Transcendence...$(_END)\n"
 	docker compose down
 
 clean: down
 	@printf "$(_YELLOW)Removing all unused containers...$(_END)\n"
 	docker system prune -f
-	docker volume prune -f
+	docker volume prune -f # doesn't work
+	-docker volume rm $$(docker volume ls -q) # works
 	# Look into docker compose system cleaning functions instead of docker alone
 
 
 fclean: down
 	@printf "$(_YELLOW)Removing all unused containers...$(_END)\n"
 	docker system prune -af
-	docker volume prune -af
+	docker volume prune -af # doesn't work
+	-docker volume rm $$(docker volume ls -q) # works
 	# same here as in 'clean'
 
 migrate:

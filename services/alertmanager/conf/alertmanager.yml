@@ -1,0 +1,14 @@
+route:
+  receiver: 'discord'
+  repeat_interval: 5m
+  group_by: [ alertname ]
+  group_wait: 1s
+  group_interval: 1s
+
+receivers:
+  - name: 'discord'
+    discord_configs:
+      # remove
+      - webhook_url: 'WEBHOOK_URL'
+        title: 'tmp message title'
+        message: 'lalalla!'

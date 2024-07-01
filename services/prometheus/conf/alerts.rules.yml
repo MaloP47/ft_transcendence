@@ -1,0 +1,26 @@
+groups:
+  - name: 'discord'
+    rules:
+
+      # Nginx down
+      - alert: NginxDown
+        expr: nginx_up == 0
+        for: 10s
+        labels:
+          severity: critical
+        annotations:
+          summary: "Nginx is down"
+          description: "Nginx has been down for more than 10 seconds."
+
+      # Other services down
+      - alert: InstanceDown
+        expr: up == 0
+        for: 10s
+        labels:
+          severity: critical
+        annotations:
+          summary: "Instance {{ $labels.instance }} is down"
+          description: "{{ $labels.instance }} of job {{ $labels.job }} has been down for more than 10 seconds."
+
+
+
