@@ -19,6 +19,11 @@ from django.db.models import Exists, F, Subquery, OuterRef, Q
 from website.models import Game, BlockedUser, User, Message, Room, FriendRequest
 import json
 from datetime import datetime, timedelta
+#userCreationForm
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth import get_user_model
+from website.forms import CustomUserCreationForm
+
 
 def index(request):
 	return render(request, "website/index.html");
@@ -254,6 +259,48 @@ def registerForm(request):
 			'html': render_to_string('website/register.html'),
 		});
 
+
+
+@csrf_exempt
+def registerUser(request):
+    if request.method == 'POST':
+        user_form = CustomUserCreationForm(request.POST, request.FILES)
+        if user_form.is_valid():
+            try:
+                profile_picture = request.FILES.get('profilPicture')
+                if profile_picture:
+                    if profile_picture.size > 2 * 1024 * 1024:
+                        raise ValidationError('File size exceeds 2MB.')
+
+                # Check file type
+                    if profile_picture.content_type not in ['image/jpeg', 'image/png', 'image/gif']:
+                        raise ValidationError('Unsupported file type. Please upload an image file (JPEG, PNG, GIF).')
+
+                    # Check file readability
+                    try:
+                        profile_picture.open()
+                        profile_picture.read()
+                    except Exception as e:
+                        raise ValidationError(f'Error reading file: {str(e)}')
+                user = user_form.save()
+                user = authenticate(username=request.POST["username"], password=request.POST["password1"])
+                if user is not None:
+                    # login(request, user) # Uncomment this line if you want to login the user immediately after registration
+                    return JsonResponse({'success': True})
+                else:
+                    return JsonResponse({'success': False, 'message': 'Authentication failed'})
+            except ValidationError as e:
+                return JsonResponse({'success': False, 'message': str(e)})
+
+        errors = user_form.errors.get_json_data()
+        error_messages = []
+        for field, field_errors in errors.items():
+            for error in field_errors:
+                error_messages.append(error['message'])
+        return JsonResponse({'success': False, 'message': ' '.join(error_messages)})
+
+    return JsonResponse({'success': False, 'message': 'Invalid request method'})
+
 def homeView(request):
 	if request.method == 'POST':
 		if request.user.is_authenticated:
@@ -275,7 +322,7 @@ def chatView(request):
 		friendId = 0
 		if (data['room'] == "Public"):
 			messages = Message.objects.filter(room__publicRoom=True).filter(date__gte=datetime.now() - timedelta(hours=2)).order_by("date").annotate(block=Subquery(Exists(BlockedUser.objects.filter(userFrom=request.user, userBlocked__id=OuterRef("user_id")))))
-		else: 
+		else:
 			messages = Message.objects.filter(room__id=data['room']).order_by("date")
 			room = Room.objects.get(id=data['room'])
 			roomId = room.id
