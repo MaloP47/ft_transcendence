@@ -37,6 +37,7 @@ export default class PongTransi {
 	toBg(time) {
 		if (time != undefined) {
 			this.initTransi("toBg", time);
+			this.pong.resetGameInfo();
 			this.pong.assets.reset();
 			this.pong.preConfig();
 			this.pong.scene.vignette.uniforms['amount'].value = 0;
@@ -51,6 +52,8 @@ export default class PongTransi {
 			this.pong.assets.p1.startAI();
 			this.pong.assets.p2.startAI();
 			this.pong.start = true;
+			this.pong.endRound = false;
+			this.pong.assets.ball.reset();
 			return ;
 		}
 		this.time += this.pong.elapsedTime;
@@ -133,6 +136,7 @@ export default class PongTransi {
 		if (transi == "toBlack")
 			this.toBlack(time);
 		else if (transi == "toBg" && this.transi != "bg") {
+			this.pong.start = false;
 			if (this.transi != "") {
 				this.toBlack(1000);
 				setTimeout(() => {

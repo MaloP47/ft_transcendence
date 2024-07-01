@@ -1,3 +1,15 @@
+// ************************************************************************** //
+//                                                                            //
+//                                                        :::      ::::::::   //
+//   PongAssets.js                                      :+:      :+:    :+:   //
+//                                                    +:+ +:+         +:+     //
+//   By: gbrunet <gbrunet@student.42.fr>            +#+  +:+       +#+        //
+//                                                +#+#+#+#+#+   +#+           //
+//   Created: 2024/06/20 09:18:54 by gbrunet           #+#    #+#             //
+//   Updated: 2024/06/20 09:19:30 by gbrunet          ###   ########.fr       //
+//                                                                            //
+// ************************************************************************** //
+
 import Ball from './Ball.js';
 import BallFire from './BallFire.js';
 import BallParticles from './BallParticles.js';
@@ -47,7 +59,7 @@ export default class PongAssets {
 			this.ballParticles.delete();
 			this.ballParticles = new BallParticles({pong: this.pong});
 		}
-		if (this.ImpactParticles) {
+		if (this.impactParticles) {
 			this.impactParticles.delete();
 			this.impactParticles = new ImpactParticles({pong: this.pong});
 		}

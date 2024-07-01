@@ -4,8 +4,10 @@
 		{% if g.p1 == user %}
 			{% if g.p2%}
 				{{g.p2}}
-			{% else %}
+			{% elif g.p2Local == "" %}
 				an A.I.
+			{% else %}
+				{{g.p2Local}}
 			{% endif %}
 		{% else %}
 			{% if g.p1%}
@@ -14,5 +16,5 @@
 				an A.I.
 			{% endif %}
 		{% endif %}
-		<button class="join btn btn-primary mx-3" style="--bs-btn-padding-y: .1rem;" data-game="{{g.id}}">Join</button><button class="forfeit btn btn-danger" style="--bs-btn-padding-y: .1rem;" data-game="{{g.id}}">Forfeit</button></div>
+		<button class="join btn btn-primary mx-3" style="--bs-btn-padding-y: .1rem;" data-type="{{g.gameType}}" data-game="{{g.id}}">Join</button><button class="forfeit btn btn-danger" style="--bs-btn-padding-y: .1rem;" data-type="{{g.gameType}}" data-game="{{g.id}}">Forfeit</button></div>
 </div>

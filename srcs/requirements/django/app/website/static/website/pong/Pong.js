@@ -6,7 +6,7 @@
 //   By: gbrunet <gbrunet@student.42.fr>            +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2024/05/21 13:52:15 by gbrunet           #+#    #+#             //
-//   Updated: 2024/06/17 12:16:02 by gbrunet          ###   ########.fr       //
+//   Updated: 2024/06/20 15:04:32 by gbrunet          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -41,15 +41,6 @@ export default class Pong {
 		this.scene = new PongScene({pong: this});
 		this.assets = new PongAssets({pong: this});
 		this.transi = new PongTransi({pong: this});
-//		this.toState(data.state);
-//		sleep(5000).then(() => {
-//			this.transi.toBlack(1000).then(() => {
-//				this.transi.toP1Game(1000).then(() => {
-//					console.log("fin mon gars")
-//				});
-//			});
-//		})
-
 		this.update();
 	}
 
@@ -116,6 +107,11 @@ export default class Pong {
 		this.bg = true;
 		this.scaleFactor = 0.75;
 		this.bonus = true;
+		this.resetGameInfo();
+	}
+
+	resetGameInfo() {
+		this.bg = true;
 		this.gameInfo = {
 			ai: 1,
 			ballSpeed: 8,
@@ -135,6 +131,7 @@ export default class Pong {
 			p2Right: 39,
 			p2score: 0,
 			winScore: 10,
+			p2Local: '',
 		}
 	}
 
@@ -159,9 +156,8 @@ export default class Pong {
 				p2Right: 39,
 				p2score: 0,
 				winScore: 10,
+				p2Local: '',
 			}
-			this.start = false;
-			console.log("wesh")
 			this.transi.to("toBg", 1500);
 		}
 		else if (state == "p1Game")
@@ -179,29 +175,6 @@ export default class Pong {
 		requestAnimationFrame(this.update.bind(this));
 	}
 
-	setConfig(data) {
-		console.log(data);
-/*		if (this.transi.transi != "bg") {
-			sleep(500).then(() => {
-				this.transi.toBlack(1000).then(() => {
-					this.preConfig(data);
-					this.transi.toP1Game(1000).then(() => {
-						this.postConfig(data);
-						console.log("lancement de la game")
-					});
-				});
-			});
-		} else {
-			this.transi.toBlack(1000).then(() => {
-				this.preConfig(data);
-				this.transi.toP1Game(1000).then(() => {
-					this.postConfig(data);
-					console.log("lancement de la game")
-				});
-			});
-		}
-*/	}
-
 	preConfig() {
 		this.p1LeftKey = this.gameInfo.p1Left;
 		this.p1RightKey = this.gameInfo.p1Right;
@@ -216,21 +189,24 @@ export default class Pong {
 		this.p1Infos = this.gameInfo.p1;
 		this.p2Infos = this.gameInfo.p2;
 		this.winScore = this.gameInfo.winScore;
+		this.p2Local = this.gameInfo.p2Local;
 	}
 
-	postConfig(data) {
+	postConfig() {
 		this.assets.ball.initSpeed = this.gameInfo.ballSpeed / 100.0;
 		this.assets.p1.score = this.gameInfo.p1score;
 		this.assets.p2.score = this.gameInfo.p2score;
 		if (this.gameInfo.p1.id == -1)
 			this.assets.p1.AI = true;
-		if (this.gameInfo.p2.id == -1)
+		if (this.gameInfo.p2.id == -1 && this.gameInfo.p2Local == "")
 			this.assets.p2.AI = true;
 		if (this.countTimeout)
 			clearTimeout(this.countTimeout)
-		this.countTimeout = setTimeout(() => {
-			this.animateCountdown(5);	
-		}, 1000)
+		if (!(this.gameInfo.p1score >= this.winScore || this.gameInfo.p2score >= this.winScore)) {
+			this.countTimeout = setTimeout(() => {
+				this.animateCountdown(5);	
+			}, 1000)
+		}
 	}
 
 	animateCountdown(sec) {
@@ -249,11 +225,8 @@ export default class Pong {
 			setTimeout(()=>{
 				this.start = true;
 				this.endRound = false;
-				if (this.gameInfo.p2.id == -1) {
-					if (this.gameInfo.ai == 1)
-						this.assets.p2.startAI();
-					else if (res.ai == 2)
-						console.log("a faire !!!")
+				if (this.gameInfo.p2.id == -1 && this.gameInfo.p2Local == "") {
+					this.assets.p2.startAI();
 				}
 			}, 500);
 		}

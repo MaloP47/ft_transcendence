@@ -33,6 +33,7 @@ class Game(models.Model):
 	date = models.DateTimeField(auto_now_add=True)
 	p1 = models.ForeignKey(User, on_delete=models.DO_NOTHING, blank=True, null=True, related_name="p1")
 	p2 = models.ForeignKey(User, on_delete=models.DO_NOTHING, blank=True, null=True, related_name="p2")
+	p2Local = models.TextField(default="", blank=True)
 	forfeit = models.ForeignKey(User, on_delete=models.DO_NOTHING, blank=True, null=True, related_name="forfeit")
 	ai = models.IntegerField(default=0)
 	p1Score = models.IntegerField(default=0)
@@ -44,3 +45,4 @@ class Game(models.Model):
 	p1Right = models.IntegerField(default=68)
 	p2Left = models.IntegerField(default=37)
 	p2Right = models.IntegerField(default=39)
+	gameType = models.IntegerField(default=0) # 0->local vs AI // 1->local 1 vs 1 // 2->remote 1 vs 1
