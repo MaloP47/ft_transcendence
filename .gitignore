@@ -1,3 +1,8 @@
 *.env
+
+# logs
 *.log
 *.logs
+
+# persistent data at project root only
+/data
