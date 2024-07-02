@@ -29,22 +29,22 @@ export default class App {
 		this.router();
 
 
-		let test = document.getElementById("btnTestMint").addEventListener("click", () => {
-			this.getApiResponseJson("/api/view/tournamentEnd/", {
-				'tournament_id': 12,
-				'winner_id': 47,
-				'wins': 7,
-				'losses': 3,
-			}).then((response) => {
-				let res = JSON.parse(response);
-				if (res.success) {
-					alert(res.message);
-				} else {
-					alert("marche pas")
-					alert(res.message);
-				}
-			});
-		})
+		// let test = document.getElementById("btnTestMint").addEventListener("click", () => {
+		// 	this.getApiResponseJson("/api/view/tournamentEnd/", {
+		// 		'tournament_id': 12,
+		// 		'winner_id': 47,
+		// 		'wins': 7,
+		// 		'losses': 3,
+		// 	}).then((response) => {
+		// 		let res = JSON.parse(response);
+		// 		if (res.success) {
+		// 			alert(res.message);
+		// 		} else {
+		// 			alert("marche pas")
+		// 			alert(res.message);
+		// 		}
+		// 	});
+		// })
 	}
 
 	preventLinkDefaultBehavior() {
