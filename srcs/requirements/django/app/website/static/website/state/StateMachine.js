@@ -1,3 +1,4 @@
+
 // ************************************************************************** //
 //                                                                            //
 //                                                        :::      ::::::::   //
@@ -69,7 +70,7 @@ export default class App {
 			id: undefined,
 		};
 	}
-	
+
 	updateUser() {
 		let prev = this.user.authenticated;
 		if (this.getCookie('csrftoken') == null) {
@@ -796,7 +797,7 @@ export default class App {
 			chatMenu.style.pointerEvents = "none";
 			menuBack.classList.add("hided");
 			menuBack.classList.add("pe-none");
-		});	
+		});
 	}
 
 	updateRooms() {
@@ -1343,7 +1344,7 @@ export default class App {
 								}, 500);
 								setTimeout(() => {
 									loginFormAlert.classList.add("hided");
-								}, 5000);
+								}, 500);
 							}
 						})
 					})
@@ -1365,27 +1366,117 @@ export default class App {
 		}
 	}
 
-	// a faire
 	getRegisterForm() {
-		let registerForm = document.getElementById("registerForm");
 		this.getApiResponse("/api/view/register/").then((response) => {
 			let res = JSON.parse(response);
 			if (res.success) {
-				let topContent = document.getElementById("topContent");
-				topContent.innerHTML = res.html;
-				let loginForm = document.getElementById("registerForm");
-				loginForm.classList.add("trXm100");
-				let form = document.getElementById("registerFormForm");
-				document.getElementById("registerFormSubmitBtn").addEventListener("click", e => {
-					e.preventDefault();
-					let formData = new FormData(form);
-				});
-				setTimeout(() => {
-					loginForm.classList.remove("hided");
-					loginForm.classList.remove("trXm100");
-				}, 15);
+				this.updateTopContent(res.html);
+				this.showRegisterForm();
+				this.addRegisterFormSubmitListener();
+				this.addTogglePasswordButtons();
+				this.addProfilePictureChangeListener();
 			}
-		})
+		});
+	}
+
+	updateTopContent(html) {
+		let topContent = document.getElementById("topContent");
+		topContent.innerHTML = html;
+	}
+
+	showRegisterForm() {
+		let registerForm = document.getElementById("registerForm");
+		registerForm.classList.add("trXm100");
+		setTimeout(() => {
+			registerForm.classList.remove("hided");
+			registerForm.classList.remove("trXm100");
+		}, 15);
+	}
+
+	addRegisterFormSubmitListener() {
+		let form = document.getElementById("registerFormForm");
+		let formBtn = document.getElementById("registerFormSubmitBtn");
+		if (formBtn) {
+			formBtn.addEventListener("click", (e) => {
+				e.preventDefault();
+				let formData = new FormData(form);
+				this.getApiResponse("api/user/register/", formData).then((response) => {
+					let res = JSON.parse(response);
+					if (res.success) {
+						history.pushState("", "", "/login");
+						this.router();
+						this.updateUser();
+					} else {
+						let registerForm = document.getElementById("registerForm");
+						registerForm.classList.add("shake");
+						document.getElementById("registerFormPassword").value = "";
+						document.getElementById("registerFormPasswordConfirm").value = "";
+						let registerFormAlert = document.getElementById("registerFormAlert");
+						registerFormAlert.textContent = res.message;
+						registerFormAlert.classList.remove("hided");
+						setTimeout(() => {
+							registerForm.classList.remove("shake");
+						}, 500);
+						setTimeout(() => {
+							registerFormAlert.classList.add("hided");
+						}, 5000);
+					}
+				});
+			});
+		}
+	}
+
+	addTogglePasswordButtons() {
+		const togglePasswordButtons = document.querySelectorAll('.toggle-password');
+		togglePasswordButtons.forEach((button) => {
+			button.addEventListener('click', function () {
+				const passwordField = this.previousElementSibling;
+				const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
+				passwordField.setAttribute('type', type);
+				const icon = this.querySelector('i');
+				icon.classList.toggle('bi-eye-slash');
+				icon.classList.toggle('bi-eye');
+			});
+		});
+	}
+
+	addProfilePictureChangeListener() {
+		let profilePictureInput = document.getElementById("registerFormProfilePicture");
+		let previewProfilePicture = document.getElementById("previewProfilePicture");
+		let registerFormAlert = document.getElementById("registerFormAlert");
+
+		profilePictureInput.addEventListener("change", function () {
+			if (this.files && this.files[0]) {
+				let file = this.files[0];
+
+				// Reset alert and preview
+				registerFormAlert.classList.add('hided');
+				registerFormAlert.textContent = '';
+				previewProfilePicture.innerHTML = '';
+
+				// File validation
+				const fileSizeLimit = 2 * 1024 * 1024; // 2MB
+				const allowedFileTypes = ['image/jpeg', 'image/png'];
+
+				if (!allowedFileTypes.includes(file.type)) {
+					registerFormAlert.textContent = 'Unsupported file type. Please upload an image file (JPEG, PNG).';
+					registerFormAlert.classList.remove('hided');
+					return;
+				}
+
+				if (file.size > fileSizeLimit) {
+					registerFormAlert.textContent = 'File size exceeds 2MB. Please upload a smaller image.';
+					registerFormAlert.classList.remove('hided');
+					return;
+				}
+
+				let reader = new FileReader();
+				reader.onload = function (e) {
+					previewProfilePicture.innerHTML = `<img src="${e.target.result}" class="img-fluid rounded rounded-circle border border-white" style="width: 150px; height: 150px;">`;
+				};
+				reader.readAsDataURL(file);
+			}
+		});
 	}
 
 	//----------------------------------------------------------//
