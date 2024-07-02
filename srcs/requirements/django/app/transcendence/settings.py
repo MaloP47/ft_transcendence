@@ -24,6 +24,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 from pathlib import Path
 import os
+import json
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -189,7 +190,23 @@ LOGGING = {
     },
 }
 
-
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
 
+API_URL = os.getenv('API_URL')
+PRIVATE_KEY = os.getenv('PRIVATE_KEY')
+CONTRACT_ADDRESS = os.getenv('CONTRACT_ADDRESS')
+ABI_PATH = os.path.join(BASE_DIR, 'ABI/contractABI.json')
+
+BLOCKCHAIN_VARS = ['API_URL', 'PRIVATE_KEY', 'CONTRACT_ADDRESS', 'ABI_PATH']
+for var in BLOCKCHAIN_VARS:
+	if globals()[var] is None:
+		raise EnvironmentError(f"Required {var} not found")
+
+try:
+    with open(ABI_PATH, 'r') as abi_file:
+        CONTRACT_ABI = json.load(abi_file)
+except FileNotFoundError:
+    raise FileNotFoundError(f"ABI file not found at path: {ABI_PATH}")
+except json.JSONDecodeError:
+    raise ValueError(f"Error decoding JSON from ABI file at path: {ABI_PATH}")

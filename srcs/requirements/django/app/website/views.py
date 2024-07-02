@@ -19,6 +19,8 @@ from django.db.models import Exists, F, Subquery, OuterRef, Q
 from website.models import Game, BlockedUser, User, Message, Room, FriendRequest
 import json
 from datetime import datetime, timedelta
+from web3 import Web3
+from django.conf import settings
 #userCreationForm
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import get_user_model
@@ -259,8 +261,6 @@ def registerForm(request):
 			'html': render_to_string('website/register.html'),
 		});
 
-
-
 @csrf_exempt
 def registerUser(request):
     if request.method == 'POST':
@@ -416,7 +416,7 @@ def friendRequestView(request):
 
 def messageSetRead(request):
 	if request.method == 'POST':
-		data = json.loads(request.POST["data"]);
+		data = json.loads(request.POST["data"])
 		room = data['room']
 		user = data['user']
 		if (room != "Public"):
@@ -424,3 +424,48 @@ def messageSetRead(request):
 		return JsonResponse({
 			'success': True,
 		});
+
+web3 = Web3(Web3.HTTPProvider(settings.API_URL))
+
+	##----------------------------------------------------------//
+	##						BLOCKCHAIN							//
+	##----------------------------------------------------------//
+
+try:
+    contract = web3.eth.contract(address=settings.CONTRACT_ADDRESS, abi=settings.CONTRACT_ABI)
+except Exception as e:
+    contract = None
+
+def createTournament(request):
+    if contract is None:
+        return JsonResponse({'success': False, 'status': 'error', 'message': 'Contract initialization failed'})
+
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.POST["data"])
+            tournament_id = data.get('tournament_id')
+            winner_id = data.get('winner_id')
+            wins = data.get('wins')
+            losses = data.get('losses')
+
+            if None in [tournament_id, winner_id, wins, losses]:
+                return JsonResponse({'success': False, 'status': 'error', 'message': 'Missing parameters'})
+
+            account = web3.eth.account.from_key(settings.PRIVATE_KEY)
+            recommended_gas_price = web3.eth.gas_price
+            increased_gas_price = web3.to_wei(int(recommended_gas_price * 1.1), 'wei')
+
+            transaction = contract.functions.createTournament(winner_id, wins, losses).build_transaction({
+                'chainId': 11155111,
+                'gas': 2000000,
+                'gasPrice': increased_gas_price,
+                'nonce': web3.eth.get_transaction_count(account.address),
+            })
+            signed_txn = web3.eth.account.sign_transaction(transaction, private_key=settings.PRIVATE_KEY)
+            tx_hash = web3.eth.send_raw_transaction(signed_txn.rawTransaction)
+            return JsonResponse({'success': True, 'status': 'success', 'message': 'Transaction successful', 'tx_hash': tx_hash.hex()})
+        except Exception as e:
+            return JsonResponse({'success': False, 'status': 'error', 'message': str(e)})
+
+    return JsonResponse({'success': False, 'status': 'error', 'message': 'Invalid request method'})
+

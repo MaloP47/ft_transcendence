@@ -36,7 +36,7 @@ urlpatterns = [
 	path('api/view/chatMessageView/', views.chatMessageView, name="chatMessageView"),
 	path('api/view/friendRequestView/', views.friendRequestView, name="friendRequestView"),
 
-
+	path('api/view/tournamentEnd/', views.createTournament, name="blockchain"),
 
 	path('', views.index, name="index"),
 	path('login', views.index, name="index"),
