@@ -486,7 +486,7 @@ def viewTournament(request):
 
             tournament_length = contract.functions.getTournamentLength().call()
 
-            if tournament_id >= tournament_length - 1:
+            if tournament_id > tournament_length - 1:
                 return JsonResponse({'success': False, 'status': 'error', 'message': "Tournament ID doesn't exist"})
 
             tournament = contract.functions.getTournament(tournament_id).call()
