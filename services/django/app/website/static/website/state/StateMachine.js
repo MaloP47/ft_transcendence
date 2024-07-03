@@ -29,22 +29,41 @@ export default class App {
 		this.router();
 
 
-		// let test = document.getElementById("btnTestMint").addEventListener("click", () => {
-		// 	this.getApiResponseJson("/api/view/tournamentEnd/", {
-		// 		'tournament_id': 12,
-		// 		'winner_id': 47,
-		// 		'wins': 7,
-		// 		'losses': 3,
-		// 	}).then((response) => {
-		// 		let res = JSON.parse(response);
-		// 		if (res.success) {
-		// 			alert(res.message);
-		// 		} else {
-		// 			alert("marche pas")
-		// 			alert(res.message);
-		// 		}
-		// 	});
-		// })
+		let test = document.getElementById("btnTestMint").addEventListener("click", () => {
+			this.getApiResponseJson("/api/view/tournamentEnd/", {
+				'tournament_id': 85,
+				'winner_id': 89,
+				'wins': 12,
+				'losses': 3,
+			}).then((response) => {
+				let res = JSON.parse(response);
+				if (res.success) {
+					alert(res.message);
+				} else {
+					alert("marche pas")
+					alert(res.message);
+				}
+			});
+		})
+
+		let test2 = document.getElementById("btnTestGet").addEventListener("click", () => {
+			this.getApiResponseJson("/api/view/getTournament/", {
+				'tour_id': -5,
+			}).then((response) => {
+				let res = JSON.parse(response);
+				if (res.success) {
+					alert("Ok")
+					alert("Tournament ID: " + res.tournament_id);
+               		alert("Winner ID: " + res.winner_id);
+                	alert("Winner Wins: " + res.winner_wins);
+                	alert("Winner Losses: " + res.winner_losses);
+				} else {
+					alert("Fuck")
+					alert(res.message);
+				}
+			});
+		})
+
 	}
 
 	preventLinkDefaultBehavior() {
