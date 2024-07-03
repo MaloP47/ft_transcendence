@@ -425,11 +425,12 @@ def messageSetRead(request):
 			'success': True,
 		});
 
-web3 = Web3(Web3.HTTPProvider(settings.API_URL))
 
 	##----------------------------------------------------------//
 	##						BLOCKCHAIN							//
 	##----------------------------------------------------------//
+
+web3 = Web3(Web3.HTTPProvider(settings.API_URL))
 
 try:
     contract = web3.eth.contract(address=settings.CONTRACT_ADDRESS, abi=settings.CONTRACT_ABI)
@@ -463,9 +464,43 @@ def createTournament(request):
             })
             signed_txn = web3.eth.account.sign_transaction(transaction, private_key=settings.PRIVATE_KEY)
             tx_hash = web3.eth.send_raw_transaction(signed_txn.rawTransaction)
-            return JsonResponse({'success': True, 'status': 'success', 'message': 'Transaction successful', 'tx_hash': tx_hash.hex()})
+            return JsonResponse({'success': True, 'status': 'success', 'message': 'Transaction successful'})
         except Exception as e:
             return JsonResponse({'success': False, 'status': 'error', 'message': str(e)})
 
     return JsonResponse({'success': False, 'status': 'error', 'message': 'Invalid request method'})
 
+def viewTournament(request):
+    if contract is None:
+        return JsonResponse({'success': False, 'status': 'error', 'message': 'Contract initialization failed'})
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.POST["data"])
+            tournament_id = data.get('tournament_id')
+
+            if tournament_id is None:
+                return JsonResponse({'success': False, 'status': 'error', 'message': 'Missing tournament ID'})
+			
+            if not isinstance(tournament_id, int) or tournament_id < 0:
+                return JsonResponse({'success': False, 'status': 'error', 'message': 'Invalid (negative) tournament ID'})
+
+            tournament_length = contract.functions.getTournamentLength().call()
+
+            if tournament_id >= tournament_length - 1:
+                return JsonResponse({'success': False, 'status': 'error', 'message': "Tournament ID doesn't exist"})
+
+            tournament = contract.functions.getTournament(tournament_id).call()
+            winner_id, winner_wins, winner_losses = tournament
+
+            return JsonResponse({
+                'success': True,
+                'status': 'success',
+                'tournament_id': tournament_id,
+                'winner_id': winner_id,
+                'winner_wins': winner_wins,
+                'winner_losses': winner_losses
+            })
+        except Exception as e:
+            return JsonResponse({'success': False, 'status': 'error', 'message': str(e)})
+
+    return JsonResponse({'success': False, 'status': 'error', 'message': 'Invalid request method'})
