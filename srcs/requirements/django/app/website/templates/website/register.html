@@ -1,42 +1,22 @@
-<div id="registerForm" class="d-flex justify-content-center align-items-center w-100 h-100 position-absolute hided">
-    <div class="register rounded p-4 border border-light" style="--bs-border-opacity:0.1; max-width: 500px; width: 90%; margin: 10px;">
-        <center><h1 style="font-size: 1.5rem; margin: 0.5;">REGISTRATION</h1></center>
-        <form id="registerFormForm" enctype="multipart/form-data">
-            {% csrf_token %}
-            <div id="previewProfilePicture" class="d-flex justify-content-center mb-2">
-                <img src="" alt="Preview" class="img-fluid border border-white" style="width: 80px; height: 80px; display: none;">
-            </div>
-            <div class="input-group input-group-sm mb-2">
-                <span class="input-group-text text-bg-dark border border-light" id="profile_picture" style="--bs-bg-opacity: .5; --bs-border-opacity: .1; width:120px">Profile Picture</span>
-                <input type="file" class="form-control text-bg-dark border border-light border-start-0 roboto" style="--bs-bg-opacity: .5; --bs-border-opacity: .1;" name="profilPicture" id="registerFormProfilePicture">
-            </div>
-            <div class="input-group input-group-sm mb-2">
-                <span class="input-group-text text-bg-dark border border-light" id="username" style="--bs-bg-opacity: .5; --bs-border-opacity: .1; width:120px">Username</span>
-                <input type="text" class="form-control text-bg-dark border border-light border-start-0 roboto" style="--bs-bg-opacity: .5; --bs-border-opacity: .1;" name="username" id="registerFormUsername">
-            </div>
-            <div class="input-group input-group-sm mb-2">
-                <span class="input-group-text text-bg-dark border border-light" id="email" style="--bs-bg-opacity: .5; --bs-border-opacity: .1; width:120px">Email address</span>
-                <input type="email" class="form-control text-bg-dark border border-light border-start-0 roboto" style="--bs-bg-opacity: .5; --bs-border-opacity: .1;" name="email" id="registerFormEmail">
-            </div>
-            <div class="input-group input-group-sm mb-2">
-                <span class="input-group-text text-bg-dark border border-light" style="--bs-bg-opacity: .5; --bs-border-opacity: .1; width:120px">Password</span>
-                <input type="password" class="form-control text-bg-dark border border-light border-start-0 roboto" style="--bs-bg-opacity: .5; --bs-border-opacity: .1;" name="password1" id="registerFormPassword" required>
-                <button class="btn btn-outline-secondary toggle-password" type="button">
-                    <i class="bi bi-eye-slash"></i>
-                </button>
-            </div>
-            <div class="input-group input-group-sm mb-2">
-                <span class="input-group-text text-bg-dark border border-light" id="password2" style="--bs-bg-opacity: .5; --bs-border-opacity: .1; width:120px">Repeat password</span>
-                <input type="password" class="form-control text-bg-dark border border-light border-start-0 roboto" style="--bs-bg-opacity: .5; --bs-border-opacity: .1;" name="password2" id="registerFormPasswordConfirm">
-                <button class="btn btn-outline-secondary toggle-password" type="button">
-                    <i class="bi bi-eye-slash"></i>
-                </button>
-                <div id="registerFormAlert" class="alert alert-danger mb-2 hided" style="width: 100%; font-size: 0.875rem; padding: 0.5rem;"></div>
-            </div>
-            <button class="w-100 btn btn-primary btn-block mb-3 mt-2" href="" id="registerFormSubmitBtn">Register</button>
-            <div class="text-center">
-                <p style="font-size: 0.875rem;">Already a member? <a href="/login" data-link>Login</a></p>
-            </div>
-        </form>
-    </div>
+<div id="registerForm" class="h-100 d-flex flex-column align-items-center justify-content-center position-absolute w-100 hided">
+	<div id="registerFormAlert" class="alert alert-danger mb-2 hided">
+		Incorrect username or password.
+	</div>
+	<div class="register rounded p-4 border border-light" style="--bs-border-opacity:0.1; width:350px">
+		<center><h1>REGISTER</h1></center>
+		<form id="registerFormForm">
+			<div class="input-group input-group-lg mb-3">
+				<span class="input-group-text text-bg-dark border border-light" id="username" style="--bs-bg-opacity: .5; --bs-border-opacity: .1;">username</span>
+				<input type="text" class="form-control text-bg-dark border border-light border-start-0 roboto" style="--bs-bg-opacity: .5; --bs-border-opacity: .1;" name="username" id="registerFormUsername">
+			</div>
+			<div class="input-group input-group-lg mb-3">
+				<span class="input-group-text text-bg-dark border border-light" id="username" style="--bs-bg-opacity: .5; --bs-border-opacity: .1;">password</span>
+				<input type="password" class="form-control text-bg-dark border border-light border-start-0" style="--bs-bg-opacity: .5; --bs-border-opacity: .1;" name="password" id="registerFormPassword">
+			</div>
+			<button class="w-100 btn btn-primary btn-block mb-4 mt-3" href="" id="registerFormSubmitBtn">Sign in</button>
+			<div class="text-center">
+				<p>Already a member? <a href="/login" data-link>Login</a></p>
+			</div>
+		</form>
+	</div>
 </div>
