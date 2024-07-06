@@ -207,8 +207,8 @@ services:
     volumes:
       - ./services/filebeat/conf/filebeat.yml:/usr/share/filebeat/filebeat.yml
       - logs_nginx:/var/log/nginx
-      # - logs_postgresql:/var/log/postgresql
       - ./services/postgres/logs:/var/log/postgresql
+      - logs_django:/var/log/django
 
     networks:
       - transcendence

@@ -2,9 +2,9 @@ filebeat.inputs:
 - type: log
   enabled: true
   paths:
-    # - /var/log/django/*.log
+    - /var/log/django/*.log
     - /var/log/postgresql/*.log
-    # - /var/log/nginx/*.log
+    - /var/log/nginx/*.log
 
 output.logstash:
   hosts: ["logstash:5044"]

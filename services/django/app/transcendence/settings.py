@@ -6,7 +6,7 @@
 #    By: guderram <guderram@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/06/03 16:02:34 by gbrunet           #+#    #+#              #
-#    Updated: 2024/06/16 17:55:49 by guderram         ###   ########.fr        #
+#    Updated: 2024/07/06 11:12:58 by guderram         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -183,7 +183,7 @@ LOGGING = {
         'file': {
             'level': 'DEBUG',
             'class': 'logging.FileHandler',
-            'filename': 'debug.log',
+            'filename': '/var/log/django/django.log',
         },
     },
     'loggers': {
