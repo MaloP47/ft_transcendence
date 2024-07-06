@@ -6,3 +6,5 @@
 
 # persistent data at project root only
 /data
+
+./services/postgres/data
