@@ -6,7 +6,7 @@
 #    By: guderram <guderram@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/05/28 10:17:29 by gbrunet           #+#    #+#              #
-#    Updated: 2024/06/13 18:10:46 by guderram         ###   ########.fr        #
+#    Updated: 2024/07/06 11:08:40 by guderram         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -58,6 +58,7 @@ clean: down
 	docker system prune -f
 	docker volume prune -f
 	rm -rf data/var-log
+	rm -rf services/postgres/logs
 
 fclean: down
 	@printf "$(_YELLOW)Removing all unused containers...$(_END)\n"
@@ -71,7 +72,8 @@ mkdirs:
 				data/var-log/django \
 				data/var-log/nginx \
 				data/var-log/postgresql \
-				data/var-log/rabbitmq
+				data/var-log/rabbitmq \
+				services/postgresql/logs
 
 migrate:
 	docker compose exec django python manage.py migrate
