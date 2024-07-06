@@ -19,24 +19,28 @@ services:
         condition: service_healthy
     restart: unless-stopped
 
-  # db:
-  #   container_name: postgres
-  #   image: postgres:alpine3.20
-  #   volumes:
-  #     - postgres_data:/var/lib/postgresql/data/
-  #     - logs_postgresql:/var/log/postgresql
-  #   networks:
-  #     - transcendence
-  #   expose:
-  #     - "5432"
-  #   healthcheck:
-  #     test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
-  #     interval: 4s
-  #     timeout: 2s
-  #     retries: 5
-  #     start_period: 2s
-  #   env_file: .env
-  #   restart: unless-stopped
+  db:
+    container_name: postgres
+    image: postgres:alpine3.20
+    volumes:
+      - ./services/postgres/conf/postgresql.conf:/etc/postgresql/postgresql.conf
+      - postgres_data:/var/lib/postgresql/data/
+      # - logs_postgresql:/var/log/postgresql
+      - ./services/postgres/logs:/var/log/postgresql
+    networks:
+      - transcendence
+    expose:
+      - "5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 4s
+      timeout: 2s
+      retries: 5
+      start_period: 2s
+    env_file: .env
+    restart: unless-stopped
+    command: ["postgres", "-c", "config_file=/etc/postgresql/postgresql.conf"]
+
 
   # db:
   #   container_name: postgres
@@ -61,26 +65,26 @@ services:
   #     interval: 10s
   #     timeout: 5s
   #     retries: 5
-  db:
-    container_name: postgres
-    image: postgres:alpine3.20
-    volumes:
-      - ./services/postgres/conf/postgresql.conf:/etc/postgresql/postgresql.conf
-      - ./services/postgres/logs:/var/log/postgresql
-      - ./services/postgres/data:/var/lib/postgresql/data
-    expose:
-      - "5432"
-    networks:
-      - transcendence
-    env_file: .env
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    user: postgres
-    command: ["postgres", "-c", "config_file=/etc/postgresql/postgresql.conf"]
+  # db:
+  #   container_name: postgres
+  #   image: postgres:alpine3.20
+  #   volumes:
+  #     - ./services/postgres/conf/postgresql.conf:/etc/postgresql/postgresql.conf
+  #     - ./services/postgres/logs:/var/log/postgresql
+  #     - ./services/postgres/data:/var/lib/postgresql/data
+  #   expose:
+  #     - "5432"
+  #   networks:
+  #     - transcendence
+  #   env_file: .env
+  #   restart: unless-stopped
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
+  #   user: postgres
+  #   command: ["postgres", "-c", "config_file=/etc/postgresql/postgresql.conf"]
 
   nginx:
     container_name: nginx
@@ -263,6 +267,11 @@ volumes:
   logs_django:
   logs_nginx:
   logs_postgresql:
+    driver: local
+    driver_opts:
+      type: none
+      device: ./services/postgres/logs
+      o: bind
   # logs_rabbitmq:
 
 networks:
