@@ -23,5 +23,11 @@ RUN mkdir -p /var/www/html
 RUN chmod 755 /var/www/html
 RUN chown -R www-data:www-data /var/www/html
 
+# Removing symbolic links and creating log files
+RUN rm /var/log/nginx/access.log /var/log/nginx/error.log
+RUN touch /var/log/nginx/access.log /var/log/nginx/error.log
+RUN chmod 755 /var/log/nginx
+RUN chown www-data:www-data /var/log/nginx/access.log /var/log/nginx/error.log
+
 # Start nginx
 ENTRYPOINT ["nginx", "-g", "daemon off;"]

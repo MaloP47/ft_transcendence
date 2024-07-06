@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   django:
     container_name: django
@@ -40,6 +42,7 @@ services:
     container_name: nginx
     build:
       context: services/nginx
+      dockerfile: Dockerfile
     volumes:
       - ./services/nginx/conf:/etc/nginx/conf.d
       - logs_nginx:/var/log/nginx
@@ -73,10 +76,6 @@ services:
       start_period: 2s
     restart: unless-stopped
 
-  # ----------------------------- #
-  #          Monitoring           #
-  # ----------------------------- #
-  # Scraper 
   prometheus:
     container_name: prometheus
     image: prom/prometheus:v2.53.0
@@ -92,7 +91,6 @@ services:
       - transcendence
     restart: unless-stopped
 
-  # Interface
   grafana:
     container_name: grafana
     image: grafana/grafana:11.1.0
@@ -109,7 +107,6 @@ services:
     env_file: .env
     restart: unless-stopped
 
-  # Exporters
   postgres-exporter:
     container_name: postgres-exporter
     image: prometheuscommunity/postgres-exporter:v0.15.0
@@ -138,7 +135,6 @@ services:
       - "9113:9113"
     restart: unless-stopped
 
-  # Alerts
   alertmanager:
     container_name: alertmanager
     image: prom/alertmanager:v0.27.0
@@ -160,7 +156,6 @@ services:
     networks:
       - transcendence
 
-  # ELK
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.17.10
     container_name: elasticsearch
@@ -207,18 +202,12 @@ services:
     container_name: filebeat
     volumes:
       - ./services/filebeat/conf/filebeat.yml:/usr/share/filebeat/filebeat.yml
-      - logs_django:/var/log/django
       - logs_nginx:/var/log/nginx
-      - logs_postgresql:/var/log/postgresql
-      - logs_rabbitmq:/var/log/rabbitmq
     networks:
       - transcendence
     depends_on:
       - logstash
     restart: unless-stopped
-  # ----------------------------- #
-  #          Monitoring           #
-  # ----------------------------- #
 
 volumes:
   postgres_data:
@@ -226,33 +215,9 @@ volumes:
   prometheus_data:
   elasticsearch_data:
   logs_django:
-    driver: local
-    driver_opts:
-      type: none
-      device: data/var-log/django
-      o: bind
   logs_nginx:
-    driver: local
-    driver_opts:
-      type: none
-      device: data/var-log/nginx/
-      o: bind
   logs_postgresql:
-    driver: local
-    driver_opts:
-      type: none
-      device: data/var-log/postgresql/
-      o: bind
   logs_rabbitmq:
-    driver: local
-    driver_opts:
-      type: none
-      device: data/var-log/rabbitmq/
-      o: bind
 
 networks:
   transcendence:
-
-    #secrets:
-    #  file_env:
-    #    file: .env
