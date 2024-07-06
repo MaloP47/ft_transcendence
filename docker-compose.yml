@@ -19,24 +19,68 @@ services:
         condition: service_healthy
     restart: unless-stopped
 
+  # db:
+  #   container_name: postgres
+  #   image: postgres:alpine3.20
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data/
+  #     - logs_postgresql:/var/log/postgresql
+  #   networks:
+  #     - transcendence
+  #   expose:
+  #     - "5432"
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+  #     interval: 4s
+  #     timeout: 2s
+  #     retries: 5
+  #     start_period: 2s
+  #   env_file: .env
+  #   restart: unless-stopped
+
+  # db:
+  #   container_name: postgres
+  #   build:
+  #     context: services/postgres
+  #     dockerfile: Dockerfile
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data/
+  #     - logs_postgresql:/var/log/postgresql
+  #   expose:
+  #     - "5432"
+  #   networks:
+  #     - transcendence
+  #   env_file: .env
+  #   environment:
+  #     POSTGRES_USER: ${POSTGRES_USER}
+  #     POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+  #     POSTGRES_DB: ${POSTGRES_DB}
+  #   restart: unless-stopped
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
   db:
     container_name: postgres
     image: postgres:alpine3.20
     volumes:
-      - postgres_data:/var/lib/postgresql/data/
-      - logs_postgresql:/var/log/postgresql
-    networks:
-      - transcendence
+      - ./services/postgres/conf/postgresql.conf:/etc/postgresql/postgresql.conf
+      - ./services/postgres/logs:/var/log/postgresql
+      - ./services/postgres/data:/var/lib/postgresql/data
     expose:
       - "5432"
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
-      interval: 4s
-      timeout: 2s
-      retries: 5
-      start_period: 2s
+    networks:
+      - transcendence
     env_file: .env
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    user: postgres
+    command: ["postgres", "-c", "config_file=/etc/postgresql/postgresql.conf"]
 
   nginx:
     container_name: nginx
@@ -62,7 +106,7 @@ services:
     volumes:
       - ./services/rabbitmq/conf/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
       - ./services/rabbitmq/conf/definitions.json:/etc/rabbitmq/definitions.json
-      - logs_rabbitmq:/var/log/rabbitmq/
+      # - logs_rabbitmq:/var/log/rabbitmq/
     networks:
       - transcendence
     ports:
@@ -203,6 +247,8 @@ services:
     volumes:
       - ./services/filebeat/conf/filebeat.yml:/usr/share/filebeat/filebeat.yml
       - logs_nginx:/var/log/nginx
+      - logs_postgresql:/var/log/postgresql
+
     networks:
       - transcendence
     depends_on:
@@ -217,7 +263,7 @@ volumes:
   logs_django:
   logs_nginx:
   logs_postgresql:
-  logs_rabbitmq:
+  # logs_rabbitmq:
 
 networks:
   transcendence:
