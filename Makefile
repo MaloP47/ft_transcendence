@@ -37,17 +37,11 @@ ifndef VERBOSE
 endif
 ### Formatting ###
 
-.PHONY : all up down stop clean flcean mkdirs migrate makemigrations craetesuperuser list help re rere
+.PHONY : all up down stop clean flcean migrate makemigrations craetesuperuser list help re rere
 
-all up: mkdirs
+all up: 
 	@printf "$(_GREEN)Building and running Transcendence...$(_END)\n"
 	docker compose up -d --build
-	@# remove migrations from here
-	@# leave rules in makefile though, it's useful
-	sleep 2;
-	make makemigrations
-	sleep 2;
-	make migrate
 
 down stop:
 	@printf "$(_YELLOW)Stoping Transcendence...$(_END)\n"
