@@ -15,8 +15,12 @@ WORKDIR /code
 COPY ./app/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 COPY ./app .
+RUN chmod +x ./django_init.sh
+
+ENTRYPOINT ["/code/django_init.sh"]
+
 # RUN service redis-server start
-CMD ["redis-server"]
+#CMD ["redis-server"]
 
 
 # RUN redis-server
