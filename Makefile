@@ -3,79 +3,90 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: gbrunet <gbrunet@student.42.fr>            +#+  +:+       +#+         #
+#    By: guderram <guderram@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/05/28 10:17:29 by gbrunet           #+#    #+#              #
-#    Updated: 2024/05/28 10:40:28 by gbrunet          ###   ########.fr        #
+#    Updated: 2024/06/13 18:10:46 by guderram         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
-_BLACK = \033[0;30m
-_RED = \033[0;31m
-_GREEN = \033[0;32m
-_BLUE = \033[0;34m
-_YELLOW = \033[0;33m
-_PURPLE = \033[0;35m
-_CYAN = \033[0;36m
-_WHITE = \033[0;37m
+### Formatting ###
+# Colors
+_BLACK	= \033[30m
+_RED	= \033[31m
+_GREEN	= \033[32m
+_BLUE	= \033[34m
+_YELLOW	= \033[33m
+_PURPLE	= \033[35m
+_CYAN	= \033[36m
+_WHITE	= \033[37m
+_GREY	= \033[90m
 
-_BOLD = \e[1m
-_THIN = \e[2m
+# Style
+_BOLD	= \033[1m
+_THIN	= \033[2m
+_ITALIC	= \033[3m
+_UNDER	= \033[4m
+_INVERT	= \033[7m
 
-_END = \033[0m
+# Reset
+_END	= \033[0m
 
-.PHONY : all stop re clean
+ifndef VERBOSE
+	MAKEFLAGS += --no-print-directory
+endif
+### Formatting ###
 
-all:
-	@echo "$(_GREEN)Building and running Transcendence...$(_END)"
-	docker compose -f ./srcs/docker-compose.yml up -d --build
+.PHONY : all up down stop clean flcean mkdirs migrate makemigrations craetesuperuser list help re rere
+
+all up: mkdirs
+	@printf "$(_GREEN)Building and running Transcendence...$(_END)\n"
+	docker compose up -d --build
+	@# remove migrations from here
+	@# leave rules in makefile though, it's useful
 	sleep 2;
-	make makemigrations --no-print-directory
+	make makemigrations
 	sleep 2;
-	make migrate --no-print-directory
+	make migrate
 
-stop:
-	@echo "$(_YELLOW)Stoping Transcendence...$(_END)"
-	docker compose -f ./srcs/docker-compose.yml down
+down stop:
+	@printf "$(_YELLOW)Stoping Transcendence...$(_END)\n"
+	docker compose down
 
-clean:
-	make stop --no-print-directory
-	@echo "$(_YELLOW)Removing all unused containers...$(_END)"
-	docker system prune
-	docker volume prune
+clean: down
+	@printf "$(_YELLOW)Removing all unused containers...$(_END)\n"
+	docker system prune -f
+	docker volume prune -f
+	@# volumes persist here somehow
 
-
-fclean:
-	make stop --no-print-directory
-	@echo "$(_YELLOW)Removing all unused containers...$(_END)"
+fclean: down
+	@printf "$(_YELLOW)Removing all unused containers...$(_END)\n"
 	docker system prune -af
 	docker volume prune -af
+	@# volumes persist here somehow
 
 migrate:
-	docker compose -f ./srcs/docker-compose.yml exec django python manage.py migrate
+	docker compose exec django python manage.py migrate
 
 makemigrations:
-	docker compose -f ./srcs/docker-compose.yml exec django python manage.py makemigrations website
-	docker compose -f ./srcs/docker-compose.yml exec django python manage.py makemigrations chat
+	docker compose exec django python manage.py makemigrations website
+	docker compose exec django python manage.py makemigrations chat
 
 createsuperuser:
-	docker compose -f ./srcs/docker-compose.yml exec django python manage.py createsuperuser
+	docker compose exec django python manage.py createsuperuser
 
 list:
-	@docker ps
+	@docker ps -a
 
 help:
-	@echo "$(_CYAN)make / make all       $(_THIN)=> build and run transcendence$(_END)"
-	@echo "$(_CYAN)make stop             $(_THIN)=> stop transcendence$(_END)"
-	@echo "$(_CYAN)make clean            $(_THIN)=> $(_RED)WARNING$(_CYAN) $(_THIN)stop transcendence and remove ALL containers and volumes$(_END)"
-	@echo "$(_CYAN)make list             $(_THIN)=> list all running container$(_END)"
-	@echo "$(_CYAN)make migrate          $(_THIN)=> migrate db for django$(_END)"
-	@echo "$(_CYAN)make createsuperuser  $(_THIN)=> create a superuser for django$(_END)"
+	@printf "$(_CYAN)make / make all        $(_ITALIC)$(_THIN)=> build and run transcendence$(_END)\n"
+	@printf "$(_CYAN)make stop              $(_ITALIC)$(_THIN)=> stop transcendence$(_END)\n"
+	@printf "$(_CYAN)make clean             $(_ITALIC)$(_THIN)=> $(_RED)WARNING!$(_CYAN) $(_THIN)stop transcendence and remove ALL containers and volumes$(_END)\n"
+	@printf "$(_CYAN)make fclean            $(_ITALIC)$(_THIN)=> $(_RED)WARNING!$(_CYAN) $(_THIN)stop transcendence and remove ALL containers and volumes$(_END)\n"
+	@printf "$(_CYAN)make list              $(_ITALIC)$(_THIN)=> list all running container$(_END)\n"
+	@printf "$(_CYAN)make migrate           $(_ITALIC)$(_THIN)=> migrate db for django$(_END)\n"
+	@printf "$(_CYAN)make createsuperuser   $(_ITALIC)$(_THIN)=> create a superuser for django$(_END)\n"
 
-re:
-	make clean --no-print-directory
-	make all --no-print-directory
+re: clean all
 
-rere:
-	make fclean --no-print-directory
-	make all --no-print-directory
+rere: fclean all

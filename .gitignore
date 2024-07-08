@@ -1,6 +1,11 @@
+*.env
+
+# Blockchain
+/blockchain/node_modules
+
+# logs
 *.log
-srcs/requirements/django/app/debug.log
+*.logs
 
-.env
-
-blockchain/node_modules
+# persistent data at project root only
+/data

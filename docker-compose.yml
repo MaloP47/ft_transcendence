@@ -1,0 +1,53 @@
+services:
+  django:
+    container_name: django
+    build: ./services/django
+    expose:
+      - "8000"
+    command: ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+    volumes:
+      - ./services/django/app:/code
+    networks:
+      transcendence:
+    env_file:
+      - .env
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    container_name: postgres
+    image: postgres:alpine3.20
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    networks:
+      - transcendence
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 4s
+      timeout: 2s
+      retries: 5
+      start_period: 2s
+    env_file: .env
+    restart: unless-stopped
+
+  nginx:
+    container_name: nginx
+    build: services/nginx
+    volumes:
+      - ./services/nginx/conf:/etc/nginx/conf.d
+    networks:
+      transcendence:
+    ports:
+      - "1443:443"
+      - "1080:80"
+    depends_on:
+      - django
+    restart: unless-stopped
+
+networks:
+  transcendence:
+
+volumes:
+  postgres_data:
