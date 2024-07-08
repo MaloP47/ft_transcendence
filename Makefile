@@ -6,7 +6,7 @@
 #    By: guderram <guderram@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/05/28 10:17:29 by gbrunet           #+#    #+#              #
-#    Updated: 2024/07/06 11:09:23 by guderram         ###   ########.fr        #
+#    Updated: 2024/07/08 10:06:51 by guderram         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -74,6 +74,7 @@ mkdirs:
 				data/var-log/postgresql \
 				data/var-log/rabbitmq \
 				services/postgres/logs
+	@chmod 777 services/postgres/logs
 
 migrate:
 	docker compose exec django python manage.py migrate

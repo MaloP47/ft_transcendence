@@ -15,8 +15,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
+      # rabbitmq:
+      #   condition: service_healthy
     restart: unless-stopped
 
   # db:
@@ -50,7 +50,7 @@ services:
     volumes:
       - ./services/postgres/conf/postgresql.conf:/etc/postgresql/postgresql.conf
       - postgres_data:/var/lib/postgresql/data/
-      # - logs_postgresql:/var/log/postgresql
+      - logs_postgresql:/var/log/postgresql
       # - ./services/postgres/logs:/var/log/postgresql
     networks:
       - transcendence
@@ -85,25 +85,25 @@ services:
       - grafana
     restart: unless-stopped
 
-  rabbitmq:
-    container_name: rabbitmq
-    image: rabbitmq:3.12.14-alpine
-    volumes:
-      - ./services/rabbitmq/conf/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
-      - ./services/rabbitmq/conf/definitions.json:/etc/rabbitmq/definitions.json
-      # - logs_rabbitmq:/var/log/rabbitmq/
-    networks:
-      - transcendence
-    ports:
-      - "5672:5672"
-      - "15672:15672"
-    healthcheck:
-      test: ["CMD-SHELL", "rabbitmqctl status"]
-      interval: 3s
-      timeout: 1s
-      retries: 10
-      start_period: 2s
-    restart: unless-stopped
+  # rabbitmq:
+  #   container_name: rabbitmq
+  #   image: rabbitmq:3.12.14-alpine
+  #   volumes:
+  #     - ./services/rabbitmq/conf/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
+  #     - ./services/rabbitmq/conf/definitions.json:/etc/rabbitmq/definitions.json
+  #     # - logs_rabbitmq:/var/log/rabbitmq/
+  #   networks:
+  #     - transcendence
+  #   ports:
+  #     - "5672:5672"
+  #     - "15672:15672"
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "rabbitmqctl status"]
+  #     interval: 3s
+  #     timeout: 1s
+  #     retries: 10
+  #     start_period: 2s
+  #   restart: unless-stopped
 
   prometheus:
     container_name: prometheus
@@ -241,7 +241,8 @@ services:
     volumes:
       - ./services/filebeat/conf/filebeat.yml:/usr/share/filebeat/filebeat.yml
       - logs_nginx:/var/log/nginx
-      - ./services/postgres/logs:/var/log/postgresql
+      # - ./services/postgres/logs:/var/log/postgresql
+      - logs_postgresql:/var/log/postgresql
       - logs_django:/var/log/django
 
     networks:
