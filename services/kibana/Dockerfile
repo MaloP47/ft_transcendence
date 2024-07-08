@@ -8,6 +8,7 @@ RUN apt-get install -y curl
 
 
 COPY ./conf/import_dashboards.sh /usr/share/kibana/import_dashboards.sh
+COPY ./conf/dashboard.ndjson /usr/share/kibana/dashboard.ndjson
 
 RUN chmod +x /usr/share/kibana/import_dashboards.sh
 

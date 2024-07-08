@@ -6,7 +6,7 @@
 #    By: guderram <guderram@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/05/28 10:17:29 by gbrunet           #+#    #+#              #
-#    Updated: 2024/07/08 10:06:51 by guderram         ###   ########.fr        #
+#    Updated: 2024/07/08 13:33:59 by guderram         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -59,12 +59,17 @@ clean: down
 	docker volume prune -f
 	rm -rf data/var-log
 	rm -rf services/postgres/logs
+	rm -rf data/kibana
+
 
 fclean: down
 	@printf "$(_YELLOW)Removing all unused containers...$(_END)\n"
 	docker system prune -af
 	docker volume prune -af
 	rm -rf data/var-log
+	rm -rf services/postgres/logs
+	rm -rf data/kibana
+
 
 mkdirs:
 	@# temporary!!! remove later 
@@ -73,7 +78,8 @@ mkdirs:
 				data/var-log/nginx \
 				data/var-log/postgresql \
 				data/var-log/rabbitmq \
-				services/postgres/logs
+				services/postgres/logs \
+				data/kibana
 	@chmod 777 services/postgres/logs
 
 migrate:

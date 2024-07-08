@@ -28,6 +28,17 @@ else
 	echo "Index pattern 'filebeat-*' already exists."
 fi
 
+# Vérifier si le tableau de bord existe déjà
+if curl -s -X GET "localhost:5601/api/saved_objects/_find?type=dashboard&search=Mon-Beau-Tableau" | grep -q '"total":0'; then
+	# curl -X POST "http://localhost:5601/api/saved_objects/_import" -H "kbn-xsrf: true" --form file=@/usr/share/kibana/dashboard.ndjson
+	curl -X POST "http://localhost:5601/api/saved_objects/_import?overwrite=true" \
+	-H "kbn-xsrf: true" \
+	--form file=@/usr/share/kibana/dashboard.ndjson
+	echo "Dashboard 'Mon-Beau-Tableau' added."
+else
+	echo "Dashboard 'My Filebeat Dashboard' already exists."
+fi
+
 sleep 5;
 
 kill $(ps aux | grep 'kibana' | awk '{print $2}')

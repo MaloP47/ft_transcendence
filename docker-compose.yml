@@ -225,11 +225,17 @@ services:
     environment:
       - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
     volumes:
+      - kibana_data:/usr/share/kibana/data
       # - ./services/kibana/conf/import_dashboards.sh:/usr/share/kibana/import_dashboards.sh
       # - ./services/kibana/conf/dashboards.ndjson:/usr/share/kibana/config/dashboards.ndjson
       - ./services/kibana/conf/dashboard.json:/usr/share/kibana/dashboard.json
     networks:
       - transcendence
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5601"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
     ports:
       - "5601:5601"
     depends_on:
@@ -259,6 +265,7 @@ volumes:
   grafana_data:
   prometheus_data:
   elasticsearch_data:
+  kibana_data:
     # driver: local
     # driver_opts:
     #   type: 'none'
