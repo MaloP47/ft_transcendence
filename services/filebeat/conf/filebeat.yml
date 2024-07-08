@@ -11,3 +11,6 @@ processors:
 
 output.logstash:
   hosts: ["logstash:5044"]
+
+setup.kibana:
+  host: "kibana:5601"

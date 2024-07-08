@@ -1,10 +1,8 @@
-*.env
-
-# logs
-*.log
-*.logs
+.env
 
 # persistent data at project root only
 /data
 
-./services/postgres/data
+/services/django/app/debug.log
+
+/services/postgres/logs
