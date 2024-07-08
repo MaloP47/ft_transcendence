@@ -46,3 +46,11 @@ class Game(models.Model):
 	p2Left = models.IntegerField(default=37)
 	p2Right = models.IntegerField(default=39)
 	gameType = models.IntegerField(default=0) # 0->local vs AI // 1->local 1 vs 1 // 2->remote 1 vs 1
+	gameOver = models.BooleanField(default=False)
+
+class Tournament(models.Model):
+	id = models.AutoField(primary_key=True)
+	date = models.DateTimeField(auto_now_add=True)
+	games = models.ManyToManyField(Game, blank=True)
+	idBC = models.IntegerField(default=-1)
+	tournamentOver = models.BooleanField(default=False)
