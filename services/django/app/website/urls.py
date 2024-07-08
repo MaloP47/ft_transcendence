@@ -37,7 +37,8 @@ urlpatterns = [
 	path('api/view/friendRequestView/', views.friendRequestView, name="friendRequestView"),
 
 	path('api/view/tournamentEnd/', views.createTournament, name="blockchain"),
-	path('api/view/getTournament/', views.viewTournament, name="blockchainView"),
+	path('api/view/getTournament/<int:tournament_id>', views.viewTournament, name="blockchainView"),
+	path('api/tournament/getWinner/', views.getTournamentWinner, name="getTournamentWinner"),
 
 	path('', views.index, name="index"),
 	path('login', views.index, name="index"),
@@ -46,4 +47,7 @@ urlpatterns = [
     path('play1vsAI/<int:game_id>', views.indexGame, name="indexGame"),
 	path('play1vs1', views.index, name="index"),
     path('play1vs1/<int:game_id>', views.indexGame, name="indexGame"),
+
+	path('listTournaments', views.index, name="index"),
+	path('api/view/listTournaments/', views.listTournaments, name="listTournaments"),
 ]
