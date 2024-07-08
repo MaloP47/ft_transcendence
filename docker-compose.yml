@@ -217,12 +217,15 @@ services:
     restart: unless-stopped
 
   kibana:
-    image: docker.elastic.co/kibana/kibana:7.17.10
+    # image: docker.elastic.co/kibana/kibana:7.17.10
+    build:
+      context: services/kibana
+      dockerfile: Dockerfile
     container_name: kibana
     environment:
       - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
     volumes:
-      - ./services/kibana/conf/import_dashboards.sh:/usr/share/kibana/import_dashboards.sh
+      # - ./services/kibana/conf/import_dashboards.sh:/usr/share/kibana/import_dashboards.sh
       # - ./services/kibana/conf/dashboards.ndjson:/usr/share/kibana/config/dashboards.ndjson
       - ./services/kibana/conf/dashboard.json:/usr/share/kibana/dashboard.json
     networks:
@@ -231,8 +234,8 @@ services:
       - "5601:5601"
     depends_on:
       - elasticsearch
-    restart: unless-stopped
-    entrypoint: ["/bin/bash", "-c", "/usr/share/kibana/import_dashboards.sh"]
+    # restart: unless-stopped
+    # entrypoint: ["/bin/bash", "-c", "/usr/share/kibana/import_dashboards.sh"]
 
 
   filebeat:
