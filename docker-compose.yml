@@ -168,12 +168,15 @@ services:
       - xpack.security.enabled=false
     volumes:
       - elasticsearch_data:/usr/share/elasticsearch/data
+      - ./services/elasticsearch/conf/init_elasticsearch.sh:/usr/share/elasticsearch/init_elasticsearch.sh
     ports:
       - "9200:9200"
       - "9300:9300"
     networks:
       - transcendence
     restart: unless-stopped
+    user: "1000:1000"
+    command: ["sh", "-c", "/usr/share/elasticsearch/bin/elasticsearch && /usr/share/elasticsearch/init_elasticsearch.sh"]
 
   logstash:
     image: docker.elastic.co/logstash/logstash:7.17.10
@@ -193,13 +196,18 @@ services:
     container_name: kibana
     environment:
       - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    volumes:
+      - ./services/kibana/conf/import_dashboards.sh:/usr/share/kibana/import_dashboards.sh
+      - ./services/kibana/conf/dashboards.ndjson:/usr/share/kibana/config/dashboards.ndjson
     networks:
       - transcendence
     ports:
       - "5601:5601"
     depends_on:
       - elasticsearch
-    restart: unless-stopped
+    # restart: unless-stopped
+    entrypoint: ["/bin/bash", "-c", "/usr/share/kibana/import_dashboards.sh"]
+
 
   filebeat:
     image: docker.elastic.co/beats/filebeat:7.17.10

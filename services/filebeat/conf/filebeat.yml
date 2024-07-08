@@ -6,5 +6,8 @@ filebeat.inputs:
     - /var/log/postgresql/*.log
     - /var/log/nginx/*.log
 
+processors:
+  - add_cloud_metadata: ~
+
 output.logstash:
   hosts: ["logstash:5044"]
