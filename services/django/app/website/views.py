@@ -478,7 +478,6 @@ def createTournament(request):
     return JsonResponse({'success': False, 'status': 'error', 'message': 'Invalid request method'})
 
 def viewTournament(request, tournament_id):
-    print(tournament_id)
     if contract is None:
         return JsonResponse({'success': False, 'status': 'error', 'message': 'Contract initialization failed'})
     if request.method == 'POST':
