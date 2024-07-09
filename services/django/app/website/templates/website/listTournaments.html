@@ -1,0 +1,34 @@
+<div id="listTournaments" class="d-flex flex-column justify-content-center align-items-center position-fixed w-100" style="z-index:300">
+	<div id="resultTournament"></div>
+	<table class="table table-dark table-striped table-hover table-sm rounded overflow-hidden" style="max-width: 500px;">
+		<thead>
+			<tr>
+				<th style="width: 30%" scope="col">Date</th>
+				<th style="width: 23%" scope="col">Finished</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for obj in tournaments %}
+				{% if obj.tournamentOver %}
+				<tr>
+					<td>
+						<a href="/getTournament/{{ obj.idBC }}" data-link class="link-underline link-underline-opacity-0 text-light">{{obj.date}}</a>
+					</td>
+					<td class="text-success">
+						<a href="/getTournament/{{ obj.idBC }}" data-link class="link-underline link-underline-opacity-0 text-success">Tournament finished</a>
+					</td>
+				</tr>
+				{% else %}
+				<tr>
+					<td>{{obj.date}}</td>
+					<td class="text-danger">Tournament in progress</td>
+				</tr>
+				{% endif %}
+				{% empty %}
+					<tr>
+						<td colspan="2">No tournaments available.</td>
+					</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+</div>

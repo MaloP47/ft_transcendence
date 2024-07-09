@@ -16,7 +16,7 @@ from django.contrib.auth import login, logout, authenticate
 from django.template.loader import render_to_string
 from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Exists, F, Subquery, OuterRef, Q
-from website.models import Game, BlockedUser, User, Message, Room, FriendRequest
+from website.models import Game, BlockedUser, User, Message, Room, FriendRequest, Tournament
 import json
 from datetime import datetime, timedelta
 from web3 import Web3
@@ -261,7 +261,7 @@ def registerForm(request):
 			'html': render_to_string('website/register.html'),
 		});
 
-@csrf_exempt
+# @csrf_exempt
 def registerUser(request):
     if request.method == 'POST':
         user_form = CustomUserCreationForm(request.POST, request.FILES)
@@ -381,7 +381,7 @@ def chatUserView(request):
 	else:
 		return JsonResponse({
 			'success': False,
-		});
+		})
 
 def chatRoomsView(request):
 	if request.method == 'POST' and request.user.is_authenticated:
@@ -393,7 +393,7 @@ def chatRoomsView(request):
 	else:
 		return JsonResponse({
 			'success': False,
-		});
+		})
 
 def chatMessageView(request):
 	if request.method == 'POST':
@@ -403,7 +403,7 @@ def chatMessageView(request):
 		return JsonResponse({
 			'success': True,
 			'html': render_to_string('website/chatMessageView.html', {"data": data, "user": request.user, "friend": friend, "blocked": blocked}),
-		});
+		})
 
 def friendRequestView(request):
 	if request.method == 'POST':
@@ -412,7 +412,7 @@ def friendRequestView(request):
 		return JsonResponse({
 			'success': True,
 			'html': render_to_string('website/friendRequestView.html', {"friend": friend, "user": request.user}),
-		});
+		})
 
 def messageSetRead(request):
 	if request.method == 'POST':
@@ -423,13 +423,21 @@ def messageSetRead(request):
 			Message.objects.filter(room_id=room).filter(user_id=user).exclude(read=True).update(read=True)
 		return JsonResponse({
 			'success': True,
-		});
+		})
 
-web3 = Web3(Web3.HTTPProvider(settings.API_URL))
+def listTournaments(request):
+	if request.method == 'POST':
+		tour = Tournament.objects.all()
+		return JsonResponse({
+			'success': True,
+			'html': render_to_string('website/listTournaments.html', {"tournaments": tour}),
+		})
 
 	##----------------------------------------------------------//
 	##						BLOCKCHAIN							//
 	##----------------------------------------------------------//
+
+web3 = Web3(Web3.HTTPProvider(settings.API_URL))
 
 try:
     contract = web3.eth.contract(address=settings.CONTRACT_ADDRESS, abi=settings.CONTRACT_ABI)
@@ -463,9 +471,60 @@ def createTournament(request):
             })
             signed_txn = web3.eth.account.sign_transaction(transaction, private_key=settings.PRIVATE_KEY)
             tx_hash = web3.eth.send_raw_transaction(signed_txn.rawTransaction)
-            return JsonResponse({'success': True, 'status': 'success', 'message': 'Transaction successful', 'tx_hash': tx_hash.hex()})
+            return JsonResponse({'success': True, 'status': 'success', 'message': 'Transaction successful'})
         except Exception as e:
             return JsonResponse({'success': False, 'status': 'error', 'message': str(e)})
 
     return JsonResponse({'success': False, 'status': 'error', 'message': 'Invalid request method'})
 
+def viewTournament(request, tournament_id):
+    if contract is None:
+        return JsonResponse({'success': False, 'status': 'error', 'message': 'Contract initialization failed'})
+    if request.method == 'POST':
+        try:
+            #data = json.loads(request.POST["data"])
+            #tournament_id = data.get('tournament_id')
+
+            if tournament_id is None:
+                return JsonResponse({'success': False, 'status': 'error', 'message': 'Missing tournament ID'})
+			
+            if not isinstance(tournament_id, int) or tournament_id < 0:
+                return JsonResponse({'success': False, 'status': 'error', 'message': 'Invalid (negative) tournament ID'})
+
+            tournament_length = contract.functions.getTournamentLength().call()
+
+            if tournament_id > tournament_length - 1:
+                return JsonResponse({'success': False, 'status': 'error', 'message': "Tournament ID doesn't exist"})
+
+            tournament = contract.functions.getTournament(tournament_id).call()
+            winner_id, winner_wins, winner_losses = tournament
+
+            return JsonResponse({
+                'success': True,
+                'status': 'success',
+                'tournament_id': tournament_id,
+                'winner_id': winner_id,
+                'winner_wins': winner_wins,
+                'winner_losses': winner_losses
+            })
+        except Exception as e:
+            return JsonResponse({'success': False, 'status': 'error', 'message': str(e)})
+
+    return JsonResponse({'success': False, 'status': 'error', 'message': 'Invalid request method'})
+
+def getTournamentWinner(request):
+	if request.method == 'POST':
+		data = json.loads(request.POST["data"])
+		winner_id = data['winner_id']
+		winner_wins = data['winner_wins']
+		winner_losses = data['winner_losses']
+		try:
+			winner = User.objects.get(id=winner_id)
+			return JsonResponse({
+				'success': True,
+				'html': render_to_string('website/tournamentWinner.html', {'winner': winner, 'winner_wins': winner_wins, 'winner_losses': winner_losses})
+			})
+		except:
+			return JsonResponse({
+				'success': False,
+			})

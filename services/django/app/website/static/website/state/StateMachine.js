@@ -31,9 +31,9 @@ export default class App {
 
 		// let test = document.getElementById("btnTestMint").addEventListener("click", () => {
 		// 	this.getApiResponseJson("/api/view/tournamentEnd/", {
-		// 		'tournament_id': 12,
-		// 		'winner_id': 47,
-		// 		'wins': 7,
+		// 		'tournament_id': 85,
+		// 		'winner_id': 89,
+		// 		'wins': 12,
 		// 		'losses': 3,
 		// 	}).then((response) => {
 		// 		let res = JSON.parse(response);
@@ -45,6 +45,25 @@ export default class App {
 		// 		}
 		// 	});
 		// })
+
+		// let test2 = document.getElementById("btnTestGet").addEventListener("click", () => {
+		// 	this.getApiResponseJson("/api/view/getTournament/", {
+		// 		'tournament_id': 18,
+		// 	}).then((response) => {
+		// 		let res = JSON.parse(response);
+		// 		if (res.success) {
+		// 			alert("Ok")
+		// 			alert("Tournament ID: " + res.tournament_id);
+        //        		alert("Winner ID: " + res.winner_id);
+        //         	alert("Winner Wins: " + res.winner_wins);
+        //         	alert("Winner Losses: " + res.winner_losses);
+		// 		} else {
+		// 			alert("Fuck")
+		// 			alert(res.message);
+		// 		}
+		// 	});
+		// })
+
 	}
 
 	preventLinkDefaultBehavior() {
@@ -77,6 +96,7 @@ export default class App {
 			"/register": {title: "Transcendence - Register", state: "Register"},
 			"/play1vsAI": {title: "Transcendence - 1 VS A.I.", state: "Play1vsAI"},
 			"/play1vs1": {title: "Transcendence - 1 VS 1 (local)", state: "Play1vs1"},
+			"/listTournaments": {title: "Transcendence - Tournaments", state: "listTournaments"},
 		}
 	}
 
@@ -123,6 +143,9 @@ export default class App {
 		} else if (path.indexOf("/play1vs1/") == 0) {
 			id = path.substring(10)
 			path = "/play1vs1"
+		} else if (path.indexOf("/getTournament/") == 0) {
+			id = path.substring(15)
+			path = "/listTournaments"
 		}
 		let view = this.routes[path];
 		if (view) {
@@ -152,6 +175,8 @@ export default class App {
 						this.hideLoginForm();
 					if (document.getElementById("createGame"))
 						this.hideCreateGame();
+					if (document.getElementById("listTournaments"))
+						this.hideListTournaments();
 					this.getHomePage("1vsAI", id);
 					break;
 				case "Play1vs1":
@@ -161,7 +186,18 @@ export default class App {
 						this.hideLoginForm();
 					if (document.getElementById("createGame"))
 						this.hideCreateGame();
+					if (document.getElementById("listTournaments"))
+						this.hideListTournaments();
 					this.getHomePage("1vs1", id);
+					break;
+				case "listTournaments":
+					if (document.getElementById("registerForm"))
+						this.hideRegisterForm();
+					if (document.getElementById("loginForm"))
+						this.hideLoginForm();
+					if (document.getElementById("createGame"))
+						this.hideCreateGame();
+					this.getHomePage("listTournaments", id);
 					break;
 			}
 		} else {
@@ -361,6 +397,10 @@ export default class App {
 					else if (state == "1vs1" && game_id != -1) {
 						this.getLocalGame(game_id);
 					}
+					else if (state == "listTournaments") {
+						this.setPong("bg");
+						this.getListTournaments(game_id);
+					}
 					let homeView = document.getElementById("homeView");
 					setTimeout(() => {
 						homeView.classList.remove("hided");
@@ -386,6 +426,9 @@ export default class App {
 				this.hideLocalConfigPage();
 				this.getLocalGame(game_id);
 			}
+			else if (state == "listTournaments") {
+				this.getListTournaments(game_id);
+			}
 		}
 	}
 
@@ -395,6 +438,14 @@ export default class App {
 			return ;
 		gameOverlay.classList.add("hided")
 		this.remove("gameOverlay")
+	}
+
+	hideListTournaments() {
+		let div = document.getElementById("listTournaments");
+		if (!div)
+			return ;
+		div.classList.add("hided")
+		this.remove("listTournaments")
 	}
 
 	getLocalGame(id) {
@@ -493,6 +544,42 @@ export default class App {
 				this.router();
 			}
 		});
+	}
+
+	getListTournaments(id) {
+		if (id == -1 || id == undefined) {
+			this.getApiResponse("api/view/listTournaments/").then((response) => {
+				let res = JSON.parse(response);
+				if (res.success) {
+					let homeContent = document.getElementById("homeContent");
+					homeContent.innerHTML += res.html;
+				} else {
+					history.replaceState("", "", "/");
+					this.router();
+				}
+			});
+		} else {
+			let resultDiv = document.getElementById("resultTournament")
+			resultDiv.innerHTML = "Consulting the blockchain..."
+			this.getApiResponse("/api/view/getTournament/" + id).then((response) => {
+				let res = JSON.parse(response);
+				if (res.success) {
+					this.getApiResponseJson("/api/tournament/getWinner/", res).then((response) => {
+						let result = JSON.parse(response);
+						if (result.success) {
+							if (resultDiv) {
+								resultDiv.innerHTML = result.html
+							}
+						} else {
+							resultDiv.innerHTML = "Unable to get user."
+						}
+					});
+				} else {
+					history.replaceState("", "", "/");
+					this.router();
+				}
+			});
+		}
 	}
 	
 	hideLocalConfigPage() {
