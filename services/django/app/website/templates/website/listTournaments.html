@@ -24,6 +24,10 @@
 					<td class="text-danger">Tournament in progress</td>
 				</tr>
 				{% endif %}
+				{% empty %}
+					<tr>
+						<td colspan="2">No tournaments available.</td>
+					</tr>
 			{% endfor %}
 		</tbody>
 	</table>
