@@ -144,6 +144,15 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+PASSWORD_HASHERS = [
+    'django.contrib.auth.hashers.Argon2PasswordHasher',  # Le plus robuste
+    'django.contrib.auth.hashers.PBKDF2PasswordHasher',
+    'django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher',
+    'django.contrib.auth.hashers.BCryptSHA256PasswordHasher',
+    'django.contrib.auth.hashers.SHA1PasswordHasher',  # Moins recommandé
+    'django.contrib.auth.hashers.MD5PasswordHasher',   # Moins recommandé
+    'django.contrib.auth.hashers.UnsaltedMD5PasswordHasher',  # Moins recommandé
+]
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
