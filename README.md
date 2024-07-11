@@ -32,13 +32,14 @@ Put here changes that will impact project mates
     - [ ] use docker compose to clean containers instead of normal docker
     - [ ] remove django migrations and put it in startup script in container or dockerfile
 - [ ] docker volumes bind-mounts inside `data` folder at project root for the ones needed, (yeah we don't need persistence but it would be nice for demonstrations and debugging)
-- [ ] remove `mkdirs` rule
+- [x] remove `mkdirs` rule
 - [ ] look more into docker `secrets` for all passwords, tokens and API keys
 - [ ] look more into the concept of init containers in combination with docker secrets
 ### Django
-- [ ] database migration command
-    - [ ] move into Dockerfile setup? or mounted bash script
+- [x] database migration command
+    - [x] move into Dockerfile setup? or mounted bash script
     - [ ] wait for postgres to be up for migrations? 
+    - [x] add `exec` at the start of last command in `django_init.sh`
 - [ ] move debug logs to a volume or smth (ask guillaume)
 ### postgres
 - [x] WARNING: POSTGRES_HOST_AUTH_METHOD has been set to "trust". This will allow anyone with access to the Postgres port to access your database without a password, even if POSTGRES_PASSWORD is set. See PostgreSQL documentation about "trust":
