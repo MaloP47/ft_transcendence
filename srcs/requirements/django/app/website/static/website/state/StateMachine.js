@@ -1396,7 +1396,6 @@ export default class App {
 		let profilePictureInput = document.getElementById("registerFormProfilePicture");
 		let previewProfilePicture = document.getElementById("previewProfilePicture");
 		let registerFormAlert = document.getElementById("registerFormAlert");
-
 		profilePictureInput.addEventListener("change", function () {
 			if (this.files && this.files[0]) {
 				let file = this.files[0];
@@ -1407,7 +1406,7 @@ export default class App {
 				previewProfilePicture.innerHTML = '';
 
 				// File validation
-				const fileSizeLimit = 2 * 1024 * 1024; // 2MB
+				const fileSizeLimit = 1 * 1024 * 1024; // 2MB
 				const allowedFileTypes = ['image/jpeg', 'image/png'];
 
 				if (!allowedFileTypes.includes(file.type)) {
@@ -1417,7 +1416,7 @@ export default class App {
 				}
 
 				if (file.size > fileSizeLimit) {
-					registerFormAlert.textContent = 'File size exceeds 2MB. Please upload a smaller image.';
+					registerFormAlert.textContent = 'File size exceeds 1MB. Please upload a smaller image.';
 					registerFormAlert.classList.remove('hided');
 					return;
 				}
