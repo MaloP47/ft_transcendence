@@ -34,7 +34,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-m9w%(t-*skf-zw=w0=1gfobllres35883!)7s3u7t0%&ao%p_n'
+SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -44,7 +44,6 @@ ALLOWED_HOSTS = ['*']
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 CSRF_TRUSTED_ORIGINS = ['https://derramond.fr', 'https://localhost:1443', 'https://127.0.0.1:1443']
-
 
 # Application definition
 
@@ -113,14 +112,21 @@ WSGI_APPLICATION = 'transcendence.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
+ENV_DB = os.getenv('POSTGRES_DB')
+ENV_NAME = os.getenv('POSTGRES_HOST')
+ENV_USER = os.getenv('POSTGRES_USER')
+ENV_ENGINE = os.getenv('POSTGRES_ENGINE')
+ENV_PASSWD = os.getenv('POSTGRES_PASSWORD')
+ENV_PORT = os.getenv('POSTGRES_PORT')
+
 DATABASES = {
     'default': {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": "postgres",
-        "USER": "postgres",
-        "PASSWORD": "postgres",
+        "ENGINE": ENV_ENGINE,
+        "NAME": ENV_NAME,
+        "USER": ENV_USER,
+        "PASSWORD": ENV_PASSWD,
         "HOST": "db",  # set in docker-compose.yml
-        "PORT": 5432,  # default postgres port
+        "PORT": ENV_PORT,  # default postgres port
     }
 }
 
