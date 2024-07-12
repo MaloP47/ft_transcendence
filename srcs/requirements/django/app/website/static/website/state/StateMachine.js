@@ -1275,6 +1275,7 @@ export default class App {
 				loginForm.classList.add("trXm100");
 				let form = document.getElementById("loginFormForm");
 				let formBtn = document.getElementById("loginFormSubmitBtn");
+				this.addTogglePasswordButtons();
 				if (formBtn) {
 					document.getElementById("loginFormSubmitBtn").addEventListener("click", e => {
 						e.preventDefault();
