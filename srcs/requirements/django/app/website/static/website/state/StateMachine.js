@@ -476,7 +476,7 @@ export default class App {
 			}
 		});
 	}
-	
+
 	hideLocalConfigPage() {
 		let configView = document.getElementById("aiConfig");
 		if (!configView)
@@ -1354,7 +1354,7 @@ export default class App {
 				this.getApiResponse("api/user/register/", formData).then((response) => {
 					let res = JSON.parse(response);
 					if (res.success) {
-						history.pushState("", "", "/login");
+						history.pushState("", "", "/");
 						this.router();
 						this.updateUser();
 					} else {

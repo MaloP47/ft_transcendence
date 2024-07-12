@@ -285,7 +285,7 @@ def registerUser(request):
                 user = user_form.save()
                 user = authenticate(username=request.POST["username"], password=request.POST["password1"])
                 if user is not None:
-                    # login(request, user) # Uncomment this line if you want to login the user immediately after registration
+                    login(request, user) # Uncomment this line if you want to login the user immediately after registration
                     return JsonResponse({'success': True})
                 else:
                     return JsonResponse({'success': False, 'message': 'Authentication failed'})
