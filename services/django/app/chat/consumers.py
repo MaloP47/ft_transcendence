@@ -49,11 +49,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
 			roomId = text_data_json['room']
 			rooms = await sync_to_async(Room.objects.all, thread_sensitive=True)()
 			count = await sync_to_async(rooms.count)()
-			if (count == 0):
-				new_room = Room(publicRoom=True)
-				await sync_to_async(new_room.save)()
 			if roomId == "Public":
-				room = await sync_to_async(Room.objects.get, thread_sensitive=True)(publicRoom=True)
+				room = await sync_to_async(Room.objects.get, thread_sensitive=True)(id=1)
 			else:
 				room = await sync_to_async(Room.objects.get, thread_sensitive=True)(id=roomId)
 			user = await sync_to_async(User.objects.get, thread_sensitive=True)(id=userId)
