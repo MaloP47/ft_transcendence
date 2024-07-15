@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   style.css                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: gbrunet <gbrunet@student.42.fr>            +#+  +:+       +#+        */
+/*   By: renstein <renstein@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/07 09:37:34 by gbrunet           #+#    #+#             */
-/*   Updated: 2024/06/20 09:45:39 by gbrunet          ###   ########.fr       */
+/*   Updated: 2024/07/15 18:03:48 by renstein         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -293,4 +293,22 @@ body {
 
 .rounded-bottom-right-1 {
 	border-bottom-right-radius: 4px !important;
+}
+
+/* Custom CSS for the file input label */
+#registerFormProfilePicture {
+	display: none;
+}
+.custom-file-label {
+	display: inline-block;
+	cursor: pointer;
+	padding: 6px 12px;
+	background-color: #007bff;
+	border: 1px solid rgba(248, 249, 250, 0.1);
+	color: white;
+	border-radius: 0.25rem;
+	margin-left: 10px;
+}
+.custom-file-label:hover {
+	background-color: #0056b3;
 }
