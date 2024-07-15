@@ -524,7 +524,24 @@ def getTournamentWinner(request):
 				'success': True,
 				'html': render_to_string('website/tournamentWinner.html', {'winner': winner, 'winner_wins': winner_wins, 'winner_losses': winner_losses})
 			})
-		except:
+		except User.DoesNotExist:
+			winner = User(username="Unknown User")
 			return JsonResponse({
 				'success': False,
+				'html': render_to_string('website/tournamentWinner.html', {'winner': winner, 'winner_wins': winner_wins, 'winner_losses': winner_losses})
 			})
+		
+	##----------------------------------------------------------//
+	##						TOURNAMENT							//
+	##----------------------------------------------------------//
+
+# Once tournament is over createTournament output along with Tournament pk id is passed to this fn
+def	setIdBc(request, tournament_id):
+	if request.method == 'POST':
+		data = json.loads(request.POST["data"])
+		success = data['success']
+		if success == True:
+			tournament = Tournament.objects.get(id=tournament_id)
+			len = contract.functions.getTournamentLength().call()
+			tournament.idBC = len - 1
+			tournament.save()

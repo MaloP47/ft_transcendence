@@ -9,26 +9,34 @@
 		</thead>
 		<tbody>
 			{% for obj in tournaments %}
-				{% if obj.tournamentOver %}
-				<tr>
-					<td>
-						<a href="/getTournament/{{ obj.idBC }}" data-link class="link-underline link-underline-opacity-0 text-light">{{obj.date}}</a>
-					</td>
-					<td class="text-success">
-						<a href="/getTournament/{{ obj.idBC }}" data-link class="link-underline link-underline-opacity-0 text-success">Tournament finished</a>
-					</td>
-				</tr>
+			{% if obj.tournamentOver %}
+				{% if obj.idBC %}
+					<tr>
+						<td>
+							<a href="/getTournament/{{ obj.idBC }}" data-link class="link-underline link-underline-opacity-0 text-light">{{obj.date}}</a>
+						</td>
+						<td class="text-success">
+							<a href="/getTournament/{{ obj.idBC }}" data-link class="link-underline link-underline-opacity-0 text-success">Tournament finished</a>
+						</td>
+					</tr>
 				{% else %}
+					<tr>
+						<td>{{obj.date}}</td>
+						<td class="text-warning">Finished but not stored on the blockchain</td>
+					</tr>
+				{% endif %}
+			{% else %}
 				<tr>
 					<td>{{obj.date}}</td>
 					<td class="text-danger">Tournament in progress</td>
 				</tr>
-				{% endif %}
-				{% empty %}
-					<tr>
-						<td colspan="2">No tournaments available.</td>
-					</tr>
-			{% endfor %}
+			{% endif %}
+		{% empty %}
+			<tr>
+				<td colspan="2">No tournaments available.</td>
+			</tr>
+		{% endfor %}
+		
 		</tbody>
 	</table>
 </div>
