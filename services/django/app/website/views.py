@@ -524,9 +524,11 @@ def getTournamentWinner(request):
 				'success': True,
 				'html': render_to_string('website/tournamentWinner.html', {'winner': winner, 'winner_wins': winner_wins, 'winner_losses': winner_losses})
 			})
-		except:
+		except User.DoesNotExist:
+			winner = User(username="Unknown User")
 			return JsonResponse({
 				'success': False,
+				'html': render_to_string('website/tournamentWinner.html', {'winner': winner, 'winner_wins': winner_wins, 'winner_losses': winner_losses})
 			})
 		
 	##----------------------------------------------------------//

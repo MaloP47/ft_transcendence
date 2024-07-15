@@ -571,7 +571,7 @@ export default class App {
 								resultDiv.innerHTML = result.html
 							}
 						} else {
-							resultDiv.innerHTML = "Unable to get user."
+							resultDiv.innerHTML = result.html
 						}
 					});
 				} else {
