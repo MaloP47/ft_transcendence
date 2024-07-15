@@ -6,6 +6,9 @@ echo "Waiting for Elasticsearch..."
 sleep 2
 done
 
+
+# bin/elasticsearch-setup-passwords interactive
+
 # Charger les indices, mappings, etc.
 curl -X PUT "http://elasticsearch:9200/filebeat-*" -H 'Content-Type: application/json' -d'
 {
@@ -17,3 +20,7 @@ curl -X PUT "http://elasticsearch:9200/filebeat-*" -H 'Content-Type: application
 	}
 }
 '
+
+
+
+

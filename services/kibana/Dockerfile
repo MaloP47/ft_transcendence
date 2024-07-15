@@ -1,4 +1,4 @@
-FROM docker.elastic.co/kibana/kibana:7.17.10
+FROM kibana:8.14.3
 
 USER root
 

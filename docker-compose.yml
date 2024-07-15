@@ -184,16 +184,25 @@ services:
     env_file: .env
     networks:
       - transcendence
+      
 
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.10
+    image: elasticsearch:8.14.3
     container_name: elasticsearch
     environment:
       - discovery.type=single-node
-      - xpack.security.enabled=false
+      - xpack.security.enabled=true
+      # - ELASTIC_USERNAME=jeanjean
+      # - ELASTIC_PASSWORD=DidierDidier
+      # - ELASTICSEARCH_USERNAME=jeanjean
+      # - ELASTICSEARCH_PASSWORD=DidierDidier
+      # - ELASTIC_PASSWORD=DidierDidier
+      - KIBANA_USERNAME=kibana_system
+      - KIBANA_PASSWORD=DidierDidier
     volumes:
       - elasticsearch_data:/usr/share/elasticsearch/data
       - ./services/elasticsearch/conf/init_elasticsearch.sh:/usr/share/elasticsearch/init_elasticsearch.sh
+      # - ./services/elasticsearch/conf/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
     ports:
       - "9200:9200"
       - "9300:9300"
@@ -222,13 +231,18 @@ services:
       context: services/kibana
       dockerfile: Dockerfile
     container_name: kibana
-    environment:
-      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    # environment:
+      # - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      # - ELASTICSEARCH_URL=http://elasticsearch:9200
+      # - ELASTICSEARCH_HOSTS=["http://elasticsearch:9200"]
+      # - ELASTICSEARCH_USERNAME=jeanjean
+      # - ELASTICSEARCH_PASSWORD=DidierDidier
     volumes:
       - kibana_data:/usr/share/kibana/data
       # - ./services/kibana/conf/import_dashboards.sh:/usr/share/kibana/import_dashboards.sh
       # - ./services/kibana/conf/dashboards.ndjson:/usr/share/kibana/config/dashboards.ndjson
       - ./services/kibana/conf/dashboard.json:/usr/share/kibana/dashboard.json
+      - ./services/kibana/conf/kibana.yml:/usr/share/kibana/config/kibana.yml
     networks:
       - transcendence
     healthcheck:
