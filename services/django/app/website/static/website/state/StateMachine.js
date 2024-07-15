@@ -97,6 +97,7 @@ export default class App {
 			"/play1vsAI": {title: "Transcendence - 1 VS A.I.", state: "Play1vsAI"},
 			"/play1vs1": {title: "Transcendence - 1 VS 1 (local)", state: "Play1vs1"},
 			"/listTournaments": {title: "Transcendence - Tournaments", state: "listTournaments"},
+			"/createTournaments": {title: "Transcendence - Tournament creation", state: "createTournaments"},
 		}
 	}
 
@@ -198,6 +199,15 @@ export default class App {
 					if (document.getElementById("createGame"))
 						this.hideCreateGame();
 					this.getHomePage("listTournaments", id);
+					break;
+				case "createTournaments":
+					if (document.getElementById("registerForm"))
+						this.hideRegisterForm();
+					if (document.getElementById("loginForm"))
+						this.hideLoginForm();
+					if (document.getElementById("createGame"))
+						this.hideCreateGame();
+					this.getHomePage("createTournaments", id);
 					break;
 			}
 		} else {
@@ -393,13 +403,14 @@ export default class App {
 					} else if (state == "1vs1" && game_id == -1) {
 						this.setPong("bg");
 						this.getLocalConfigPage();
-					}
-					else if (state == "1vs1" && game_id != -1) {
+					} else if (state == "1vs1" && game_id != -1) {
 						this.getLocalGame(game_id);
-					}
-					else if (state == "listTournaments") {
+					} else if (state == "listTournaments") {
 						this.setPong("bg");
 						this.getListTournaments(game_id);
+					} else if (state == "createTournaments") {
+						this.setPong("bg");
+						this.getCreateTournament();
 					}
 					let homeView = document.getElementById("homeView");
 					setTimeout(() => {
@@ -425,11 +436,134 @@ export default class App {
 			} else if (state == "1vs1" && game_id != -1) {
 				this.hideLocalConfigPage();
 				this.getLocalGame(game_id);
-			}
-			else if (state == "listTournaments") {
+			} else if (state == "listTournaments") {
 				this.getListTournaments(game_id);
+			} else if (state == "createTournaments") {
+				this.getCreateTournament();
 			}
 		}
+	}
+
+	getCreateTournament() {
+		let homeContent = document.getElementById("homeContent");
+		if (!homeContent)
+			return ;
+		this.getApiResponse("/api/view/tournamentConfig/").then((response) => {
+			let res = JSON.parse(response);
+			if (res.success) {
+				homeContent.innerHTML += res.html;
+				setTimeout(() => {
+					let configView = document.getElementById("config");
+					if (!configView)
+						return ;
+					configView.classList.remove("hided");
+					this.setTournamentConfigInteraction();
+				}, 200);
+			}
+		});
+	}
+	
+	setTournamentConfigInteraction() {
+		let config = {
+			winScore: 10,
+			startSpeed: 8,
+			bonuses: true,
+		}
+		this.tournamentPlayers = []
+		let configView = document.getElementById("config");
+		if (configView.dataset.events != "done") {
+			configView.dataset.events = "done";
+			let winScore = document.getElementById("winScore");
+			let winScoreText = document.getElementById("winScoreText");
+			winScore.addEventListener('input', (e) => {
+				winScoreText.innerHTML = winScore.value;
+				config.winScore = winScore.value;
+			});
+			let startSpeed = document.getElementById("startSpeed");
+			let startSpeedText = document.getElementById("startSpeedText");
+			startSpeed.addEventListener('input', (e) => {
+				startSpeedText.innerHTML = startSpeed.value;
+				config.startSpeed = startSpeed.value;
+			});
+			if (document.querySelector('input[name="bonuses"]')) {
+				document.querySelectorAll('input[name="bonuses"]').forEach((elem) => {
+					elem.addEventListener("change", function(event) {
+						if (event.target.value == 'on')
+							config.bonuses = true;
+						else
+							config.bonuses = false;
+					});
+				});
+			}
+			document.getElementById("addPlayer").addEventListener("keyup", (e) => {
+				let val = document.getElementById("addPlayer").value;
+				if (val != "")
+					this.searchPlayer(val);
+				else {
+					let playerResult = document.getElementById("playerResult");
+					if (playerResult)
+						playerResult.innerHTML = "";
+				}
+			})
+			let createBtn = document.getElementById("createBtn")
+			createBtn.addEventListener("click", (e) => {
+				console.log("click");
+/*				this.getApiResponseJson("/api/game/new/1vsAI/", config).then((response) => {
+				let res = JSON.parse(response);
+				if (res.success) {
+						let aiConfig = document.getElementById("aiConfig");
+						aiConfig.classList.add("hided")
+						this.remove("aiConfig")
+						history.pushState("", "", "/play1vsAI/" + res.id);
+						this.router();
+					}
+				});*/
+			});
+		}
+	}
+
+	searchPlayer(val) {
+		this.getApiResponseJson("/api/tournament/playerSearch/", {search: val}).then((response) => {
+			let res = JSON.parse(response);
+			if (res.success) {
+				let playerResult = document.getElementById("playerResult");
+				if (playerResult)
+					playerResult.innerHTML = res.html;
+				let btns = playerResult.getElementsByClassName("btn");
+				for (let i = 0; i < btns.length; i++) {
+					if (this.tournamentPlayers.find((elem) => elem.id == btns[i].dataset.id)) {
+						btns[i].disabled = true;
+						continue;
+					}
+					btns[i].addEventListener("click", (e) => {
+						if (this.tournamentPlayers.find((elem) => elem.id == btns[i].dataset.id))
+							return ;
+						this.tournamentPlayers.push({
+							id: btns[i].dataset.id,
+							name: btns[i].dataset.name,
+						})
+						document.getElementById("addPlayer").value = "";
+						let playerResult = document.getElementById("playerResult");
+						if (playerResult)
+							playerResult.innerHTML = "";
+						nbPlayer = document.getElementById("nbPlayer");
+						nbPlayer.innerHTML = this.tournamentPlayers.length;
+						var html = "";
+						for (let j = 0; j < this.tournamentPlayers.length; j++) {
+							html += '<div class="px-1 mx-1 border border-light rounded" style="--bs-border-opacity:0.25;">' + this.tournamentPlayers[j].name + '</div>'
+						}
+						players = document.getElementById("players");
+						players.innerHTML = html;
+						createBtn = document.getElementById("createBtn");
+						if (this.tournamentPlayers.length == 4) {
+							createBtn.disabled = false;
+						} else {
+							createBtn.disabled = true;
+						}
+					})
+				}
+			}
+		});
 	}
 
 	hideLocalGame() {
