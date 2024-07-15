@@ -4,13 +4,14 @@ from django.db import migrations
 
 def create_public_room(apps, schema_editor):
 	Room = apps.get_model("website", "Room")
-	publicRoom = Room(publicRoom=True)
-	publicRoom.save()
+	if (Room.objects.all().count() < 1):
+		publicRoom = Room(publicRoom=True)
+		publicRoom.save()
 
 class Migration(migrations.Migration):
 
 	dependencies = [
-        ('website', '0001_initial'),
+		('website', '0001_initial'),
 	]
 
 	operations = [

@@ -261,45 +261,46 @@ def registerForm(request):
 			'html': render_to_string('website/register.html'),
 		});
 
-# @csrf_exempt
 def registerUser(request):
-    if request.method == 'POST':
-        user_form = CustomUserCreationForm(request.POST, request.FILES)
-        if user_form.is_valid():
-            try:
-                profile_picture = request.FILES.get('profilPicture')
-                if profile_picture:
-                    if profile_picture.size > 2 * 1024 * 1024:
-                        raise ValidationError('File size exceeds 2MB.')
+	if request.method == 'POST':
+		user_form = CustomUserCreationForm(request.POST, request.FILES)
+		if user_form.is_valid():
+			try:
+				profile_picture = request.FILES.get('profilPicture')
+				if profile_picture:
+					if profile_picture.size > 2 * 1024 * 1024:
+						raise ValidationError('File size exceeds 2MB.')
 
-                # Check file type
-                    if profile_picture.content_type not in ['image/jpeg', 'image/png', 'image/gif']:
-                        raise ValidationError('Unsupported file type. Please upload an image file (JPEG, PNG, GIF).')
+				# Check file type
+					if profile_picture.content_type not in ['image/jpeg', 'image/png', 'image/gif']:
+						raise ValidationError('Unsupported file type. Please upload an image file (JPEG, PNG, GIF).')
 
-                    # Check file readability
-                    try:
-                        profile_picture.open()
-                        profile_picture.read()
-                    except Exception as e:
-                        raise ValidationError(f'Error reading file: {str(e)}')
-                user = user_form.save()
-                user = authenticate(username=request.POST["username"], password=request.POST["password1"])
-                if user is not None:
-                    # login(request, user) # Uncomment this line if you want to login the user immediately after registration
-                    return JsonResponse({'success': True})
-                else:
-                    return JsonResponse({'success': False, 'message': 'Authentication failed'})
-            except ValidationError as e:
-                return JsonResponse({'success': False, 'message': str(e)})
+					# Check file readability
+					try:
+						profile_picture.open()
+						profile_picture.read()
+					except Exception as e:
+						raise ValidationError(f'Error reading file: {str(e)}')
+				user = user_form.save()
+				if not profile_picture:
+					user.profilPicture = 'profilPicture/default.jpg'
+					user.save()
+				user = authenticate(username=request.POST["username"], password=request.POST["password1"])
+				if user is not None:
+					return JsonResponse({'success': True})
+				else:
+					return JsonResponse({'success': False, 'message': 'Authentication failed'})
+			except ValidationError as e:
+				return JsonResponse({'success': False, 'message': str(e)})
 
-        errors = user_form.errors.get_json_data()
-        error_messages = []
-        for field, field_errors in errors.items():
-            for error in field_errors:
-                error_messages.append(error['message'])
-        return JsonResponse({'success': False, 'message': ' '.join(error_messages)})
+		errors = user_form.errors.get_json_data()
+		error_messages = []
+		for field, field_errors in errors.items():
+			for error in field_errors:
+				error_messages.append(error['message'])
+		return JsonResponse({'success': False, 'message': ' '.join(error_messages)})
 
-    return JsonResponse({'success': False, 'message': 'Invalid request method'})
+	return JsonResponse({'success': False, 'message': 'Invalid request method'})
 
 def homeView(request):
 	if request.method == 'POST':
@@ -440,77 +441,77 @@ def listTournaments(request):
 web3 = Web3(Web3.HTTPProvider(settings.API_URL))
 
 try:
-    contract = web3.eth.contract(address=settings.CONTRACT_ADDRESS, abi=settings.CONTRACT_ABI)
+	contract = web3.eth.contract(address=settings.CONTRACT_ADDRESS, abi=settings.CONTRACT_ABI)
 except Exception as e:
-    contract = None
+	contract = None
 
 def createTournament(request):
-    if contract is None:
-        return JsonResponse({'success': False, 'status': 'error', 'message': 'Contract initialization failed'})
+	if contract is None:
+		return JsonResponse({'success': False, 'status': 'error', 'message': 'Contract initialization failed'})
 
-    if request.method == 'POST':
-        try:
-            data = json.loads(request.POST["data"])
-            tournament_id = data.get('tournament_id')
-            winner_id = data.get('winner_id')
-            wins = data.get('wins')
-            losses = data.get('losses')
+	if request.method == 'POST':
+		try:
+			data = json.loads(request.POST["data"])
+			tournament_id = data.get('tournament_id')
+			winner_id = data.get('winner_id')
+			wins = data.get('wins')
+			losses = data.get('losses')
 
-            if None in [tournament_id, winner_id, wins, losses]:
-                return JsonResponse({'success': False, 'status': 'error', 'message': 'Missing parameters'})
+			if None in [tournament_id, winner_id, wins, losses]:
+				return JsonResponse({'success': False, 'status': 'error', 'message': 'Missing parameters'})
 
-            account = web3.eth.account.from_key(settings.PRIVATE_KEY)
-            recommended_gas_price = web3.eth.gas_price
-            increased_gas_price = web3.to_wei(int(recommended_gas_price * 1.1), 'wei')
+			account = web3.eth.account.from_key(settings.PRIVATE_KEY)
+			recommended_gas_price = web3.eth.gas_price
+			increased_gas_price = web3.to_wei(int(recommended_gas_price * 1.1), 'wei')
 
-            transaction = contract.functions.createTournament(winner_id, wins, losses).build_transaction({
-                'chainId': 11155111,
-                'gas': 2000000,
-                'gasPrice': increased_gas_price,
-                'nonce': web3.eth.get_transaction_count(account.address),
-            })
-            signed_txn = web3.eth.account.sign_transaction(transaction, private_key=settings.PRIVATE_KEY)
-            tx_hash = web3.eth.send_raw_transaction(signed_txn.rawTransaction)
-            return JsonResponse({'success': True, 'status': 'success', 'message': 'Transaction successful'})
-        except Exception as e:
-            return JsonResponse({'success': False, 'status': 'error', 'message': str(e)})
+			transaction = contract.functions.createTournament(winner_id, wins, losses).build_transaction({
+				'chainId': 11155111,
+				'gas': 2000000,
+				'gasPrice': increased_gas_price,
+				'nonce': web3.eth.get_transaction_count(account.address),
+			})
+			signed_txn = web3.eth.account.sign_transaction(transaction, private_key=settings.PRIVATE_KEY)
+			tx_hash = web3.eth.send_raw_transaction(signed_txn.rawTransaction)
+			return JsonResponse({'success': True, 'status': 'success', 'message': 'Transaction successful'})
+		except Exception as e:
+			return JsonResponse({'success': False, 'status': 'error', 'message': str(e)})
 
-    return JsonResponse({'success': False, 'status': 'error', 'message': 'Invalid request method'})
+	return JsonResponse({'success': False, 'status': 'error', 'message': 'Invalid request method'})
 
 def viewTournament(request, tournament_id):
-    if contract is None:
-        return JsonResponse({'success': False, 'status': 'error', 'message': 'Contract initialization failed'})
-    if request.method == 'POST':
-        try:
-            #data = json.loads(request.POST["data"])
-            #tournament_id = data.get('tournament_id')
+	if contract is None:
+		return JsonResponse({'success': False, 'status': 'error', 'message': 'Contract initialization failed'})
+	if request.method == 'POST':
+		try:
+			#data = json.loads(request.POST["data"])
+			#tournament_id = data.get('tournament_id')
 
-            if tournament_id is None:
-                return JsonResponse({'success': False, 'status': 'error', 'message': 'Missing tournament ID'})
+			if tournament_id is None:
+				return JsonResponse({'success': False, 'status': 'error', 'message': 'Missing tournament ID'})
 			
-            if not isinstance(tournament_id, int) or tournament_id < 0:
-                return JsonResponse({'success': False, 'status': 'error', 'message': 'Invalid (negative) tournament ID'})
+			if not isinstance(tournament_id, int) or tournament_id < 0:
+				return JsonResponse({'success': False, 'status': 'error', 'message': 'Invalid (negative) tournament ID'})
 
-            tournament_length = contract.functions.getTournamentLength().call()
+			tournament_length = contract.functions.getTournamentLength().call()
 
-            if tournament_id > tournament_length - 1:
-                return JsonResponse({'success': False, 'status': 'error', 'message': "Tournament ID doesn't exist"})
+			if tournament_id > tournament_length - 1:
+				return JsonResponse({'success': False, 'status': 'error', 'message': "Tournament ID doesn't exist"})
 
-            tournament = contract.functions.getTournament(tournament_id).call()
-            winner_id, winner_wins, winner_losses = tournament
+			tournament = contract.functions.getTournament(tournament_id).call()
+			winner_id, winner_wins, winner_losses = tournament
 
-            return JsonResponse({
-                'success': True,
-                'status': 'success',
-                'tournament_id': tournament_id,
-                'winner_id': winner_id,
-                'winner_wins': winner_wins,
-                'winner_losses': winner_losses
-            })
-        except Exception as e:
-            return JsonResponse({'success': False, 'status': 'error', 'message': str(e)})
+			return JsonResponse({
+				'success': True,
+				'status': 'success',
+				'tournament_id': tournament_id,
+				'winner_id': winner_id,
+				'winner_wins': winner_wins,
+				'winner_losses': winner_losses
+			})
+		except Exception as e:
+			return JsonResponse({'success': False, 'status': 'error', 'message': str(e)})
 
-    return JsonResponse({'success': False, 'status': 'error', 'message': 'Invalid request method'})
+	return JsonResponse({'success': False, 'status': 'error', 'message': 'Invalid request method'})
 
 def getTournamentWinner(request):
 	if request.method == 'POST':
