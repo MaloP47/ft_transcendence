@@ -21,30 +21,45 @@ def validate_password_strength(value):
 
 
 class CustomUserCreationForm(UserCreationForm):
-    email = forms.EmailField(required=True, help_text="Required. Enter a valid email address.")
+    email = forms.EmailField(required=False, help_text="Required. Enter a valid email address.")
     profilPicture = forms.ImageField(required=False, help_text="Optional. Upload a profile photo.")
+    username = forms.CharField(required=False, help_text="Required. Enter a valid username.")
+    password1 = forms.CharField(required=False, help_text="Required. Enter a valid password.")
+    password2 = forms.CharField(required=False, help_text="Required. Enter the same password as above.")
+
+
+
 
     class Meta(UserCreationForm.Meta):
         model = CustomUser
         fields = ("username", "email", "password1", "password2", "profilPicture")
+    def clean(self):
+        cleaned_data = super().clean()
+        email = cleaned_data.get('email')
+        username = cleaned_data.get('username')
+        password1 = cleaned_data.get('password1')
+        password2 = cleaned_data.get('password2')
 
-    def clean_email(self):
-        email = self.cleaned_data.get('email')
-        if CustomUser.objects.filter(email=email).exists():
-            raise forms.ValidationError("Email address must be unique.")
-        return email
+        if not username:
+            self.add_error('username', 'Username field is required.')
+        if not email:
+            self.add_error('email', 'Email field is required.')
+        elif CustomUser.objects.filter(email=email).exists():
+            self.add_error('email', 'Email address must be unique.')
 
-    def clean_password2(self):
-        password1 = self.cleaned_data.get('password1')
-        password2 = self.cleaned_data.get('password2')
+        if not password1:
+            self.add_error('password1', 'Password field is required.')
 
-        if password1 and password2 and password1 != password2:
-            raise forms.ValidationError("Passwords do not match.")
-
-        # Validate password strength
-        validate_password_strength(password1)
-
-        return password2
+        if not password2:
+            self.add_error('password2', 'Password confirmation field is required.')
+        elif password1 and password2 and password1 != password2:
+            self.add_error('password2', 'Passwords do not match.')
+        if password1:
+            try:
+                validate_password_strength(password1)
+            except ValidationError as e:
+                self.add_error('password1', e)
+            return cleaned_data
 
     def save(self, commit=True):
         user = super(CustomUserCreationForm, self).save(commit=False)
@@ -55,3 +70,4 @@ class CustomUserCreationForm(UserCreationForm):
         if commit:
             user.save()
         return user
+
