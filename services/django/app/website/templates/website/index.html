@@ -29,7 +29,19 @@
         
         <script src="{% static 'website/bootstrap/bootstrap.bundle.min.js' %}" crossorigin="anonymous"></script>
         <script type="module" src="{% static 'website/main.js' %}"></script>
-        <audio id="audio_transcendence" src="{% static 'mp3/Transcendence.mp3' %}" loop></audio>
+
+            {% block 'body' %}
+            {% endblock %}
+        </div>
+        {% include "website/navbar.html" %}
+        <!-- <button id="btnTestMint" class="btn btn-success" style="position:absolute; top:10%; left:50%" href="#">Mint</button>
+        <script src="{% static 'website/bootstrap/bootstrap.bundle.min.js' %}" crossorigin="anonymous"></script>
+        <button id="btnTestGet" class="btn btn-success" style="position:absolute; top:10%; left:55%" href="#">Get</button> -->
+        <script src="{% static 'website/bootstrap/bootstrap.bundle.min.js' %}" crossorigin="anonymous"></script>
+        <script type="module" src="{% static 'website/main.js' %}"></script>
+
+         <audio id="audio_transcendence" src="{% static 'mp3/Transcendence.mp3' %}" loop></audio>
+      
         <!-- Button to toggle the audio -->
         <button id="toggleButton" class="btn btn-dark btn-sm" style="position:fixed; top:10px; right:10px; z-index:1000;">
             <i id="toggleIcon" class="bi bi-play-fill"></i>
