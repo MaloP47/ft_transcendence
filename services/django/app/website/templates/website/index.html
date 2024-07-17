@@ -17,12 +17,19 @@
         <link rel="stylesheet" href="{% static 'website/style/style.css' %}">
         <link rel="stylesheet" href="{% static 'website/bootstrap/bootstrap-icons-1.11.3/font/bootstrap-icons.min.css' %}">
         <link rel="icon" type="image/x-icon" href="{% static 'favicon.ico' %}">
-
     </head>
     {% csrf_token %}
     <body class="bg-black text-light">
         {% include "website/canvas.html" %}
         <div id="topContent" class="position-fixed w-100 h-100">
+            {% block body %}
+            {% endblock %}
+        </div>
+        {% include "website/navbar.html" %}
+        
+        <script src="{% static 'website/bootstrap/bootstrap.bundle.min.js' %}" crossorigin="anonymous"></script>
+        <script type="module" src="{% static 'website/main.js' %}"></script>
+
             {% block 'body' %}
             {% endblock %}
         </div>
@@ -33,14 +40,12 @@
         <script src="{% static 'website/bootstrap/bootstrap.bundle.min.js' %}" crossorigin="anonymous"></script>
         <script type="module" src="{% static 'website/main.js' %}"></script>
 
-        <audio id="audio_transcendence" src="{% static 'music/Transcendence.mp3' %}" loop></audio>
-
+         <audio id="audio_transcendence" src="{% static 'mp3/Transcendence.mp3' %}" loop></audio>
+      
         <!-- Button to toggle the audio -->
         <button id="toggleButton" class="btn btn-dark btn-sm" style="position:fixed; top:10px; right:10px; z-index:1000;">
             <i id="toggleIcon" class="bi bi-play-fill"></i>
         </button>
-
         <script src="{% static 'website/music/music.js' %}"></script>
-
     </body>
 </html>

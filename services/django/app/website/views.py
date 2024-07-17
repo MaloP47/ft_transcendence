@@ -137,6 +137,17 @@ def getGame(request):
 				'success': False,
 			})
 
+def searchPlayer(request):
+	if request.method == 'POST':
+		data = json.loads(request.POST["data"]);
+		users = User.objects.filter(username__icontains=data['search']).annotate(
+			block=Subquery(Exists(BlockedUser.objects.filter(userFrom=request.user, userBlocked__id=OuterRef("id"))))
+		).exclude(id__in=request.user.friends.all())[:8]
+		return JsonResponse({
+			'success': True,
+			'html': render_to_string('website/searchPlayer.html', {"user": request.user, "users": users}),
+		});
+
 def searchUser(request):
 	if request.method == 'POST':
 		data = json.loads(request.POST["data"]);
@@ -349,6 +360,13 @@ def chatMenu(request):
 		return JsonResponse({
 			'success': True,
 			'html': render_to_string('website/chatMenu.html', {"user": request.user, "isFriend": isFriend, "isBlocked": isBlocked, "for": user}),
+		})
+
+def createTournamentConfig(request):
+	if request.method == 'POST':
+		return JsonResponse({
+			'success': True,
+			'html': render_to_string('website/tournamentConfig.html'),
 		})
 
 def localAiConfig(request):
