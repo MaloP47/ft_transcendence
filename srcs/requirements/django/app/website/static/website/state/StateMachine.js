@@ -1,14 +1,14 @@
-// ************************************************************************** //
-//                                                                            //
-//                                                        :::      ::::::::   //
-//   StateMachine.js                                    :+:      :+:    :+:   //
-//                                                    +:+ +:+         +:+     //
-//   By: gbrunet <gbrunet@student.42.fr>            +#+  +:+       +#+        //
-//                                                +#+#+#+#+#+   +#+           //
-//   Created: 2024/06/13 11:54:22 by gbrunet           #+#    #+#             //
-//   Updated: 2024/06/21 10:10:46 by gbrunet          ###   ########.fr       //
-//                                                                            //
-// ************************************************************************** //
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   StateMachine.js                                    :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: renstein <renstein@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/06/13 11:54:22 by gbrunet           #+#    #+#             */
+/*   Updated: 2024/07/18 12:37:16 by renstein         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
 import Pong from '../pong/Pong.js';
 
@@ -402,22 +402,43 @@ export default class App {
 
 	getProfile(id) {
 		let homeContent = document.getElementById("homeContent");
-		if (!homeContent)
-			return ;
-		this.getApiResponseJson("/api/view/profile/" + id,).then((response) => {
+		if (!homeContent) return;
+	
+		this.getApiResponseJson("/api/view/profile/" + id).then((response) => {
 			let res = JSON.parse(response);
 			if (res.success) {
 				homeContent.innerHTML = res.html;
+	
 				let profileView = document.getElementById("profile");
-				if (!profileView)
-					return ;
+				if (!profileView) return;
+	
 				setTimeout(() => {
 					profileView.classList.remove("hided");
-				}, 15)
-				//this.setAiConfigInteraction();
+				}, 15);
+	
+				// Проверка и установка обработчика события после обновления содержимого
+				const profilePictureInput = document.getElementById('id_profile_picture');
+				const previewContainer = document.querySelector('.rounded.rounded-circle');
+	
+				if (profilePictureInput && previewContainer) {
+					const defaultImage = previewContainer.getAttribute('data-default-image');
+					profilePictureInput.addEventListener('change', function () {
+						const file = profilePictureInput.files[0];
+						if (file) {
+							const reader = new FileReader();
+							reader.onload = function (e) {
+								previewContainer.style.backgroundImage = `url(${e.target.result})`;
+							};
+							reader.readAsDataURL(file);
+						} else {
+							previewContainer.style.backgroundImage = `url(${defaultImage})`;  // Сбрасываем изображение, если файл не выбран
+						}
+					});
+				}
 			}
-		})
+		});
 	}
+	
 
 	hideLocalGame() {
 		let gameOverlay = document.getElementById("gameOverlay");

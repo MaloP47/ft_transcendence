@@ -31,3 +31,12 @@ class editProfileForm(forms.Form):
 			}
 		)
 	)
+	def save(self, commit=True):
+		user = super(editProfileForm, self).save(commit=False)
+		user.email = self.cleaned_data['email']
+		if 'profilPicture' in self.cleaned_data:
+			user.profilPicture = self.cleaned_data['profilPicture']
+
+		if commit:
+			user.save()
+		return user
