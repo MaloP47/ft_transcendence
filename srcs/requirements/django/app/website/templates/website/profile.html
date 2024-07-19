@@ -9,13 +9,16 @@
 		</div>
 		<form method="post" enctype="multipart/form-data">
 		{% csrf_token %}
-		<div class="mb-3">
-				<label for="id_profile_picture" class="form-label">Profile Picture</label>
+		<div class="mb-3"style="width:400px">
 			{{ form.profile_picture }}
 		</div>
 		<div class="input-group mb-3" style="width:400px">
 			<span class="input-group-text">Username</span>
 			{{form.username}}
+		</div>
+		<div class="input-group mb-3" style="width:400px">
+			<span class="input-group-text">Email</span>
+			{{form.email}}
 		</div>
 		<div class="input-group mb-3" style="width:400px">
 			<span class="input-group-text">Password</span>
@@ -27,7 +30,7 @@
 		</div>
 		<button type="submit" class="btn btn-primary mt-3">Save Changes</button>
 	</form>
-		<!-- <h3>Statistics</h3>
+		<h3>Statistics</h3>
 		<table class="table table-dark table-striped table-hover table-sm">
 			<thead>
 				<tr>
@@ -130,4 +133,4 @@
 	{{perso}}
 	{% endif %}
 	</div>
-</div> -->
+</div>
