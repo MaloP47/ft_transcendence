@@ -142,7 +142,7 @@ def searchPlayer(request):
 		data = json.loads(request.POST["data"]);
 		users = User.objects.filter(username__icontains=data['search']).annotate(
 			block=Subquery(Exists(BlockedUser.objects.filter(userFrom=request.user, userBlocked__id=OuterRef("id"))))
-		).exclude(id__in=request.user.friends.all())[:8]
+		)[:8]
 		return JsonResponse({
 			'success': True,
 			'html': render_to_string('website/searchPlayer.html', {"user": request.user, "users": users}),
@@ -369,6 +369,38 @@ def createTournamentConfig(request):
 			'html': render_to_string('website/tournamentConfig.html'),
 		})
 
+def createTournamentGame(request):
+	if request.method == 'POST':
+		data = json.loads(request.POST["data"]);
+		tour = Tournament()
+		tour.save()
+		players = data['players']
+		for p in players:
+			user = User.objects.get(id=p['id'])
+			tour.users.add(user)
+		config = data['config']
+		tour.scoreToWin = config['winScore']
+		tour.ballSpeed = config['startSpeed']
+		tour.bonuses = config['bonuses']
+		tour.save()
+		p1 =  User.objects.get(id=players[0]['id'])
+		p2 =  User.objects.get(id=players[1]['id'])
+		p3 =  User.objects.get(id=players[2]['id'])
+		p4 =  User.objects.get(id=players[3]['id'])
+		game1 = Game(p1=p1,p2=p2, scoreToWin=tour.scoreToWin, ballSpeed=tour.ballSpeed, bonuses=tour.bonuses, gameType=2, tournamentGame=True)
+		game1.save()
+		game2 = Game(p1=p3,p2=p4, scoreToWin=tour.scoreToWin, ballSpeed=tour.ballSpeed, bonuses=tour.bonuses, gameType=2, tournamentGame=True)
+		game2.save()
+		return JsonResponse({
+			'success': True,
+			'g1': game1.id,
+			'p1': p1.id,
+			'p2': p2.id,
+			'g2': game2.id,
+			'p3': p3.id,
+			'p4': p4.id,
+		})
+
 def localAiConfig(request):
 	if request.method == 'POST':
 		return JsonResponse({
@@ -422,6 +454,15 @@ def chatMessageView(request):
 		return JsonResponse({
 			'success': True,
 			'html': render_to_string('website/chatMessageView.html', {"data": data, "user": request.user, "friend": friend, "blocked": blocked}),
+		})
+
+def gameRequestView(request):
+	if request.method == 'POST':
+		data = json.loads(request.POST["data"]);
+		game = Game.objects.get(id=data['id'])
+		return JsonResponse({
+			'success': True,
+			'html': render_to_string('website/unfinishedGameView.html', {"g": game, "user": request.user}),
 		})
 
 def friendRequestView(request):

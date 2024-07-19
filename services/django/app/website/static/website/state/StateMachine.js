@@ -1,4 +1,3 @@
-
 // ************************************************************************** //
 //                                                                            //
 //                                                        :::      ::::::::   //
@@ -7,7 +6,7 @@
 //   By: gbrunet <gbrunet@student.42.fr>            +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2024/06/13 11:54:22 by gbrunet           #+#    #+#             //
-//   Updated: 2024/06/20 15:05:50 by gbrunet          ###   ########.fr       //
+//   Updated: 2024/07/19 11:12:20 by gbrunet          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -27,43 +26,6 @@ export default class App {
 		this.initUser();
 		this.updateUser();
 		this.router();
-
-
-		// let test = document.getElementById("btnTestMint").addEventListener("click", () => {
-		// 	this.getApiResponseJson("/api/view/tournamentEnd/", {
-		// 		'tournament_id': 85,
-		// 		'winner_id': 89,
-		// 		'wins': 12,
-		// 		'losses': 3,
-		// 	}).then((response) => {
-		// 		let res = JSON.parse(response);
-		// 		if (res.success) {
-		// 			alert(res.message);
-		// 		} else {
-		// 			alert("marche pas")
-		// 			alert(res.message);
-		// 		}
-		// 	});
-		// })
-
-		// let test2 = document.getElementById("btnTestGet").addEventListener("click", () => {
-		// 	this.getApiResponseJson("/api/view/getTournament/", {
-		// 		'tournament_id': 18,
-		// 	}).then((response) => {
-		// 		let res = JSON.parse(response);
-		// 		if (res.success) {
-		// 			alert("Ok")
-		// 			alert("Tournament ID: " + res.tournament_id);
-        //        		alert("Winner ID: " + res.winner_id);
-        //         	alert("Winner Wins: " + res.winner_wins);
-        //         	alert("Winner Losses: " + res.winner_losses);
-		// 		} else {
-		// 			alert("Fuck")
-		// 			alert(res.message);
-		// 		}
-		// 	});
-		// })
-
 	}
 
 	preventLinkDefaultBehavior() {
@@ -363,14 +325,18 @@ export default class App {
 
 			this.chatSocket.onmessage = function(e) {
 				const data = JSON.parse(e.data);
+				console.log("oui")
+				console.log(data)
 				if (data.need_update) {
 					this.updateConnectedUsers();
 					this.updateRooms();
 				}
-				else if (data.message)
+				if (data.message)
 					this.handleNewMessage(data);
-				else if (data.friendRequest)
+				if (data.friendRequest)
 					this.handleFriendRequestMessage(data);
+				if (data.game_notif)
+					this.handleTournamentNotif(data);
 			}.bind(this);
 		}
 
@@ -507,17 +473,28 @@ export default class App {
 			})
 			let createBtn = document.getElementById("createBtn")
 			createBtn.addEventListener("click", (e) => {
-				console.log("click");
-/*				this.getApiResponseJson("/api/game/new/1vsAI/", config).then((response) => {
-				let res = JSON.parse(response);
-				if (res.success) {
-						let aiConfig = document.getElementById("aiConfig");
-						aiConfig.classList.add("hided")
-						this.remove("aiConfig")
-						history.pushState("", "", "/play1vsAI/" + res.id);
-						this.router();
+				this.getApiResponseJson("api/tournament/create/", {config: config, players: this.tournamentPlayers}).then((response) => {
+					let res = JSON.parse(response);
+					if (res.success) {
+						let tourConfig = document.getElementById("config");
+						tourConfig.classList.add("hided")
+						this.chatSocket.send(JSON.stringify({
+							'gameNotif': res.g1,
+							'p1': res.p1,
+							'p2': res.p1,
+						}));
+						this.chatSocket.send(JSON.stringify({
+							'gameNotif': res.g2,
+							'p1': res.p3,
+							'p2': res.p4,
+						}));
+						setTimeout(() => {
+							this.remove("config")
+							history.pushState("", "", "/");
+							this.router();
+						}, 100)
 					}
-				});*/
+				});
 			});
 		}
 	}
@@ -542,28 +519,55 @@ export default class App {
 							id: btns[i].dataset.id,
 							name: btns[i].dataset.name,
 						})
-						document.getElementById("addPlayer").value = "";
-						let playerResult = document.getElementById("playerResult");
-						if (playerResult)
-							playerResult.innerHTML = "";
-						nbPlayer = document.getElementById("nbPlayer");
-						nbPlayer.innerHTML = this.tournamentPlayers.length;
-						var html = "";
-						for (let j = 0; j < this.tournamentPlayers.length; j++) {
-							html += '<div class="px-1 mx-1 border border-light rounded" style="--bs-border-opacity:0.25;">' + this.tournamentPlayers[j].name + '</div>'
-						}
-						players = document.getElementById("players");
-						players.innerHTML = html;
-						createBtn = document.getElementById("createBtn");
-						if (this.tournamentPlayers.length == 4) {
-							createBtn.disabled = false;
-						} else {
-							createBtn.disabled = true;
-						}
+						this.updatePlayerList();
+						setTimeout(()=>{
+							this.configureDeleteTournamentPlayers()
+						}, 100)
 					})
 				}
 			}
 		});
+	}
+
+	updatePlayerList() {
+		document.getElementById("addPlayer").value = "";
+		let playerResult = document.getElementById("playerResult");
+		if (playerResult)
+			playerResult.innerHTML = "";
+		nbPlayer = document.getElementById("nbPlayer");
+		nbPlayer.innerHTML = this.tournamentPlayers.length;
+		var html = "";
+		for (let j = 0; j < this.tournamentPlayers.length; j++) {
+			html += '<div id="player-' + this.tournamentPlayers[j].id + '" class="px-1 mx-1 border border-light rounded" style="--bs-border-opacity:0.25;">' + this.tournamentPlayers[j].name + '<button data-id="' + this.tournamentPlayers[j].id + '" class="btn btn-light delPlayerList" style="line-height: 12px; font-size:12px; padding: 0 4px 0 4px; margin-left: 8px">x</button></div>'
+		}
+		players = document.getElementById("players");
+		players.innerHTML = html;
+		createBtn = document.getElementById("createBtn");
+		var addPlayerInput = document.getElementById("addPlayer");
+		if (this.tournamentPlayers.length == 4) {
+			createBtn.disabled = false;
+			addPlayerInput.disabled = true;
+		} else {
+			createBtn.disabled = true;
+			addPlayerInput.disabled = false;
+		}
+	}
+
+	configureDeleteTournamentPlayers() {
+		var addPlayerInput = document.getElementById("addPlayer");
+		let btns = document.getElementsByClassName("delPlayerList");
+		for (let i in btns) {
+			if (btns[i].type == 'submit') {
+				btns[i].addEventListener("click", (e) => {
+					this.tournamentPlayers =
+						this.tournamentPlayers.filter((item) => item.id != btns[i].dataset.id)
+					this.updatePlayerList()
+					setTimeout(()=>{
+						this.configureDeleteTournamentPlayers()
+					}, 100)
+				})
+			}
+		}
 	}
 
 	hideLocalGame() {
@@ -1295,6 +1299,21 @@ export default class App {
 						messages[messages.length - 1].classList.remove("height0");
 						chatBottom.scrollIntoView()
 					}, 15);
+				}
+			}
+		});
+	}
+
+	handleTournamentNotif(data) {
+		if (this.user.id != data.p1 && this.user.id != data.p2)
+			return ;
+		this.getApiResponseJson("/api/view/gameRequestView/", {id: data.game_notif}).then((response) => {
+			let res = JSON.parse(response);
+			if (res.success) {
+				let notificationCenter = document.getElementById("notif")
+				if (notificationCenter) {
+					notificationCenter.innerHTML += res.html;
+					this.addNotificationEvents();
 				}
 			}
 		});

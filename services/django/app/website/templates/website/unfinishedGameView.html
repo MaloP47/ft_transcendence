@@ -1,6 +1,15 @@
 <div class="d-flex notification hided">
 	<div class="bg-blur-15 p-2 rounded border border-light mb-2" style="margin-left:7px; --bs-border-opacity:0.1">
-		You have an unfinished game with 
+		You have 
+		{% if g.p1Score == 0 and g.p2Score == 0 %}
+		a new
+		{% else %}
+		an unfinished 
+		{% endif%}
+		{% if g.tournamentGame %}
+		tournament 
+		{% endif%}
+		game with 
 		{% if g.p1 == user %}
 			{% if g.p2%}
 				{{g.p2}}
