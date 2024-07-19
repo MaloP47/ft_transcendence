@@ -1,4 +1,5 @@
 <div id="profile" class="d-flex hided flex-column justify-content-center align-items-center position-fixed w-100" style="z-index:300">
+	{% csrf_token %}
 	<div class="p-3 px-4 bg-blur-5 rounded border border-light d-flex flex-column align-items-center position-fixed overflow-auto" style="--bs-border-opacity:0.25;max-height:calc(100% - 150px); min-width: calc(100% - 300px)">
 		<h2 class="mb-3">{{ user.username }}</h2>
 	{% if perso %}
@@ -8,28 +9,29 @@
 		 data-default-image="{{ user.profilPicture.url }}">
 		</div>
 		<form method="post" enctype="multipart/form-data">
-		{% csrf_token %}
+
 		<div class="mb-3"style="width:400px">
 			{{ form.profile_picture }}
 		</div>
 		<div class="input-group mb-3" style="width:400px">
-			<span class="input-group-text">Username</span>
+			<span class="input-group-text" style="--bs-bg-opacity: .5; --bs-border-opacity: .1; width:85px">Username</span>
 			{{form.username}}
 		</div>
 		<div class="input-group mb-3" style="width:400px">
-			<span class="input-group-text">Email</span>
+			<span class="input-group-text" style="--bs-bg-opacity: .5; --bs-border-opacity: .1; width:85px">Email</span>
 			{{form.email}}
 		</div>
 		<div class="input-group mb-3" style="width:400px">
-			<span class="input-group-text">Password</span>
+			<span class="input-group-text"style="--bs-bg-opacity: .5; --bs-border-opacity: .1; width:85px">Password</span>
 			{{form.password}}
 		</div>
 		<div class="input-group mb-3" style="width:400px">
-			<span class="input-group-text">Confirm</span>
+			<span class="input-group-text"style="--bs-bg-opacity: .5; --bs-border-opacity: .1; width:85px">Confirm</span>
 			{{form.confirm_password}}
 		</div>
 		<button type="submit" class="btn btn-primary mt-3">Save Changes</button>
 	</form>
+
 		<h3>Statistics</h3>
 		<table class="table table-dark table-striped table-hover table-sm">
 			<thead>
@@ -134,3 +136,9 @@
 	{% endif %}
 	</div>
 </div>
+<style>
+	.form-control {
+		width: 100%; /* Make inputs full-width */
+		height: 38px; /* Ensure consistent height */
+	}
+</style>

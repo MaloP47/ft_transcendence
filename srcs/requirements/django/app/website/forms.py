@@ -35,7 +35,7 @@ class editProfileForm(forms.Form):
 	confirm_password = forms.CharField(
 		widget=forms.PasswordInput(
 			attrs = {
-				'class': 'form-control', 
+				'class': 'form-control',
 			}
 		)
 	)
@@ -43,6 +43,7 @@ class editProfileForm(forms.Form):
 	class Meta:
 			model = CustomUser
 			fields = ("username", "email", "password1", "password2", "profilPicture")
+
 	def save(self, commit=True):
 		user = super(editProfileForm, self).save(commit=False)
 		user.email = self.cleaned_data['email']
