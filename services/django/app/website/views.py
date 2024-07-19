@@ -142,7 +142,7 @@ def searchPlayer(request):
 		data = json.loads(request.POST["data"]);
 		users = User.objects.filter(username__icontains=data['search']).annotate(
 			block=Subquery(Exists(BlockedUser.objects.filter(userFrom=request.user, userBlocked__id=OuterRef("id"))))
-		).exclude(id__in=request.user.friends.all())[:8]
+		)[:8]
 		return JsonResponse({
 			'success': True,
 			'html': render_to_string('website/searchPlayer.html', {"user": request.user, "users": users}),

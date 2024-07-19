@@ -164,7 +164,7 @@ export default class Ball {
 				} else {
 					endDiv.innerHTML = gameVs + "<p style='font-size:5rem; margin-top: -30px'>" + p2 + " wins this game !</p>"
 				}
-				endDiv.classList.remove("coundown");
+				endDiv.classList.remove("countdown");
 				endDiv.style.fontSize = "5rem";
 				endDiv.classList.add("visible");
 			}

@@ -1,3 +1,14 @@
+// ************************************************************************** //
+//                                                                            //
+//                                                        :::      ::::::::   //
+//   StateMachine.js                                    :+:      :+:    :+:   //
+//                                                    +:+ +:+         +:+     //
+//   By: gbrunet <gbrunet@student.42.fr>            +#+  +:+       +#+        //
+//                                                +#+#+#+#+#+   +#+           //
+//   Created: 2024/07/19 08:54:33 by gbrunet           #+#    #+#             //
+//   Updated: 2024/07/19 09:15:40 by gbrunet          ###   ########.fr       //
+//                                                                            //
+// ************************************************************************** //
 
 // ************************************************************************** //
 //                                                                            //
@@ -27,43 +38,6 @@ export default class App {
 		this.initUser();
 		this.updateUser();
 		this.router();
-
-
-		// let test = document.getElementById("btnTestMint").addEventListener("click", () => {
-		// 	this.getApiResponseJson("/api/view/tournamentEnd/", {
-		// 		'tournament_id': 85,
-		// 		'winner_id': 89,
-		// 		'wins': 12,
-		// 		'losses': 3,
-		// 	}).then((response) => {
-		// 		let res = JSON.parse(response);
-		// 		if (res.success) {
-		// 			alert(res.message);
-		// 		} else {
-		// 			alert("marche pas")
-		// 			alert(res.message);
-		// 		}
-		// 	});
-		// })
-
-		// let test2 = document.getElementById("btnTestGet").addEventListener("click", () => {
-		// 	this.getApiResponseJson("/api/view/getTournament/", {
-		// 		'tournament_id': 18,
-		// 	}).then((response) => {
-		// 		let res = JSON.parse(response);
-		// 		if (res.success) {
-		// 			alert("Ok")
-		// 			alert("Tournament ID: " + res.tournament_id);
-        //        		alert("Winner ID: " + res.winner_id);
-        //         	alert("Winner Wins: " + res.winner_wins);
-        //         	alert("Winner Losses: " + res.winner_losses);
-		// 		} else {
-		// 			alert("Fuck")
-		// 			alert(res.message);
-		// 		}
-		// 	});
-		// })
-
 	}
 
 	preventLinkDefaultBehavior() {
@@ -542,28 +516,55 @@ export default class App {
 							id: btns[i].dataset.id,
 							name: btns[i].dataset.name,
 						})
-						document.getElementById("addPlayer").value = "";
-						let playerResult = document.getElementById("playerResult");
-						if (playerResult)
-							playerResult.innerHTML = "";
-						nbPlayer = document.getElementById("nbPlayer");
-						nbPlayer.innerHTML = this.tournamentPlayers.length;
-						var html = "";
-						for (let j = 0; j < this.tournamentPlayers.length; j++) {
-							html += '<div class="px-1 mx-1 border border-light rounded" style="--bs-border-opacity:0.25;">' + this.tournamentPlayers[j].name + '</div>'
-						}
-						players = document.getElementById("players");
-						players.innerHTML = html;
-						createBtn = document.getElementById("createBtn");
-						if (this.tournamentPlayers.length == 4) {
-							createBtn.disabled = false;
-						} else {
-							createBtn.disabled = true;
-						}
+						this.updatePlayerList();
+						setTimeout(()=>{
+							this.configureDeleteTournamentPlayers()
+						}, 100)
 					})
 				}
 			}
 		});
+	}
+
+	updatePlayerList() {
+		document.getElementById("addPlayer").value = "";
+		let playerResult = document.getElementById("playerResult");
+		if (playerResult)
+			playerResult.innerHTML = "";
+		nbPlayer = document.getElementById("nbPlayer");
+		nbPlayer.innerHTML = this.tournamentPlayers.length;
+		var html = "";
+		for (let j = 0; j < this.tournamentPlayers.length; j++) {
+			html += '<div id="player-' + this.tournamentPlayers[j].id + '" class="px-1 mx-1 border border-light rounded" style="--bs-border-opacity:0.25;">' + this.tournamentPlayers[j].name + '<button data-id="' + this.tournamentPlayers[j].id + '" class="btn btn-light delPlayerList" style="line-height: 12px; font-size:12px; padding: 0 4px 0 4px; margin-left: 8px">x</button></div>'
+		}
+		players = document.getElementById("players");
+		players.innerHTML = html;
+		createBtn = document.getElementById("createBtn");
+		var addPlayerInput = document.getElementById("addPlayer");
+		if (this.tournamentPlayers.length == 4) {
+			createBtn.disabled = false;
+			addPlayerInput.disabled = true;
+		} else {
+			createBtn.disabled = true;
+			addPlayerInput.disabled = false;
+		}
+	}
+
+	configureDeleteTournamentPlayers() {
+		var addPlayerInput = document.getElementById("addPlayer");
+		let btns = document.getElementsByClassName("delPlayerList");
+		for (let i in btns) {
+			if (btns[i].type == 'submit') {
+				btns[i].addEventListener("click", (e) => {
+					this.tournamentPlayers =
+						this.tournamentPlayers.filter((item) => item.id != btns[i].dataset.id)
+					this.updatePlayerList()
+					setTimeout(()=>{
+						this.configureDeleteTournamentPlayers()
+					}, 100)
+				})
+			}
+		}
 	}
 
 	hideLocalGame() {
