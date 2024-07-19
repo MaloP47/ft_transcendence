@@ -6,6 +6,26 @@ echo "Waiting for Elasticsearch..."
 sleep 2
 done
 
+# /usr/share/elasticsearch/bin/elasticsearch-setup-passwords interactive -b <<EOF
+# DidierDidier
+# DidierDidier
+# DidierDidier
+# DidierDidier
+# DidierDidier
+# DidierDidier
+# DidierDidier
+# DidierDidier
+# DidierDidier
+# DidierDidier
+# DidierDidier
+# DidierDidier
+# EOF
+
+# elasticsearch-reset-password -i -u kibana <<EOF
+# DidierDidier
+# DidierDidier
+# EOF
+
 
 # bin/elasticsearch-setup-passwords interactive
 

@@ -1,5 +1,5 @@
 elasticsearch.hosts: ["http://elasticsearch:9200"]
-elasticsearch.username: "kibana_system"
+elasticsearch.username: "kibana"
 elasticsearch.password: "DidierDidier"
 xpack.encryptedSavedObjects.encryptionKey: "4r7uTj!n@pV3xZ^yBgFmLpQr1zSw3d5f"
 

@@ -197,10 +197,11 @@ services:
       # - ELASTICSEARCH_USERNAME=jeanjean
       # - ELASTICSEARCH_PASSWORD=DidierDidier
       # - ELASTIC_PASSWORD=DidierDidier
-      - KIBANA_USERNAME=kibana_system
-      - KIBANA_PASSWORD=DidierDidier
+      # - KIBANA_USERNAME=kibana_system
+      # - KIBANA_PASSWORD=DidierDidier
     volumes:
       - elasticsearch_data:/usr/share/elasticsearch/data
+      # - ./data/elasticsearch:/usr/share/elasticsearch/data
       - ./services/elasticsearch/conf/init_elasticsearch.sh:/usr/share/elasticsearch/init_elasticsearch.sh
       # - ./services/elasticsearch/conf/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
     ports:
@@ -236,7 +237,7 @@ services:
       # - ELASTICSEARCH_URL=http://elasticsearch:9200
       # - ELASTICSEARCH_HOSTS=["http://elasticsearch:9200"]
       # - ELASTICSEARCH_USERNAME=jeanjean
-      # - ELASTICSEARCH_PASSWORD=DidierDidier
+      # - ELASTICSEARCH_PASSWORD=Didier
     volumes:
       - kibana_data:/usr/share/kibana/data
       # - ./services/kibana/conf/import_dashboards.sh:/usr/share/kibana/import_dashboards.sh
