@@ -26,6 +26,21 @@ class ChatConsumer(AsyncWebsocketConsumer):
 	async def receive(self, text_data):
 		text_data_json = json.loads(text_data)
 		try:
+			gameNotif = text_data_json['gameNotif']
+			p1 = text_data_json['p1']
+			p2 = text_data_json['p2']
+			await self.channel_layer.group_send(
+				self.room_group_name,
+				{
+					'type': 'game_notif',
+					'id': gameNotif,
+					'p1': p1,
+					'p2': p2,
+				}
+			)
+		except:
+			pass
+		try:
 			friendRequest = text_data_json['friendRequest']
 			await self.channel_layer.group_send(
 				self.room_group_name,
@@ -86,6 +101,13 @@ class ChatConsumer(AsyncWebsocketConsumer):
 	async def need_update(self, event):
 		await self.send(text_data=json.dumps({
 			'need_update': True,
+		}))
+
+	async def game_notif(self, event):
+		await self.send(text_data=json.dumps({
+			'game_notif': event['id'],
+			'p1': event['p1'],
+			'p2': event['p1'],
 		}))
 
 	async def friend_request(self, event):

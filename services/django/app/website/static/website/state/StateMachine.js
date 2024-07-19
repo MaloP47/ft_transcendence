@@ -5,20 +5,8 @@
 //                                                    +:+ +:+         +:+     //
 //   By: gbrunet <gbrunet@student.42.fr>            +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
-//   Created: 2024/07/19 08:54:33 by gbrunet           #+#    #+#             //
-//   Updated: 2024/07/19 09:15:40 by gbrunet          ###   ########.fr       //
-//                                                                            //
-// ************************************************************************** //
-
-// ************************************************************************** //
-//                                                                            //
-//                                                        :::      ::::::::   //
-//   StateMachine.js                                    :+:      :+:    :+:   //
-//                                                    +:+ +:+         +:+     //
-//   By: gbrunet <gbrunet@student.42.fr>            +#+  +:+       +#+        //
-//                                                +#+#+#+#+#+   +#+           //
 //   Created: 2024/06/13 11:54:22 by gbrunet           #+#    #+#             //
-//   Updated: 2024/06/20 15:05:50 by gbrunet          ###   ########.fr       //
+//   Updated: 2024/07/19 11:12:20 by gbrunet          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -337,14 +325,18 @@ export default class App {
 
 			this.chatSocket.onmessage = function(e) {
 				const data = JSON.parse(e.data);
+				console.log("oui")
+				console.log(data)
 				if (data.need_update) {
 					this.updateConnectedUsers();
 					this.updateRooms();
 				}
-				else if (data.message)
+				if (data.message)
 					this.handleNewMessage(data);
-				else if (data.friendRequest)
+				if (data.friendRequest)
 					this.handleFriendRequestMessage(data);
+				if (data.game_notif)
+					this.handleTournamentNotif(data);
 			}.bind(this);
 		}
 
@@ -481,17 +473,28 @@ export default class App {
 			})
 			let createBtn = document.getElementById("createBtn")
 			createBtn.addEventListener("click", (e) => {
-				console.log("click");
-/*				this.getApiResponseJson("/api/game/new/1vsAI/", config).then((response) => {
-				let res = JSON.parse(response);
-				if (res.success) {
-						let aiConfig = document.getElementById("aiConfig");
-						aiConfig.classList.add("hided")
-						this.remove("aiConfig")
-						history.pushState("", "", "/play1vsAI/" + res.id);
-						this.router();
+				this.getApiResponseJson("api/tournament/create/", {config: config, players: this.tournamentPlayers}).then((response) => {
+					let res = JSON.parse(response);
+					if (res.success) {
+						let tourConfig = document.getElementById("config");
+						tourConfig.classList.add("hided")
+						this.chatSocket.send(JSON.stringify({
+							'gameNotif': res.g1,
+							'p1': res.p1,
+							'p2': res.p1,
+						}));
+						this.chatSocket.send(JSON.stringify({
+							'gameNotif': res.g2,
+							'p1': res.p3,
+							'p2': res.p4,
+						}));
+						setTimeout(() => {
+							this.remove("config")
+							history.pushState("", "", "/");
+							this.router();
+						}, 100)
 					}
-				});*/
+				});
 			});
 		}
 	}
@@ -1296,6 +1299,21 @@ export default class App {
 						messages[messages.length - 1].classList.remove("height0");
 						chatBottom.scrollIntoView()
 					}, 15);
+				}
+			}
+		});
+	}
+
+	handleTournamentNotif(data) {
+		if (this.user.id != data.p1 && this.user.id != data.p2)
+			return ;
+		this.getApiResponseJson("/api/view/gameRequestView/", {id: data.game_notif}).then((response) => {
+			let res = JSON.parse(response);
+			if (res.success) {
+				let notificationCenter = document.getElementById("notif")
+				if (notificationCenter) {
+					notificationCenter.innerHTML += res.html;
+					this.addNotificationEvents();
 				}
 			}
 		});

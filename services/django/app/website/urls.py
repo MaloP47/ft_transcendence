@@ -35,10 +35,12 @@ urlpatterns = [
 	path('api/view/chatRoomsView/', views.chatRoomsView, name="chatRoomsView"),
 	path('api/view/chatMessageView/', views.chatMessageView, name="chatMessageView"),
 	path('api/view/friendRequestView/', views.friendRequestView, name="friendRequestView"),
+	path('api/view/gameRequestView/', views.gameRequestView, name="gameRequestView"),
 
 	path('api/view/tournamentEnd/', views.createTournament, name="blockchain"),
 	path('api/view/getTournament/<int:tournament_id>', views.viewTournament, name="blockchainView"),
 	path('api/tournament/getWinner/', views.getTournamentWinner, name="getTournamentWinner"),
+	path('api/tournament/create/', views.createTournamentGame, name="createTournamentGame"),
 	path('api/view/tournamentConfig/', views.createTournamentConfig, name="createTournamentConfig"),
 	path('api/tournament/playerSearch/', views.searchPlayer, name="searchPlayer"),
 
