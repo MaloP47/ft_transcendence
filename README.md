@@ -25,3 +25,5 @@ rm -rf ~/.local/share/Trash/*
 
 ### Merge ask guillaume
 - [ ] in `services/django/app/requirements.txt` set a version for django-prometheus dependence to avoid errors at new version during correction
+- [ ] `logstash` and `kibana` take 10 seconds to close, probably SIGTERM issue, fixes: `exec` at the end of entrypoint script or similar, needs to be pid 1
+- [ ] `grafana` change admin password
