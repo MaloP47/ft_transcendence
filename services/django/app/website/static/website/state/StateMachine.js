@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
@@ -10,6 +11,8 @@
 /*                                                                            */
 /* ************************************************************************** */
 
+=======
+>>>>>>> 4ab213f (ball position broadcasted, better logic in consumer.py for receive but only for multiHostInfo)
 import Pong from '../pong/Pong.js';
 
 function sleep(ms) {
@@ -193,9 +196,9 @@ export default class App {
 		}
 	}
 
-	//----------------------------------------------------------//
-	//					DJANGO-JS COMMUNICATION					//
-	//----------------------------------------------------------//
+	// -----------------------------------------------------------
+	// ----------------- DJANGO-JS COMMUNICATION -----------------
+	// -----------------------------------------------------------
 
 	getCookie(name) {
 		let cookieValue = null;
@@ -276,9 +279,9 @@ export default class App {
 		return await this.makeApiRequestJson(url, json);
 	}
 
-	//----------------------------------------------------------//
-	//						VIEW UPDATE							//
-	//----------------------------------------------------------//
+	// ---------------------------------------------------------
+	// ---------------------- VIEW UPDATE ----------------------
+	// ---------------------------------------------------------
 
 	setPong(state) {
 		if (!this.pong)
@@ -350,7 +353,13 @@ export default class App {
 					this.handleFriendRequestMessage(data);
 				if (data.game_notif)
 					this.handleTournamentNotif(data);
-				// add multi logic here
+				// multi socket logic here --v
+				if (data.type && data.type == 'multiHostInfo') {
+					console.log('coucou');
+					console.log(data.ballpos);
+					//console.log(data);
+				}
+				// multi socket logic here --^
 			}.bind(this);
 		}
 
@@ -1867,9 +1876,9 @@ export default class App {
 		});
 	}
 
-	//----------------------------------------------------------//
-	//						 SINGLETON							//
-	//----------------------------------------------------------//
+	//-------------------------------------------------------
+	// --------------------- SINGLETON ----------------------
+	//-------------------------------------------------------
 
 	static get() {
 		if (!this.instance) {
