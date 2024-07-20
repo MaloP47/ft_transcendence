@@ -2,24 +2,24 @@
 
 # Attendre que Elasticsearch soit prêt
 until curl -s http://elasticsearch:9200; do
-echo "Waiting for Elasticsearch..."
-sleep 2
+	echo "Waiting for Elasticsearch..."
+	sleep 5
 done
 
-# /usr/share/elasticsearch/bin/elasticsearch-setup-passwords interactive -b <<EOF
-# DidierDidier
-# DidierDidier
-# DidierDidier
-# DidierDidier
-# DidierDidier
-# DidierDidier
-# DidierDidier
-# DidierDidier
-# DidierDidier
-# DidierDidier
-# DidierDidier
-# DidierDidier
-# EOF
+/usr/share/elasticsearch/bin/elasticsearch-setup-passwords interactive -b <<EOF
+DidierDidier
+DidierDidier
+DidierDidier
+DidierDidier
+DidierDidier
+DidierDidier
+DidierDidier
+DidierDidier
+DidierDidier
+DidierDidier
+DidierDidier
+DidierDidier
+EOF
 
 # elasticsearch-reset-password -i -u kibana <<EOF
 # DidierDidier

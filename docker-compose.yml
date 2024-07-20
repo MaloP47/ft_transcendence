@@ -187,20 +187,28 @@ services:
       
 
   elasticsearch:
-    image: elasticsearch:8.14.3
+    image: elasticsearch:7.12.1
     container_name: elasticsearch
     environment:
-      - discovery.type=single-node
-      - xpack.security.enabled=true
-      # - ELASTIC_USERNAME=jeanjean
+        - bootstrap.memory_lock=true
+        - discovery.type=single-node
+        - ELASTIC_PASSWORD=DidierDidier
+        - xpack.security.enabled=true
+    #   - discovery.type=single-node
+    #   - xpack.security.enabled=true
+    #   - ELASTIC_USERNAME=jeanjean
+    #   - ELASTIC_PASSWORD=DidierDidier
+    #   - ELASTICSEARCH_USERNAME=jeanjean
+    #   - ELASTICSEARCH_PASSWORD=DidierDidier
       # - ELASTIC_PASSWORD=DidierDidier
-      # - ELASTICSEARCH_USERNAME=jeanjean
-      # - ELASTICSEARCH_PASSWORD=DidierDidier
-      # - ELASTIC_PASSWORD=DidierDidier
-      # - KIBANA_USERNAME=kibana_system
+      # - KIBANA_USERNAME=kibana
       # - KIBANA_PASSWORD=DidierDidier
+    # ulimits:
+    #   memlock:
+    #     soft: -1
+    #     hard: -1
     volumes:
-      - elasticsearch_data:/usr/share/elasticsearch/data
+      # - elasticsearch_data:/usr/share/elasticsearch/data
       # - ./data/elasticsearch:/usr/share/elasticsearch/data
       - ./services/elasticsearch/conf/init_elasticsearch.sh:/usr/share/elasticsearch/init_elasticsearch.sh
       # - ./services/elasticsearch/conf/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
@@ -233,11 +241,17 @@ services:
       dockerfile: Dockerfile
     container_name: kibana
     # environment:
+      # - ELASTIC_VERSION=$ELASTIC_VERSION
+      # - ELASTICSEARCH_USERNAME=elastic
+      # - ELASTICSEARCH_PASSWORD=$ELASTIC_PASSWORD
       # - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
       # - ELASTICSEARCH_URL=http://elasticsearch:9200
       # - ELASTICSEARCH_HOSTS=["http://elasticsearch:9200"]
       # - ELASTICSEARCH_USERNAME=jeanjean
       # - ELASTICSEARCH_PASSWORD=Didier
+    # dns:
+    #   - 8.8.8.8
+    #   - 8.8.4.4
     volumes:
       - kibana_data:/usr/share/kibana/data
       # - ./services/kibana/conf/import_dashboards.sh:/usr/share/kibana/import_dashboards.sh
