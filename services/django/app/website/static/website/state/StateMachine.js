@@ -58,6 +58,7 @@ export default class App {
 			"/register": {title: "Transcendence - Register", state: "Register"},
 			"/play1vsAI": {title: "Transcendence - 1 VS A.I.", state: "Play1vsAI"},
 			"/play1vs1": {title: "Transcendence - 1 VS 1 (local)", state: "Play1vs1"},
+			"/multi": {title: "Transcendence - 1 VS 1 (multiplayer)", state: "PlayMulti"},
 			"/listTournaments": {title: "Transcendence - Tournaments", state: "listTournaments"},
 			"/createTournaments": {title: "Transcendence - Tournament creation", state: "createTournaments"},
 		}
@@ -106,6 +107,9 @@ export default class App {
 		} else if (path.indexOf("/play1vs1/") == 0) {
 			id = path.substring(10)
 			path = "/play1vs1"
+		} else if (path.indexOf("/multi/") == 0) {
+			id = path.substring(7)
+			path = "/multi"
 		} else if (path.indexOf("/getTournament/") == 0) {
 			id = path.substring(15)
 			path = "/listTournaments"
@@ -152,6 +156,17 @@ export default class App {
 					if (document.getElementById("listTournaments"))
 						this.hideListTournaments();
 					this.getHomePage("1vs1", id);
+					break;
+				case "PlayMulti":
+					if (document.getElementById("registerForm"))
+						this.hideRegisterForm();
+					if (document.getElementById("loginForm"))
+						this.hideLoginForm();
+					if (document.getElementById("createGame"))
+						this.hideCreateGame();
+					if (document.getElementById("listTournaments"))
+						this.hideListTournaments();
+					this.getHomePage("multi", id);
 					break;
 				case "listTournaments":
 					if (document.getElementById("registerForm"))
@@ -325,8 +340,6 @@ export default class App {
 
 			this.chatSocket.onmessage = function(e) {
 				const data = JSON.parse(e.data);
-				console.log("oui")
-				console.log(data)
 				if (data.need_update) {
 					this.updateConnectedUsers();
 					this.updateRooms();
@@ -337,6 +350,7 @@ export default class App {
 					this.handleFriendRequestMessage(data);
 				if (data.game_notif)
 					this.handleTournamentNotif(data);
+				// add multi logic here
 			}.bind(this);
 		}
 
@@ -371,6 +385,14 @@ export default class App {
 						this.getLocalConfigPage();
 					} else if (state == "1vs1" && game_id != -1) {
 						this.getLocalGame(game_id);
+					} else if (state == "multi" && !this.user.authenticated) {
+						history.replaceState("", "", "/");
+						this.router();
+					} else if (state == "multi" && game_id == -1) {
+						this.setPong("bg");
+						this.getMultiConfigPage();
+					} else if (state == "multi" && game_id != -1) {
+						this.getMultiGame(game_id);
 					} else if (state == "listTournaments") {
 						this.setPong("bg");
 						this.getListTournaments(game_id);
@@ -402,6 +424,13 @@ export default class App {
 			} else if (state == "1vs1" && game_id != -1) {
 				this.hideLocalConfigPage();
 				this.getLocalGame(game_id);
+			} else if (state == "multi" && game_id == -1) {
+				this.setPong("bg");
+				this.hideLocalGame();
+				this.getMultiConfigPage();
+			} else if (state == "multi" && game_id != -1) {
+				this.hideLocalConfigPage();
+				this.getMultiGame(game_id);
 			} else if (state == "listTournaments") {
 				this.getListTournaments(game_id);
 			} else if (state == "createTournaments") {
@@ -587,6 +616,54 @@ export default class App {
 	}
 
 	getLocalGame(id) {
+		this.getApiResponseJson("/api/game/get/", {id: id}).then((response) => {
+			let res = JSON.parse(response);
+			if (res.success) {
+				if (res.winScore <= res.p1score || res.winScore <= res.p2score)
+					this.setPong("bg")
+				else
+					this.setPong("p1Game");
+				this.pong.game_id = id;
+				this.pong.gameInfo = res;
+				let homeContent = document.getElementById("homeContent");
+				if (document.getElementById("gameOverlay"))
+					return ;
+				homeContent.innerHTML += res.html;
+				let gameOverlay = document.getElementById("gameOverlay")
+				if (gameOverlay.dataset.loaded != "true") {
+					gameOverlay.dataset.loaded = "true";
+					document.getElementById("p1score").innerHTML = res.p1score
+					document.getElementById("p2score").innerHTML = res.p2score
+					if (res.p1score >= res.winScore || res.p2score >= res.winScore) {
+						let endDiv = document.getElementById("countdown");
+						if (endDiv) {
+							let p1 = "A.I.";
+							if (res.p1.id != -1)
+								p1 = res.p1.username;
+							let p2 = res.p2Local;
+							if (res.p2.id != -1)
+								p2 = res.p2.username;
+							let gameVs = "<span class='fs-2 text-light-emphasis'>" + p1 + " vs " + p2 + "</span>";
+							if (res.p1score > res.p2score)
+								endDiv.innerHTML = gameVs + "<p style='font-size:5rem; margin-top: -30px'>" + p1 + " wins this game !</p>"
+							else
+								endDiv.innerHTML = gameVs + "<p style='font-size:5rem; margin-top: -30px'>" + p2 + " wins this game !</p>"
+							endDiv.classList.remove("coundown");
+							endDiv.style.fontSize = "5rem"
+							endDiv.classList.add("visible");
+						}
+						console.log('game is finished...')
+					} else {
+						this.pong.config = res;
+					}
+				}
+			} else {
+				history.replaceState("", "", "/");
+				this.router();
+			}
+		});
+	}
+	getMultiGame(id) {
 		this.getApiResponseJson("/api/game/get/", {id: id}).then((response) => {
 			let res = JSON.parse(response);
 			if (res.success) {
@@ -837,6 +914,24 @@ export default class App {
 			}
 		});
 	}
+	getMultiConfigPage() {
+		let homeContent = document.getElementById("homeContent");
+		if (!homeContent)
+			return ;
+		this.getApiResponse("/api/view/multiConfig/").then((response) => {
+			let res = JSON.parse(response);
+			if (res.success) {
+				homeContent.innerHTML += res.html;
+				setTimeout(() => {
+					let configView = document.getElementById("config");
+					if (!configView)
+						return ;
+					configView.classList.remove("hided");
+					this.setMultiConfigInteraction();
+				}, 200);
+			}
+		});
+	}
 
 	setConfigInteraction() {
 		let config = {
@@ -915,6 +1010,89 @@ export default class App {
 						config.classList.add("hided")
 						this.remove("config")
 						history.pushState("", "", "/play1vs1/" + res.id);
+						this.router();
+					}
+				});
+			});
+		}
+	}
+	setMultiConfigInteraction() {
+		let config = {
+			winScore: 10,
+			startSpeed: 8,
+			bonuses: true,
+			ai: 1,
+			leftKey: 65,
+			rightKey: 68,
+			leftKey2: 37,
+			rightKey2: 39,
+			p2Local: '',
+		}
+		let configView = document.getElementById("config");
+		if (configView.dataset.events != "done") {
+			configView.dataset.events = "done";
+			let winScore = document.getElementById("winScore");
+			let winScoreText = document.getElementById("winScoreText");
+			winScore.addEventListener('input', (e) => {
+				winScoreText.innerHTML = winScore.value;
+				config.winScore = winScore.value;
+			});
+			let startSpeed = document.getElementById("startSpeed");
+			let startSpeedText = document.getElementById("startSpeedText");
+			startSpeed.addEventListener('input', (e) => {
+				startSpeedText.innerHTML = startSpeed.value;
+				config.startSpeed = startSpeed.value;
+			});
+			if (document.querySelector('input[name="bonuses"]')) {
+				document.querySelectorAll('input[name="bonuses"]').forEach((elem) => {
+					elem.addEventListener("change", function(event) {
+						if (event.target.value == 'on')
+							config.bonuses = true;
+						else
+							config.bonuses = false;
+					});
+				});
+			}
+			let leftKey = document.getElementById("leftKey");
+			leftKey.addEventListener("click", async (e) => {
+				leftKey.innerHTML = "_";
+				await this.waitKeypress("leftKey");
+				config.leftKey = leftKey.dataset.code;
+			})
+			let rightKey = document.getElementById("rightKey");
+			rightKey.addEventListener("click", async (e) => {
+				rightKey.innerHTML = "_";
+				await this.waitKeypress("rightKey");
+				config.rightKey = rightKey.dataset.code;
+			})
+			if (document.querySelector('input[name="p2Local"]')) {
+				document.querySelector('input[name="p2Local"]').addEventListener("input", function(e) {
+					config.p2Local = e.target.value;
+				});
+			}
+			let leftKey2 = document.getElementById("leftKey2");
+			leftKey2.addEventListener("click", async (e) => {
+				leftKey2.innerHTML = "_";
+				await this.waitKeypress("leftKey2");
+				config.leftKey2 = leftKey2.dataset.code;
+			})
+			let rightKey2 = document.getElementById("rightKey2");
+			rightKey2.addEventListener("click", async (e) => {
+				rightKey2.innerHTML = "_";
+				await this.waitKeypress("rightKey2");
+				config.rightKey2 = rightKey2.dataset.code;
+			})
+			let playBtn = document.getElementById("playBtn")
+			playBtn.addEventListener("click", (e) => {
+				if (config.p2Local == "")
+					config.p2Local = "Local P2"
+				this.getApiResponseJson("/api/game/new/multi/", config).then((response) => {
+				let res = JSON.parse(response);
+				if (res.success) {
+						let config = document.getElementById("config");
+						config.classList.add("hided")
+						this.remove("config")
+						history.pushState("", "", "/multi/" + res.id);
 						this.router();
 					}
 				});

@@ -171,9 +171,22 @@ export default class Pong {
 		this.transi.update();
 		this.scene.update();
 		this.assets.update();
+
+		if (this.isMulti())
+		{
+			console.log('Multi...');
+		}
 		
 		requestAnimationFrame(this.update.bind(this));
 	}
+
+	// Multi utils
+	isMulti() {
+		return (this.gameInfo.gameType == 2);
+	}
+	//isHost() {
+	//	return (this.gameInfo.p1.
+	//}
 
 	preConfig() {
 		this.p1LeftKey = this.gameInfo.p1Left;

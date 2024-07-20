@@ -19,6 +19,7 @@ urlpatterns = [
 	path('api/game/save/', views.saveGame, name="saveGame"),
 	path('api/game/new/1vsAI/', views.gameNew1vsAi, name="gameNew1vsAi"),
 	path('api/game/new/1vs1/', views.gameNew1vs1, name="gameNew1vs1"),
+	path('api/game/new/multi/', views.gameNewMulti, name="gameNewMulti"),
 	path('api/game/forfeit/', views.gameForfeit, name="gameForfeit"),
 
 	path('api/messages/setRead/', views.messageSetRead, name="messageSetRead"),
@@ -26,6 +27,7 @@ urlpatterns = [
 	path('api/view/createGame/', views.createGame, name="createGame"),
 	path('api/view/localAiConfig/', views.localAiConfig, name="localAiConfig"),
 	path('api/view/localConfig/', views.localConfig, name="localConfig"),
+	path('api/view/multiConfig/', views.multiConfig, name="multiConfig"),
 	path('api/view/profilMenu/', views.profilMenu, name="profilMenu"),
 	path('api/view/login/', views.loginForm, name="loginForm"),
 	path('api/view/register/', views.registerForm, name="registerForm"),
@@ -51,6 +53,8 @@ urlpatterns = [
     path('play1vsAI/<int:game_id>', views.indexGame, name="indexGame"),
 	path('play1vs1', views.index, name="index"),
     path('play1vs1/<int:game_id>', views.indexGame, name="indexGame"),
+	path('multi', views.index, name="index"),
+    path('multi/<int:game_id>', views.indexGame, name="indexGame"),
 
 	path('listTournaments', views.index, name="index"),
 	path('createTournaments', views.index, name="index"),

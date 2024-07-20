@@ -23,23 +23,27 @@ Put here changes that will impact project mates
 - Prevents random non functioning project in the future, for example, during the evaluation if image has changed
 
 # TODO
-### Project Structure
-- [x] rename requirements to services, meaning make changes to docker-compose.yml file and makefile
-- [x] Move things out of `services/`
-- Makefile
-    - [x] changing `echo` for `printf` (for POSIX portability)
-    - [x] find better solution to --no-print-directory to put rules in deps instead
-    - [ ] use docker compose to clean containers instead of normal docker
-    - [ ] remove django migrations and put it in startup script in container or dockerfile
-- [ ] docker volumes bind-mounts inside `data` folder at project root for the ones needed, (yeah we don't need persistence but it would be nice for demonstrations and debugging)
-- [x] remove `mkdirs` rule
-- [ ] look more into docker `secrets` for all passwords, tokens and API keys
-- [ ] look more into the concept of init containers in combination with docker secrets
-### Django
-- [x] database migration command
-    - [x] move into Dockerfile setup? or mounted bash script
-    - [ ] wait for postgres to be up for migrations? 
-    - [x] add `exec` at the start of last command in `django_init.sh`
-- [ ] move debug logs to a volume or smth (ask guillaume)
-### postgres
-- [x] WARNING: POSTGRES_HOST_AUTH_METHOD has been set to "trust". This will allow anyone with access to the Postgres port to access your database without a password, even if POSTGRES_PASSWORD is set. See PostgreSQL documentation about "trust":
+### Stuff to fix (not my work)
+- [ ] music error message when doing nothing `Autoplay was prevented: DOMException: play() failed because the user didn't interact with the document first. https://goo.gl/xX8pDD` `music.js:14`
+- [ ] logout button not working because of music button
+    - TODO: remove temporary logout button from `templates/navbar.html`, and uncomment music.js but first fix the constant loop trying to play it
+- [ ] does forfeiting a game mark it as over?
+### Stuff to fix (my work)
+- [x] refreshing multi config page gives `Page not found (404)`
+    - FIX: forgot to add `/multi` to urls path, not sure why it was working at all, probably because page is static
+- [x] play button in multi config redirecting to normal game
+### Multiplayer
+- Stuff to create:
+    - in `models.py`:
+        - [x] `multiConfig()`
+        - [x] added `gameType` to `getGame()`
+    - in `urls.py`:
+        - [x] `/api/view/multiConfig/`
+        - [x] `/api/game/new/multi/`
+    - in `StateMachine.js`:
+        - [x] `getMultiConfigPage()`
+        - [x] `getMultiGame()`
+        - [x] `setMultiConfigInteraction()`
+    - in `templates`:
+        - [x] `website/multiConfig.html`
+            - [ ] add opponent selector like in tournament creator
