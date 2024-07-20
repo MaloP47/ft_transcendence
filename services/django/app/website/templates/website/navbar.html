@@ -1,9 +1,14 @@
 <nav class="navbar navbar-expand-lg bg-dark text-white border-bottom border-light" data-bs-theme="dark" style="--bs-bg-opacity:0.5; --bs-border-opacity: 0.1;">
 	<div class="container-fluid">
 		<a class="navbar-brand" href="/" data-link="/">Transcendence</a>
-		<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+		<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">navbar
+
 			<span class="navbar-toggler-icon"></span>
 		</button>
+
+		<!--TEMPORARY NOA LOGOUT BUTTON-->
+		<a class="dropdown-item" href="/" data-api="{% url 'logout' %}">Logout(tmp)</a>
+
 		<div class="collapse navbar-collapse" id="navbarSupportedContent">
 			<ul class="navbar-nav me-auto mb-2 mb-lg-0" id="navbar">
 				<span id="profilMenu" class="hided">

@@ -131,6 +131,7 @@ def getGame(request):
 				'date' : game.date,
 				'p2Local': game.p2Local,
 				'html': render_to_string('website/gameOverlay.html'),
+                'gameType': game.gameType,
 			});
 		else:
 			return JsonResponse({
@@ -186,6 +187,15 @@ def gameNew1vs1(request):
 	if request.method == 'POST':
 		data = json.loads(request.POST["data"]);
 		game = Game(p1=request.user, ai=data['ai'], scoreToWin=data['winScore'], ballSpeed=data['startSpeed'], bonuses=data['bonuses'], p1Left=data['leftKey'], p1Right=data['rightKey'], p2Left=data['leftKey2'], p2Right=data['rightKey2'], p2Local=data['p2Local'], gameType=1)
+		game.save()
+		return JsonResponse({
+			'success': True,
+			'id': game.id,
+		});
+def gameNewMulti(request):
+	if request.method == 'POST':
+		data = json.loads(request.POST["data"]);
+		game = Game(p1=request.user, ai=data['ai'], scoreToWin=data['winScore'], ballSpeed=data['startSpeed'], bonuses=data['bonuses'], p1Left=data['leftKey'], p1Right=data['rightKey'], p2Left=data['leftKey2'], p2Right=data['rightKey2'], p2Local=data['p2Local'], gameType=2)
 		game.save()
 		return JsonResponse({
 			'success': True,
@@ -413,6 +423,12 @@ def localConfig(request):
 		return JsonResponse({
 			'success': True,
 			'html': render_to_string('website/localConfig.html'),
+		})
+def multiConfig(request):
+	if request.method == 'POST':
+		return JsonResponse({
+			'success': True,
+			'html': render_to_string('website/multiConfig.html'),
 		})
 
 def createGame(request):
