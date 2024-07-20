@@ -1,15 +1,3 @@
-// ************************************************************************** //
-//                                                                            //
-//                                                        :::      ::::::::   //
-//   Pong.js                                            :+:      :+:    :+:   //
-//                                                    +:+ +:+         +:+     //
-//   By: gbrunet <gbrunet@student.42.fr>            +#+  +:+       +#+        //
-//                                                +#+#+#+#+#+   +#+           //
-//   Created: 2024/05/21 13:52:15 by gbrunet           #+#    #+#             //
-//   Updated: 2024/06/20 15:04:32 by gbrunet          ###   ########.fr       //
-//                                                                            //
-// ************************************************************************** //
-
 import * as THREE from 'three';
 
 import PongScene from './PongScene.js';
@@ -108,6 +96,7 @@ export default class Pong {
 		this.scaleFactor = 0.75;
 		this.bonus = true;
 		this.resetGameInfo();
+		this.reset
 	}
 
 	resetGameInfo() {
@@ -172,21 +161,67 @@ export default class Pong {
 		this.scene.update();
 		this.assets.update();
 
-		if (this.isMulti())
-		{
-			console.log('Multi...');
+		if (this.isMulti()) {
+			if (this.isHost()) {
+				this.sendMultiData();
+				// Dont reset data stupidly
+				// There shouldn't be missing fields now and then
+			}
+			//} else {
+
+			//}
 		}
 		
 		requestAnimationFrame(this.update.bind(this));
 	}
 
-	// Multi utils
+	// -----------------------------
+	// -------- Multi utils --------
+	// --------------v--------------
+	sendMultiData() {
+		if (!this.socketIsReady())
+			return;
+		if (!this.isHost())
+			return;
+		//if (!this.isHost() && !this.isGuest())
+		//	return;
+
+		//// Set data
+		if (this.isHost()) {
+			var type = 'multiHostInfo';
+		}
+		//else if (isGuest()) {
+		//	type = 'multiGuestInfo'
+		//}
+		//else {
+		//	return ;
+		//}
+
+		// Send data 
+		this.stateMachine.chatSocket.send(JSON.stringify({
+			'type': type,
+			'ballpos': this.assets.ball.ball.position,
+			//data: this.multiData,
+		}));
+	}
 	isMulti() {
 		return (this.gameInfo.gameType == 2);
 	}
-	//isHost() {
-	//	return (this.gameInfo.p1.
-	//}
+	isMultiNotHost() {
+		return (this.gameInfo.gameType == 2 && !this.isHost());
+	}
+	isHost() {
+		return (this.stateMachine.user.id == this.gameInfo.p1.id);
+	}
+	isGuest() {
+		return (this.stateMachine.user.id == this.gameInfo.p2.id);
+	}
+	isSpectator() {
+		return (!this.isHost() && !this.isGuest());
+	}
+	socketIsReady() {
+		return (this.stateMachine.chatSocket.readyState === WebSocket.OPEN);
+	}
 
 	preConfig() {
 		this.p1LeftKey = this.gameInfo.p1Left;

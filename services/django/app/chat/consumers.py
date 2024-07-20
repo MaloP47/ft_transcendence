@@ -23,8 +23,35 @@ class ChatConsumer(AsyncWebsocketConsumer):
 		)
 		await ChatConsumer.updateOnline(self, False)
 
+	# This NEEDS to be changed, add a common `type` field or something with value hostGameInfo, gameNotif, friendRequest, etc.
+	# And I don't mean the `type` in `group_send`
+	# This might cause severe lag, not sure, basically there's a way to avoid all these try except easily
 	async def receive(self, text_data):
 		text_data_json = json.loads(text_data)
+		# Multiplayer logic --v
+		if 'type' in text_data_json:
+			if text_data_json['type'] == 'multiHostInfo': 
+				# Checks can be performed here or in the handler function below for permission
+				# Need to restrict access to data too with rooms or groups or something
+				# Check if sender is really host or guest for example
+				await self.channel_layer.group_send(self.room_group_name, text_data_json)
+		else:
+			print('No type field in received data')
+
+		try:
+			hostGameInfo = text_data_json['hostGameInfo']
+			ballpos = text_data_json['ballpos']
+			await self.channel_layer.group_send(
+				self.room_group_name,
+				{
+					'type': 'host_game_info',
+					'hostGameInfo': hostGameInfo,
+					'ballpos': ballpos,
+				}
+			)
+		except:
+			pass
+		# Multiplayer logic --^
 		try:
 			gameNotif = text_data_json['gameNotif']
 			p1 = text_data_json['p1']
@@ -84,6 +111,19 @@ class ChatConsumer(AsyncWebsocketConsumer):
 			)
 		except:
 			pass
+
+	async def multiHostInfo(self, event):
+		# Try except can be performed here if need
+		# This way it lowers number of try except per received message greatly
+		await self.send(text_data=json.dumps(event))
+
+	#async def host_game_info(self, event):
+	#	hostGameInfo = event['hostGameInfo']
+	#	ballpos = event['ballpos']
+	#	await self.send(text_data=json.dumps({
+	#		'hostGameInfo': hostGameInfo,
+	#		'ballpos': ballpos,
+	#	}))
 
 	async def chat_message(self, event):
 		message = event['message']

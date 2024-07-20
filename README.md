@@ -28,6 +28,7 @@ Put here changes that will impact project mates
 - [ ] logout button not working because of music button
     - TODO: remove temporary logout button from `templates/navbar.html`, and uncomment music.js but first fix the constant loop trying to play it
 - [ ] does forfeiting a game mark it as over?
+- [ ] join button not working? no error in chrome console
 ### Stuff to fix (my work)
 - [x] refreshing multi config page gives `Page not found (404)`
     - FIX: forgot to add `/multi` to urls path, not sure why it was working at all, probably because page is static
@@ -47,3 +48,15 @@ Put here changes that will impact project mates
     - in `templates`:
         - [x] `website/multiConfig.html`
             - [ ] add opponent selector like in tournament creator
+    - in `consumer.py`:
+        - [ ] receive method seems to do everything, no if checks for type, ask guillaume
+        - [ ] receive data in a smarter way for hostGameInfo only using a `type` field as a proof of concept
+    - in `Pong.js`:
+        - lots of multi utils functions added
+        - [ ] variable that holds multi game info/data, `multiData`
+            - These functions should set `multiData` properly if needed
+                - [ ] `initGameVariable()`
+                - [ ] `resetGameInfo()`
+                - [ ] `toState()`
+                - [ ] `preConfig()`
+                - [ ] `postConfig()`
