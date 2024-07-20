@@ -2,6 +2,9 @@
 
 
 /usr/share/elasticsearch/bin/elasticsearch &
+ELASTIC_PID=$!
+
+echo "Elasticsearch started with PID $ELASTIC_PID."
 
 Attendre que Elasticsearch soit prêt
 until curl -s http://elasticsearch:9200; do
@@ -25,6 +28,20 @@ DidierDidier
 DidierDidier
 DidierDidier
 EOF
+
+echo "Stopping Elasticsearch with PID $ELASTIC_PID."
+
+kill $ELASTIC_PID
+
+# Attendre que Elasticsearch soit arrêté
+wait $ELASTIC_PID
+
+echo "Elasticsearch stopped."
+
+# Vérifier qu'aucun processus Elasticsearch ne reste en cours
+ps aux | grep '/usr/share/elasticsearch/bin/' | grep -v grep
+
+echo "Restarting Elasticsearch..."
 
 exec elasticsearch
 

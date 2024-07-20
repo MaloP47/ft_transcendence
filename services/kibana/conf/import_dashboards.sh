@@ -3,12 +3,11 @@
 # Démarrer Kibana en arrière-plan
 echo "Starting Kibana..."
 
-# exec kibana
+# Démarrer Kibana
 /usr/share/kibana/bin/kibana --allow-root &
-# exec kibana --allow-root
+KIBANA_PID=$!
 
-
-echo "Kibana started."
+echo "Kibana started with PID $KIBANA_PID."
 
 # Attendre que Kibana soit prêt
 # while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' localhost:5601/api/status)" != "200" ]]; do 
@@ -16,7 +15,7 @@ echo "Kibana started."
 # 	sleep 5
 # done
 
-sleep 5;
+sleep 5
 
 if curl -s -X GET "localhost:5601/api/saved_objects/_find?type=index-pattern&search=filebeat-*&search_fields=title" | grep -q '"total":0'; then
 	# Ajouter l'index pattern
@@ -25,7 +24,6 @@ if curl -s -X GET "localhost:5601/api/saved_objects/_find?type=index-pattern&sea
 		-H 'kbn-xsrf: true' \
 		-d '{"attributes":{"title":"filebeat-*","timeFieldName":"@timestamp"}}'
 	echo "Index pattern 'filebeat-*' added."
-	# exec kibana --allow-root
 else
 	echo "Index pattern 'filebeat-*' already exists."
 fi
@@ -41,29 +39,21 @@ else
 	echo "Dashboard 'My Filebeat Dashboard' already exists."
 fi
 
-sleep 5;
+sleep 5
 
-echo "kibana status"
+echo "Stopping Kibana with PID $KIBANA_PID."
 
-# ps aux | grep 'kibana'
+kill $KIBANA_PID
 
-ps aux | grep '/usr/share/kibana/bin/'
+# Attendre que Kibana soit arrêté
+wait $KIBANA_PID
 
+echo "Kibana stopped."
 
-kill $(ps aux | grep '/usr/share/kibana/bin/' | awk '{print $2}')
+# Vérifier qu'aucun processus Kibana ne reste en cours
+ps aux | grep '/usr/share/kibana/bin/' | grep -v grep
 
-echo "Kibana stopped ???"
+echo "Restarting Kibana..."
 
-ps aux | grep 'kibana'
-
-exec kibana --allow-root
-
-# # Vérifier si le tableau de bord existe déjà
-# if curl -s -X GET "localhost:5601/api/saved_objects/_find?type=dashboard&search=Mon-Tableau" | grep -q '"total":0'; then
-# 	# Importer le tableau de bord
-# 	curl -X POST "http://kibana:5601/api/saved_objects/_import" \
-# 	-H "kbn-xsrf: true" \
-# 	--form file=@/usr/share/kibana/dashboard.json
-# else
-# 	echo "Dashboard 'My Filebeat Dashboard' already exists."
-# fi
+# Redémarrer Kibana
+exec /usr/share/kibana/bin/kibana --allow-root
