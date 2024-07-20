@@ -1,0 +1,40 @@
+global:
+  scrape_interval: 4s
+  evaluation_interval: 4s
+
+
+scrape_configs:
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  - job_name: 'nginx-exporter'
+    static_configs:
+      - targets: ['nginx-exporter:9113']
+
+  - job_name: 'grafana'
+    metrics_path: '/grafana/metrics'
+    static_configs:
+      - targets: ['grafana:3000']
+
+  # gonna change this later, that's not how metrics work, install blackbox_exporter for stuff like this or an actual exporter
+  - job_name: 'django'
+    static_configs:
+      - targets: ['django:8000']
+
+  - job_name: 'postgres-exporter'
+    static_configs:
+      - targets: ['postgres-exporter:9187']
+
+  - job_name: 'alertmanager'
+    static_configs:
+      - targets: ['alertmanager:9093']
+
+rule_files:
+  - 'alerts.rules.yml'
+
+alerting:
+  alertmanagers:
+    - scheme: http
+      static_configs:
+        - targets: ['alertmanager:9093']

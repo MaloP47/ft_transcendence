@@ -1,3 +1,4 @@
+# env
 *.env
 
 # Blockchain
@@ -6,6 +7,7 @@
 # logs
 *.log
 *.logs
+/services/postgres/logs
 
 # persistent data at project root only
 /data

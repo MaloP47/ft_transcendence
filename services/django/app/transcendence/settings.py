@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    settings.py                                        :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: gbrunet <gbrunet@student.42.fr>            +#+  +:+       +#+         #
+#    By: guderram <guderram@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/06/03 16:02:34 by gbrunet           #+#    #+#              #
-#    Updated: 2024/06/03 16:02:47 by gbrunet          ###   ########.fr        #
+#    Updated: 2024/07/06 11:12:58 by guderram         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -58,6 +58,7 @@ INSTALLED_APPS = [
     'channels',
     'chat',
     'rest_framework',
+	'django_prometheus',
 ]
 
 
@@ -79,6 +80,7 @@ CHANNEL_LAYERS = {
 # }
 
 MIDDLEWARE = [
+	'django_prometheus.middleware.PrometheusBeforeMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -86,6 +88,10 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # All your other middlewares go here, including the default
+    # middlewares like SessionMiddleware, CommonMiddleware,
+    # CsrfViewmiddleware, SecurityMiddleware, etc.
+    'django_prometheus.middleware.PrometheusAfterMiddleware',
 ]
 
 ROOT_URLCONF = 'transcendence.urls'
@@ -193,7 +199,7 @@ LOGGING = {
         'file': {
             'level': 'DEBUG',
             'class': 'logging.FileHandler',
-            'filename': 'debug.log',
+            'filename': '/var/log/django/django.log',
         },
     },
     'loggers': {

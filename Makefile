@@ -37,9 +37,9 @@ ifndef VERBOSE
 endif
 ### Formatting ###
 
-.PHONY : all up down stop clean flcean migrate makemigrations craetesuperuser list help re rere
+.PHONY : all up down stop clean flcean mkdirs migrate makemigrations craetesuperuser list help re rere
 
-all up: 
+all up: mkdirs
 	@printf "$(_GREEN)Building and running Transcendence...$(_END)\n"
 	docker compose up -d --build
 
@@ -51,13 +51,28 @@ clean: down
 	@printf "$(_YELLOW)Removing all unused containers...$(_END)\n"
 	docker system prune -f
 	docker volume prune -f
-	@# volumes persist here somehow
+	rm -rf data/var-log
+	rm -rf services/postgres/logs
+	rm -rf data/kibana
 
 fclean: down
 	@printf "$(_YELLOW)Removing all unused containers...$(_END)\n"
 	docker system prune -af
 	docker volume prune -af
-	@# volumes persist here somehow
+	rm -rf data/var-log
+	rm -rf services/postgres/logs
+	rm -rf data/kibana
+
+
+mkdirs:
+	@mkdir -p	data/var-log \
+				data/var-log/django \
+				data/var-log/nginx \
+				data/var-log/postgresql \
+				data/var-log/rabbitmq \
+				services/postgres/logs \
+				data/kibana
+	@chmod 777 services/postgres/logs
 
 migrate:
 	docker compose exec django python manage.py migrate
