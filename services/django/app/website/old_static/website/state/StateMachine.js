@@ -1,0 +1,1617 @@
+import Pong from '../pong/Pong.js';
+
+function sleep(ms) {
+	return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+export default class App {
+	constructor() {
+		this.pongSocket = null;
+		this.chatSocket = null;
+		this.setupStaticPageBehavior();
+		this.initRoutes();
+		this.initUser();
+		this.updateUser();
+		this.router();
+
+		//this.updateUser().then(() => {
+		//	this.router();
+		//	this.setPong("bg"); // for some reason needs to be done twice to work, one for init, one for starting the game
+		//});
+	}
+
+	setupStaticPageBehavior() {
+		// history buttons
+		window.onpopstate = function(e) {
+			this.router();
+		}.bind(this);
+
+		// clickable links
+		window.addEventListener("click", e => {
+			if (e.target.matches("[data-api]")) {
+				e.preventDefault();
+				this.getApiResponse(e.target.dataset.api).then((response) => {
+					history.pushState("", "", e.target.href);
+					let res = JSON.parse(response)
+					if (res.needUserUpdate) {
+						this.updateUser(); // idk man
+						this.chatSocket.send(JSON.stringify({
+							'updateFriends': true
+						}));
+					}
+				});
+			}
+			else if (e.target.matches("[data-link]")) {
+				e.preventDefault();
+				history.pushState("", "", e.target.href);
+				this.router();
+			}
+		});
+	}
+
+	initRoutes() {
+		this.routes = {
+			"/": {title: "Transcendence", state: "Home", type: 'root', state_name: 'home'},
+			"/login": {title: "Transcendence - Login", state: "Login", type: 'loginForm', state_name: 'login'},
+			"/register": {title: "Transcendence - Register", state: "Register", type: 'registerForm', state_name: 'register'},
+			"/play1vsAI": {title: "Transcendence - 1 VS A.I.", state: "Play1vsAI", type: 'game', state_name: '1vsAI'},
+			"/play1vs1": {title: "Transcendence - 1 VS 1 (local)", state: "Play1vs1", type: 'game', state_name: '1vs1'},
+			"/remote1vs1": {title: "Transcendence - 1 VS 1 (remote)", state: "Remote1vs1", type: 'game', state_name: 'remote1vs1'},
+		}
+	}
+
+	initUser() {
+		this.user = {
+			authenticated: false,
+			username: "",
+			id: undefined,
+		};
+	}
+
+	updateUser() {
+		let prev = this.user.authenticated;
+		if (this.getCookie('csrftoken') == null) {
+			this.user.authenticated = false;
+			this.user.username = "";
+			this.user.id = undefined;
+			return ;
+		}
+		
+		this.getApiResponse("/api/user/").then((response) => {
+			let user = JSON.parse(response);
+			if (user.authenticated) {
+				this.user.authenticated = true;
+				this.user.username = user.username;
+				this.user.id = user.id;
+			}
+			else {
+				this.user.authenticated = false;
+				this.user.username = "";
+				this.user.id = undefined;
+			}
+			if (prev != this.user.authenticated)
+				this.toggleProfilMenu();
+			//this.router(); // commented this to see what it does
+		});
+	}
+
+	router() {
+		this.socketReset('pongSocket'); // might be destroying pong socket during game if clicking on chat, not sure so check
+		//this.socketReset('chatSocket'); // should I reset that one too?
+
+
+		// DEBUG
+		//console.log('In router...');
+
+		let path = String(location.pathname)
+		let id = -1;
+		if (path.indexOf("/play1vsAI/") == 0) {
+			id = path.substring(11);
+			path = "/play1vsAI";
+		} else if (path.indexOf("/play1vs1/") == 0) {
+			id = path.substring(10);
+			path = "/play1vs1";
+		} else if (path.indexOf("/remote1vs1/") == 0) {
+			id = path.substring(12);
+			path = "/remote1vs1";
+		}
+		let view = this.routes[path];
+		if (view) {
+			document.title = view.title;
+
+			// Always hide elements first, seems to work
+			this.hideRegisterForm();
+			this.hideLoginForm();
+			this.hideCreateGame();
+
+			if (view.type == 'root') {
+				this.getHomePage("home");
+			} else if (view.type == 'loginForm') {
+				this.getLoginForm();
+			} else if (view.type == 'registerForm') {
+				this.getRegisterForm();
+			} else if (view.type == 'game') {
+				this.getHomePage(view.state_name, id);
+			} 
+		} else {
+			history.replaceState("", "", "/");
+			this.router();
+		}
+	}
+
+	// ---------------------------------------------------------------
+	// ------------------- DJANGO-JS COMMUNICATION -------------------
+	// ---------------------------------------------------------------
+
+	getCookie(name) {
+		let cookieValue = null;
+		if (document.cookie && document.cookie !== '') {
+			const cookies = document.cookie.split(';');
+			for (let i = 0; i < cookies.length; i++) {
+				const cookie = cookies[i].trim();
+				if (cookie.substring(0, name.length + 1) === (name + '=')) {
+					cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+					break;
+				}
+			}
+		}
+		return cookieValue;
+	}
+
+	makeApiRequest(url, data) {
+		let csrf = this.getCookie('csrftoken');
+		return new Promise(function (resolve, reject) {
+			let xhr = new XMLHttpRequest();
+			xhr.open("POST", url);
+			xhr.onload = function () {
+				if (this.status >= 200 && this.status < 300) {
+					resolve(xhr.response);
+				} else {
+					reject({
+						status: this.status,
+						statusText: xhr.statusText
+					});
+				}
+			};
+			xhr.onerror = function () {
+				reject({
+					status: this.status,
+					statusText: xhr.statusText
+				});
+			};
+			xhr.setRequestHeader("X-CSRFToken", csrf);
+			if (data != undefined)
+				xhr.send(data)
+			else
+				xhr.send();
+		}.bind(this));
+	}
+
+	async getApiResponse(url, data) {
+		return await this.makeApiRequest(url, data);
+	}
+
+	makeApiRequestJson(url, json) {
+		let csrf = this.getCookie('csrftoken');
+		return new Promise(function (resolve, reject) {
+			let xhr = new XMLHttpRequest();
+			xhr.open("POST", url);
+			xhr.onload = function () {
+				if (this.status >= 200 && this.status < 300) {
+					resolve(xhr.response);
+				} else {
+					reject({
+						status: this.status,
+						statusText: xhr.statusText
+					});
+				}
+			};
+			xhr.onerror = function () {
+				reject({
+					status: this.status,
+					statusText: xhr.statusText
+				});
+			};
+			xhr.setRequestHeader("X-CSRFToken", csrf);
+			xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+			xhr.send("data=" + encodeURIComponent(JSON.stringify(json)));
+		}.bind(this));
+	}
+
+	async getApiResponseJson(url, json) {
+		return await this.makeApiRequestJson(url, json);
+	}
+
+	// ----------------------------------------------------------
+	// ---------------------- VIEW UPDATE -----------------------
+	// ----------------------------------------------------------
+
+	setPong(state) { // this bitch is being called in constructor so sometimes if state is remote it will try to fetch stuff from broadcast and get nothing
+		if (!this.pong)
+			this.pong = new Pong({stateMachine: this, state: state});
+		else
+			this.pong.toState(state);
+	}
+
+	toggleProfilMenu() {
+		let profilMenu = document.getElementById("profilMenu");
+		if (this.user.authenticated) {
+			this.getApiResponse("/api/view/profilMenu/")
+				.then((response) => {
+					let res = JSON.parse(response);
+					if (res.success) {
+						profilMenu.innerHTML = res.html;
+						profilMenu.classList.remove("hided");
+					}
+				})
+		} else {
+			profilMenu.classList.add("hided");
+			setTimeout(() => {
+				profilMenu.innerHTML = "";
+			}, 200);
+		}
+	}
+
+	remove(domId) {
+		setTimeout(() => {
+			let dom = document.getElementById(domId);
+			if (dom)
+				dom.remove();
+		}, 200);
+	}
+
+	empty(domId) {
+		setTimeout(() => {
+			let dom = document.getElementById(domId);
+			if (dom)
+				dom.innerHTML = "";
+		}, 200);
+	}
+
+	displayNone(domId) {
+		setTimeout(() => {
+			let dom = document.getElementById(domId);
+			if (dom)
+				dom.classList.add("displayNone");
+		}, 200);
+	}
+
+	getHomePage(state, game_id) {
+		// get Home view
+		if (!document.getElementById("homeView")) {
+			this.getApiResponse("/api/view/home/").then((response) => {
+				let res = JSON.parse(response);
+				if (res.success) {
+					let topContent = document.getElementById("topContent");
+					topContent.innerHTML = res.html;
+					this.initHideMenusOnBgClick();
+					this.displayChat("Public");
+					this.addNotificationEvents();
+					this.initAddFriendBtn();
+					this.initDeleteFriendBtn();
+					this.updateRooms();
+					this.setPong("bg"); // removed if (state == "home") around it
+					this.getCreateGame();
+					let homeView = document.getElementById("homeView");
+					setTimeout(() => {
+						homeView.classList.remove("hided");
+					}, 15);
+				}
+			})
+		}
+
+		if (!this.user.authenticated && state != 'home') { // Authentication check
+			console.log('Not logged in, redirecting to home page!');
+			history.replaceState("", "", "/"); 
+			this.router();
+			return ;
+		} else { // socket setup
+			this.socketReset('pongSocket'); // will this cause issue during multiplayer if clicking on chat or something?
+			this.socketReset('chatSocket');
+
+			// Set up chat socket
+			this.chatSocket = new WebSocket(
+				'wss://' + window.location.host + '/ws/chat/'
+			);
+			this.chatSocket.onmessage = function(e) {
+				const data = JSON.parse(e.data);
+				if (data.need_update) {
+					this.updateConnectedUsers();
+					this.updateRooms();
+				}
+				else if (data.message)
+					this.handleNewMessage(data);
+				else if (data.friendRequest)
+					this.handleFriendRequestMessage(data);
+			}.bind(this);
+		}
+
+		if (state == 'home' || game_id == -1)
+			this.setPong("bg");
+		if (state == "home") {
+			this.getCreateGame();
+		} else if (state == "1vsAI") {
+			if (game_id == -1) {
+				this.hideLocalGame();
+				this.getLocalAiConfigPage();
+			} else {
+				this.hideLocalConfigPage();
+				this.getLocalAiGame(game_id);
+			}
+		} else if (state == "1vs1") {
+			if (game_id == -1) {
+				this.hideLocalGame();
+				this.getLocalConfigPage();
+			} else {
+				this.hideLocalConfigPage();
+				this.getLocalGame(game_id);
+			}
+		} else if (state == "remote1vs1") {
+			if (game_id == -1) {
+				this.hideLocalGame();
+				console.log("you reach here??");
+				this.getRemoteConfigPage();
+			} else {
+				this.hideLocalConfigPage();
+				this.getRemoteGame(game_id);
+			}
+		}
+	}
+
+	hideLocalGame() {
+		let gameOverlay = document.getElementById("gameOverlay");
+		if (!gameOverlay)
+			return ;
+		gameOverlay.classList.add("hided");
+		this.remove("gameOverlay");
+	}
+
+	getLocalGame(id) {
+		this.getApiResponseJson("/api/game/get/", {id: id}).then((response) => {
+			let res = JSON.parse(response);
+			if (res.success) {
+				if (res.winScore <= res.p1score || res.winScore <= res.p2score)
+					this.setPong("bg")
+				else
+					this.setPong("p1Game");
+				this.pong.game_id = id;
+				this.pong.gameInfo = res;
+				let homeContent = document.getElementById("homeContent");
+				if (document.getElementById("gameOverlay"))
+					return ;
+				homeContent.innerHTML += res.html;
+				let gameOverlay = document.getElementById("gameOverlay")
+				if (gameOverlay.dataset.loaded != "true") {
+					gameOverlay.dataset.loaded = "true";
+					document.getElementById("p1score").innerHTML = res.p1score
+					document.getElementById("p2score").innerHTML = res.p2score
+					if (res.p1score >= res.winScore || res.p2score >= res.winScore) {
+						let endDiv = document.getElementById("countdown");
+						if (endDiv) {
+							let p1 = "A.I.";
+							if (res.p1.id != -1)
+								p1 = res.p1.username;
+							let p2 = res.p2Local;
+							if (res.p2.id != -1)
+								p2 = res.p2.username;
+							let gameVs = "<span class='fs-2 text-light-emphasis'>" + p1 + " vs " + p2 + "</span>";
+							if (res.p1score > res.p2score)
+								endDiv.innerHTML = gameVs + "<p style='font-size:5rem; margin-top: -30px'>" + p1 + " wins this game !</p>"
+							else
+								endDiv.innerHTML = gameVs + "<p style='font-size:5rem; margin-top: -30px'>" + p2 + " wins this game !</p>"
+							endDiv.classList.remove("coundown");
+							endDiv.style.fontSize = "5rem"
+							endDiv.classList.add("visible");
+						}
+						console.log('game is finished...')
+					} else {
+						this.pong.config = res;
+					}
+				}
+			} else {
+				history.replaceState("", "", "/");
+				this.router();
+			}
+		});
+	}
+
+	getRemoteGame(id) {
+		this.getApiResponseJson("/api/game/get/", {id: id}).then((response) => {
+			let res = JSON.parse(response);
+			if (res.success) {
+				if (res.winScore <= res.p1score || res.winScore <= res.p2score)
+					this.setPong("bg");
+				else
+					this.setPong("p1Game");
+				this.pong.game_id = id;
+				this.pong.gameInfo = res;
+
+				// Pong socket
+				this.socketReset('pongSocket')
+				this.pongSocket = new WebSocket(
+					'wss://' + window.location.host + '/ws/pong/'
+				);
+				this.pongSocket.onmessage = function(e) {
+					const data = JSON.parse(e.data);
+					if (!this.pong.isHost()) { // receive data if NOT host
+						this.pong.rd = data;
+						//console.log('level 0: stateMachine.js');
+						//console.log(this.pong.rd);
+					}
+					//else if (host AND data from guest) // host needs to handle guest inputs
+				}.bind(this);
+
+				let homeContent = document.getElementById("homeContent");
+				if (document.getElementById("gameOverlay"))
+					return ;
+				homeContent.innerHTML += res.html;
+				let gameOverlay = document.getElementById("gameOverlay")
+				if (gameOverlay.dataset.loaded != "true") {
+					gameOverlay.dataset.loaded = "true";
+					document.getElementById("p1score").innerHTML = res.p1score
+					document.getElementById("p2score").innerHTML = res.p2score
+					if (res.p1score >= res.winScore || res.p2score >= res.winScore) {
+						let endDiv = document.getElementById("countdown");
+						if (endDiv) {
+							let p1 = "A.I.";
+							if (res.p1.id != -1)
+								p1 = res.p1.username;
+							let p2 = res.p2Local;
+							if (res.p2.id != -1)
+								p2 = res.p2.username;
+							let gameVs = "<span class='fs-2 text-light-emphasis'>" + p1 + " vs " + p2 + "</span>";
+							if (res.p1score > res.p2score)
+								endDiv.innerHTML = gameVs + "<p style='font-size:5rem; margin-top: -30px'>" + p1 + " wins this game !</p>"
+							else
+								endDiv.innerHTML = gameVs + "<p style='font-size:5rem; margin-top: -30px'>" + p2 + " wins this game !</p>"
+							endDiv.classList.remove("coundown");
+							endDiv.style.fontSize = "5rem"
+							endDiv.classList.add("visible");
+						}
+						console.log('game is finished...');
+						this.socketReset('pongSocket');
+					}
+				} else {
+					// probably need to do something with socket here
+					this.pong.config = res;
+				}
+			} else {
+				this.socketReset('pongSocket');
+				history.replaceState("", "", "/");
+				this.router();
+			}
+		});
+	}
+
+	getLocalAiGame(id) {
+		this.getApiResponseJson("/api/game/get/", {id: id}).then((response) => {
+			let res = JSON.parse(response);
+			if (res.success) {
+				if (res.winScore <= res.p1score || res.winScore <= res.p2score)
+					this.setPong("bg")
+				else
+					this.setPong("p1Game");
+				this.pong.game_id = id;
+				this.pong.gameInfo = res;
+				let homeContent = document.getElementById("homeContent");
+				if (document.getElementById("gameOverlay"))
+					return ;
+				homeContent.innerHTML += res.html;
+				let gameOverlay = document.getElementById("gameOverlay")
+				if (gameOverlay.dataset.loaded != "true") {
+					gameOverlay.dataset.loaded = "true";
+					document.getElementById("p1score").innerHTML = res.p1score
+					document.getElementById("p2score").innerHTML = res.p2score
+					if (res.p1score >= res.winScore || res.p2score >= res.winScore) {
+						let endDiv = document.getElementById("countdown");
+						if (endDiv) {
+							let p1 = "A.I.";
+							if (res.p1.id != -1)
+								p1 = res.p1.username;
+							let p2 = "A.I.";
+							if (res.p2.id != -1)
+								p2 = res.p2.username;
+							let gameVs = "<span class='fs-2 text-light-emphasis'>" + p1 + " vs " + p2 + "</span>";
+							if (res.p1score > res.p2score)
+								endDiv.innerHTML = gameVs + "<p style='font-size:5rem; margin-top: -30px'>" + p1 + " wins this game !</p>"
+							else
+								endDiv.innerHTML = gameVs + "<p style='font-size:5rem; margin-top: -30px'>" + p2 + " wins this game !</p>"
+							endDiv.classList.remove("coundown");
+							endDiv.style.fontSize = "5rem"
+							endDiv.classList.add("visible");
+						}
+						console.log('game is finished...')
+					} else {
+						this.pong.config = res;
+					}
+				}
+			} else {
+				history.replaceState("", "", "/");
+				this.router();
+			}
+		});
+	}
+
+	hideLocalConfigPage() {
+		let configView = document.getElementById("aiConfig");
+		if (!configView)
+			return ;
+		configView.classList.add("hided")
+		this.remove("aiConfig")
+	}
+
+	getLocalAiConfigPage() {
+		let homeContent = document.getElementById("homeContent");
+		if (!homeContent)
+			return ;
+		this.getApiResponse("/api/view/localAiConfig/").then((response) => {
+			let res = JSON.parse(response);
+			if (res.success) {
+				homeContent.innerHTML += res.html;
+				setTimeout(() => {
+					let configView = document.getElementById("aiConfig");
+					if (!configView)
+						return ;
+					configView.classList.remove("hided");
+					this.setAiConfigInteraction();
+				}, 200);
+			}
+		});
+	}
+
+	setAiConfigInteraction() {
+		let config = {
+			winScore: 10,
+			startSpeed: 8,
+			bonuses: true,
+			ai: 1,
+			leftKey: 65,
+			rightKey: 68,
+		}
+		let configView = document.getElementById("aiConfig");
+		if (configView.dataset.events != "done") {
+			configView.dataset.events = "done";
+			let winScore = document.getElementById("winScore");
+			let winScoreText = document.getElementById("winScoreText");
+			winScore.addEventListener('input', (e) => {
+				winScoreText.innerHTML = winScore.value;
+				config.winScore = winScore.value;
+			});
+			let startSpeed = document.getElementById("startSpeed");
+			let startSpeedText = document.getElementById("startSpeedText");
+			startSpeed.addEventListener('input', (e) => {
+				startSpeedText.innerHTML = startSpeed.value;
+				config.startSpeed = startSpeed.value;
+			});
+			if (document.querySelector('input[name="bonuses"]')) {
+				document.querySelectorAll('input[name="bonuses"]').forEach((elem) => {
+					elem.addEventListener("change", function(event) {
+						if (event.target.value == 'on')
+							config.bonuses = true;
+						else
+							config.bonuses = false;
+					});
+				});
+			}
+			if (document.querySelector('input[name="aiLevel"]')) {
+				document.querySelectorAll('input[name="aiLevel"]').forEach((elem) => {
+					elem.addEventListener("change", function(event) {
+						if (event.target.value == 'normal')
+							config.ai = 1;
+						else
+							config.ai = 2;
+					});
+				});
+			}
+			let leftKey = document.getElementById("leftKey");
+			leftKey.addEventListener("click", async (e) => {
+				leftKey.innerHTML = "_";
+				await this.waitKeypress("leftKey");
+				config.leftKey = leftKey.dataset.code;
+			})
+			let rightKey = document.getElementById("rightKey");
+			rightKey.addEventListener("click", async (e) => {
+				rightKey.innerHTML = "_";
+				await this.waitKeypress("rightKey");
+				config.rightKey = rightKey.dataset.code;
+			})
+			let playBtn = document.getElementById("playBtn")
+			playBtn.addEventListener("click", (e) => {
+				this.getApiResponseJson("/api/game/new/1vsAI/", config).then((response) => {
+					let res = JSON.parse(response);
+					if (res.success) {
+						let aiConfig = document.getElementById("aiConfig");
+						aiConfig.classList.add("hided")
+						this.remove("aiConfig")
+						history.pushState("", "", "/play1vsAI/" + res.id);
+						this.router();
+					}
+				});
+			});
+		}
+	}
+
+	getLocalConfigPage() {
+		let homeContent = document.getElementById("homeContent");
+		if (!homeContent)
+			return ;
+		this.getApiResponse("/api/view/localConfig/").then((response) => {
+			let res = JSON.parse(response);
+			if (res.success) {
+				homeContent.innerHTML += res.html;
+				setTimeout(() => {
+					let configView = document.getElementById("config");
+					if (!configView)
+						return ;
+					configView.classList.remove("hided");
+					this.setConfigInteraction();
+				}, 200);
+			}
+		});
+	}
+	getRemoteConfigPage() {
+		let homeContent = document.getElementById("homeContent");
+		if (!homeContent)
+			return ;
+		this.getApiResponse("/api/view/remoteConfig/").then((response) => { // make /api/view/remoteConfig
+			let res = JSON.parse(response);
+			if (res.success) {
+				homeContent.innerHTML += res.html;
+				setTimeout(() => {
+					let configView = document.getElementById("config");
+					if (!configView)
+						return ;
+					configView.classList.remove("hided");
+					this.setRemoteConfigInteraction();
+				}, 200);
+			}
+		});
+	}
+
+	setConfigInteraction() {
+		let config = {
+			winScore: 10,
+			startSpeed: 8,
+			bonuses: true,
+			ai: 1,
+			leftKey: 65,
+			rightKey: 68,
+			leftKey2: 37,
+			rightKey2: 39,
+			p2Local: '',
+		}
+		let configView = document.getElementById("config");
+		if (configView.dataset.events != "done") {
+			configView.dataset.events = "done";
+			let winScore = document.getElementById("winScore");
+			let winScoreText = document.getElementById("winScoreText");
+			winScore.addEventListener('input', (e) => {
+				winScoreText.innerHTML = winScore.value;
+				config.winScore = winScore.value;
+			});
+			let startSpeed = document.getElementById("startSpeed");
+			let startSpeedText = document.getElementById("startSpeedText");
+			startSpeed.addEventListener('input', (e) => {
+				startSpeedText.innerHTML = startSpeed.value;
+				config.startSpeed = startSpeed.value;
+			});
+			if (document.querySelector('input[name="bonuses"]')) {
+				document.querySelectorAll('input[name="bonuses"]').forEach((elem) => {
+					elem.addEventListener("change", function(event) {
+						if (event.target.value == 'on')
+							config.bonuses = true;
+						else
+							config.bonuses = false;
+					});
+				});
+			}
+			let leftKey = document.getElementById("leftKey");
+			leftKey.addEventListener("click", async (e) => {
+				leftKey.innerHTML = "_";
+				await this.waitKeypress("leftKey");
+				config.leftKey = leftKey.dataset.code;
+			})
+			let rightKey = document.getElementById("rightKey");
+			rightKey.addEventListener("click", async (e) => {
+				rightKey.innerHTML = "_";
+				await this.waitKeypress("rightKey");
+				config.rightKey = rightKey.dataset.code;
+			})
+			if (document.querySelector('input[name="p2Local"]')) {
+				document.querySelector('input[name="p2Local"]').addEventListener("input", function(e) {
+					config.p2Local = e.target.value;
+				});
+			}
+			let leftKey2 = document.getElementById("leftKey2");
+			leftKey2.addEventListener("click", async (e) => {
+				leftKey2.innerHTML = "_";
+				await this.waitKeypress("leftKey2");
+				config.leftKey2 = leftKey2.dataset.code;
+			})
+			let rightKey2 = document.getElementById("rightKey2");
+			rightKey2.addEventListener("click", async (e) => {
+				rightKey2.innerHTML = "_";
+				await this.waitKeypress("rightKey2");
+				config.rightKey2 = rightKey2.dataset.code;
+			})
+			let playBtn = document.getElementById("playBtn")
+			playBtn.addEventListener("click", (e) => {
+				if (config.p2Local == "")
+					config.p2Local = "Local P2"
+				this.getApiResponseJson("/api/game/new/1vs1/", config).then((response) => {
+					let res = JSON.parse(response);
+					if (res.success) {
+						let config = document.getElementById("config");
+						config.classList.add("hided")
+						this.remove("config")
+						history.pushState("", "", "/play1vs1/" + res.id);
+						this.router();
+					}
+				});
+			});
+		}
+	}
+	setRemoteConfigInteraction() {
+		let config = {
+			winScore: 10,
+			startSpeed: 8,
+			bonuses: true,
+			ai: 0, // ask guillaume if settings this to zero is fine
+			leftKey: 65,
+			rightKey: 68,
+			leftKey2: 37,
+			rightKey2: 39,
+			p2Local: '',
+
+		}
+		let configView = document.getElementById("config");
+		if (configView.dataset.events != "done") {
+			configView.dataset.events = "done";
+			let winScore = document.getElementById("winScore");
+			let winScoreText = document.getElementById("winScoreText");
+			winScore.addEventListener('input', (e) => {
+				winScoreText.innerHTML = winScore.value;
+				config.winScore = winScore.value;
+			});
+			let startSpeed = document.getElementById("startSpeed");
+			let startSpeedText = document.getElementById("startSpeedText");
+			startSpeed.addEventListener('input', (e) => {
+				startSpeedText.innerHTML = startSpeed.value;
+				config.startSpeed = startSpeed.value;
+			});
+			if (document.querySelector('input[name="bonuses"]')) {
+				document.querySelectorAll('input[name="bonuses"]').forEach((elem) => {
+					elem.addEventListener("change", function(event) {
+						if (event.target.value == 'on')
+							config.bonuses = true;
+						else
+							config.bonuses = false;
+					});
+				});
+			}
+			let leftKey = document.getElementById("leftKey");
+			leftKey.addEventListener("click", async (e) => {
+				leftKey.innerHTML = "_";
+				await this.waitKeypress("leftKey");
+				config.leftKey = leftKey.dataset.code;
+			})
+			let rightKey = document.getElementById("rightKey");
+			rightKey.addEventListener("click", async (e) => {
+				rightKey.innerHTML = "_";
+				await this.waitKeypress("rightKey");
+				config.rightKey = rightKey.dataset.code;
+			})
+			if (document.querySelector('input[name="p2Local"]')) {
+				document.querySelector('input[name="p2Local"]').addEventListener("input", function(e) {
+					config.p2Local = e.target.value;
+				});
+			}
+			let leftKey2 = document.getElementById("leftKey2");
+			leftKey2.addEventListener("click", async (e) => {
+				leftKey2.innerHTML = "_";
+				await this.waitKeypress("leftKey2");
+				config.leftKey2 = leftKey2.dataset.code;
+			})
+			let rightKey2 = document.getElementById("rightKey2");
+			rightKey2.addEventListener("click", async (e) => {
+				rightKey2.innerHTML = "_";
+				await this.waitKeypress("rightKey2");
+				config.rightKey2 = rightKey2.dataset.code;
+			})
+			let playBtn = document.getElementById("playBtn")
+			playBtn.addEventListener("click", (e) => {
+				if (config.p2Local == "")
+					config.p2Local = "Local P2"
+				this.getApiResponseJson("/api/game/new/remote1vs1/", config).then((response) => {
+					let res = JSON.parse(response);
+					if (res.success) {
+						let config = document.getElementById("config");
+						config.classList.add("hided")
+						this.remove("config")
+						history.pushState("", "", "/remote1vs1/" + res.id);
+						this.router();
+					}
+				});
+			});
+		}
+	}
+
+	waitKeypress(id) {
+		return new Promise((resolve) => {
+			let btn = document.getElementById(id);
+			document.addEventListener('keydown', onKeyHandler);
+			function onKeyHandler(e) {
+				if ((e.keyCode >= 65 && e.keyCode <= 90) || (e.keyCode >= 37 && e.keyCode <= 40)) {
+					if (e.keyCode >= 65)
+						btn.innerHTML = String.fromCharCode(e.keyCode);
+					else if (e.keyCode == 37)
+						btn.innerHTML = "←";
+					else if (e.keyCode == 38)
+						btn.innerHTML = "↑";
+					else if (e.keyCode == 39)
+						btn.innerHTML = "→";
+					else if (e.keyCode == 40)
+						btn.innerHTML = "↓";
+					btn.dataset.code = e.keyCode;
+					document.removeEventListener('keydown', onKeyHandler);
+					resolve();
+				}
+			}
+		});
+	}
+
+	getCreateGame() {
+		let homeContent = document.getElementById("homeContent");
+		if (!homeContent)
+			return ;
+		this.getApiResponse("/api/view/createGame/").then((response) => {
+			let res = JSON.parse(response);
+			if (res.success) {
+				homeContent.innerHTML = res.html;
+				let gameBtns = document.getElementById("createGame");
+				setTimeout(() => {
+					let dom = document.getElementById("createGame")
+					if (dom)
+						dom.classList.remove("hided");
+				}, 15);
+			}
+		});
+	}
+
+	initHideMenusOnBgClick() {
+		let menuBack = document.getElementById("menuBack");
+		if (!menuBack)
+			return ;
+		menuBack.addEventListener("click", (e) => {
+			let menu = document.getElementById("menu");
+			if (!menu.classList.contains("hided")) {
+				let userBtn = document.getElementsByClassName("user")
+				for (let i = 0; i < userBtn.length; i++)
+					userBtn[i].classList.remove("selected");
+			}
+			menu.classList.add("hided");
+			menu.style.pointerEvents = "none";
+			let addFriendMenu = document.getElementById("addFriendMenu");
+			if (!addFriendMenu.classList.contains("hided")) {
+				let friendBtn = document.getElementById("addFriend")
+				friendBtn.classList.remove("selected");
+				document.getElementById("addFriendInput").value = ""
+				document.getElementById("searchResult").innerHTML = ""
+			}
+			addFriendMenu.classList.add("hided");
+			addFriendMenu.style.pointerEvents = "none";
+			let chatMenu = document.getElementById("chatMenu");
+			chatMenu.classList.add("hided");
+			chatMenu.style.pointerEvents = "none";
+			menuBack.classList.add("hided");
+			menuBack.classList.add("pe-none");
+		});
+	}
+
+	updateRooms() {
+		let chatRooms = document.getElementById("chatRooms");
+		if (!chatRooms)
+			return ;
+		this.getApiResponse("/api/view/chatRoomsView/").then((response) => {
+			let res = JSON.parse(response);
+			if (res.success) {
+				if (chatRooms) {
+					chatRooms.innerHTML = res.html;
+					this.initChatDocker();
+				}
+			}
+		});
+	}
+
+	initChatDocker() {
+		let chat = document.getElementById("chatContainer");
+		let visibleChat = document.getElementById("chatContainer").firstChild;
+		let vChat = 0
+		if (visibleChat && visibleChat.dataset)
+			vChat = visibleChat.dataset.room
+		let chatDocker = document.getElementById("chatDocker")
+		if (!chatDocker)
+			return ;
+		let roomsDom = document.getElementsByClassName("room");
+		let isThere = false;
+		for (let i = 0; i < roomsDom.length; i++) {
+			if (roomsDom[i].dataset.room == vChat) {
+				isThere = true;
+				roomsDom[i].classList.add("selected");
+			}
+			roomsDom[i].addEventListener("click", (e) => {
+				let target = e.target;
+				target.getElementsByClassName("newMess")[0].classList.add("hided")
+				// here i need to update all messages from the other user to read=True.
+					if (target.dataset.room != "Public") {
+						this.getApiResponseJson("/api/messages/setRead/", {room: target.dataset.room, user: target.dataset.user}).then((response) => {
+							let res = JSON.parse(response);
+						});
+					}
+				let chatRooms = chat.getElementsByClassName("chatRoom")
+				for (let j = 0; j < roomsDom.length; j++) {
+					if (roomsDom[j] != target && roomsDom[j].classList.contains("selected")) {
+						roomsDom[j].classList.remove("selected");
+						for (let k = 0; k < chatRooms.length; k++)
+							if (chatRooms[k].dataset.room == roomsDom[j].dataset.room)
+								chatRooms[k].remove();
+					}
+				}
+				target.classList.toggle("selected");
+				if (target.classList.contains("selected")) {
+					this.displayChat(target.dataset.room)
+				} else {
+					let chatRooms = chat.getElementsByClassName("chatRoom")
+					for (let j = 0; j < chatRooms.length; j++) {
+						if (chatRooms[j].dataset.room == target.dataset.room)
+							chatRooms[j].remove();
+					}
+				}
+			})
+		}
+		if (!isThere && visibleChat) {
+			visibleChat.remove();
+		}
+	}
+
+	displayChat(roomId) { // do the same for new messages please
+		this.getApiResponseJson("/api/view/chatView/", {room: roomId}).then((response) => {
+			let res = JSON.parse(response);
+			if (res.success) {
+				let chatContainer = document.getElementById("chatContainer")
+				if (!chatContainer)
+					return ;
+				chatContainer.innerHTML = res.html;
+				let messages = chatContainer.getElementsByClassName("message__avatar")
+				for (let i = 0; i < messages.length; i++) {
+					if (messages[i].dataset.user == this.user.id)
+						continue ;
+					messages[i].addEventListener("click", (e) => {
+						this.getApiResponseJson("/api/view/chatMenu/", {id: e.target.dataset.user}).then((response) => {
+							let res = JSON.parse(response);
+							if (res.success) {
+								let chatMenu = document.getElementById("chatMenu")
+								if (!chatMenu)
+									return ;
+								chatMenu.style.top = (e.clientY + 5) + "px";
+								chatMenu.style.right = (window.innerWidth - e.clientX + 5) + "px";
+								chatMenu.innerHTML = res.html;
+								let sendPlay = document.getElementById("chatSendPlay")
+								this.chatMenuDeleteFriend();
+								this.chatMenuAddFriend();
+								this.chatMenuBlockUser();
+								let menuBack = document.getElementById("menuBack")
+								menuBack.classList.remove("pe-none");
+								chatMenu.classList.remove("displayNone");
+								chatMenu.style.pointerEvents = "all";
+								setTimeout(() => {
+									chatMenu.classList.remove("hided");
+								}, 15)
+							}
+						});
+					})
+				}
+				let chatBottom = document.getElementById("chatBottom")
+				if (chatBottom)
+					chatBottom.scrollIntoView()
+				if (document.getElementById('chatSend')) {
+					document.getElementById('chatSend').addEventListener("click", sendMessage.bind(this), false);
+					document.getElementById('chatMessage').addEventListener("keyup", sendMessage.bind(this), false);
+					function sendMessage(e) {
+						if (e.target.id == "chatMessage" && e.which != 13)
+							return ;
+						e.preventDefault();
+						const message = document.getElementById('chatMessage').value;
+						if (message == "")
+							return ;
+						if (this.chatSocket.readyState === WebSocket.OPEN) {
+							this.chatSocket.send(JSON.stringify({
+								'message': message,
+								'room': roomId
+							}));
+							document.getElementById('chatMessage').value = '';
+						} else {
+							console.error('Chat socket is not open. Unable to send message.');
+						}
+					}
+				}
+			}
+		})
+	}
+
+	chatMenuBlockUser() {
+		let blockUser = document.getElementById("chatBlockUser")
+		if (!blockUser)
+			return ;
+		blockUser.addEventListener("click", (e) => {
+			this.getApiResponseJson("/api/user/block/", {id: e.target.dataset.id}).then((response) => {
+				let res = JSON.parse(response);
+				if (res.success) {
+					let chat = document.getElementById("chatContainer").firstChild;
+					if (chat && chat.dataset.user == e.target.dataset.id)
+						chat.remove();
+					else if (chat && chat.dataset.room == "Public")
+						this.displayChat("Public");
+					this.chatSocket.send(JSON.stringify({
+						'updateFriends': true
+					}));
+					let menu = document.getElementById("chatMenu");
+					if (!menu)
+						return ;
+					menu.classList.add("hided");
+					menu.style.pointerEvents = ("none");
+					this.displayNone("chatMenu")
+					let menuBack = document.getElementById("menuBack");
+					menuBack.classList.add("hided");
+					menuBack.classList.add("pe-none");
+				}
+			});
+		});
+	}
+
+	chatMenuAddFriend() {
+		let addFriend = document.getElementById("chatAddFriend");
+		if (!addFriend)
+			return ;
+		addFriend.addEventListener("click", (e) => {
+			this.getApiResponseJson("/api/user/addfriend/", {id: e.target.dataset.id}).then((response) => {
+				let res = JSON.parse(response);
+				if (res.success) {
+					this.chatSocket.send(JSON.stringify({
+						'friendRequest': e.target.dataset.id
+					}));
+					let menu = document.getElementById("chatMenu");
+					if (!menu)
+						return ;
+					menu.classList.add("hided");
+					menu.style.pointerEvents = ("none");
+					this.displayNone("chatMenu")
+					let menuBack = document.getElementById("menuBack");
+					menuBack.classList.add("hided");
+					menuBack.classList.add("pe-none");
+				}
+			});
+		});
+	}
+
+	chatMenuDeleteFriend() {
+		let deleteFriend = document.getElementById("chatDeleteFriend")
+		if (!deleteFriend)
+			return ;
+		deleteFriend.addEventListener("click", (e) => {
+			this.getApiResponseJson("/api/user/deletefriend/", {id: e.target.dataset.id}).then((response) => {
+				let res = JSON.parse(response);
+				if (res.success) {
+					this.updateConnectedUsers()
+					this.updateRooms()
+					let menu = document.getElementById("chatMenu");
+					if (!menu)
+						return ;
+					menu.classList.add("hided");
+					menu.style.pointerEvents = ("none");
+					this.displayNone("chatMenu")
+					let menuBack = document.getElementById("menuBack");
+					menuBack.classList.add("hided");
+					menuBack.classList.add("pe-none");
+					let chat = document.getElementById("chatContainer").firstChild;
+					if (chat.dataset.user == e.target.dataset.id)
+						chat.remove();
+					this.chatSocket.send(JSON.stringify({
+						'updateFriends': true
+					}));
+				}
+			});
+		})
+	}
+
+	initAddFriendBtn() {
+		let addFriend = document.getElementById("addFriend");
+		if (!addFriend)
+			return ;
+		document.getElementById("addFriendInput").addEventListener("keyup", (e) => {
+			let val = document.getElementById("addFriendInput").value;
+			if (val != "")
+				this.searchUser(val);
+			else {
+				let searchResult = document.getElementById("searchResult");
+				if (searchResult)
+					searchResult.innerHTML = "";
+			}
+		})
+		addFriend.addEventListener("click", (e) => {
+			let menu = document.getElementById("addFriendMenu");
+			if (menu) {
+				menu.style.top = (e.clientY + 5) + "px";
+				menu.style.right = (window.innerWidth - e.clientX + 5) + "px";
+			}
+			let target = e.target;
+			target.classList.toggle("selected");
+			let menuBack = document.getElementById("menuBack")
+			menuBack.classList.remove("pe-none");
+			menu.classList.remove("displayNone");
+			menu.style.pointerEvents = "all";
+			setTimeout(() => {
+				menu.classList.remove("hided");
+				document.getElementById("addFriendInput").focus();
+			}, 15)
+		})
+	}
+
+	initDeleteFriendBtn() {
+		let delFriend = document.getElementById("deleteFriend");
+		if (!delFriend)
+			return ;
+		delFriend.addEventListener("click", (e) => {
+			this.getApiResponseJson("/api/user/deletefriend/", {id: e.target.dataset.id}).then((response) => {
+				let res = JSON.parse(response);
+				if (res.success) {
+					this.updateConnectedUsers()
+					this.updateRooms()
+					let menu = document.getElementById("menu");
+					if (!menu)
+						return ;
+					menu.classList.add("hided");
+					menu.style.pointerEvents = ("none");
+					this.displayNone("menu")
+					let menuBack = document.getElementById("menuBack");
+					menuBack.classList.add("hided");
+					menuBack.classList.add("pe-none");
+					let chat = document.getElementById("chatContainer").firstChild;
+					if (chat.dataset.user == e.target.dataset.id)
+						chat.remove();
+					this.chatSocket.send(JSON.stringify({
+						'updateFriends': true
+					}));
+				}
+			});
+		})
+	}
+
+	handleNewMessage(data) {
+		let roomsBtn = document.getElementsByClassName("room");
+		for (let i = 0; i < roomsBtn.length; i++) {
+			if (roomsBtn[i].dataset.room == data.roomId) {
+				if (!roomsBtn[i].classList.contains("selected"))
+					roomsBtn[i].getElementsByClassName("newMess")[0].classList.remove("hided");
+			}
+		}
+		let visibleRoom = document.getElementsByClassName("chatRoom")[0];
+		if (!visibleRoom || visibleRoom.dataset.room != data.roomId)
+			return ;
+		this.getApiResponseJson("/api/view/chatMessageView/", {message: data.message, user:data.user, timestamp: data.timestamp}).then((response) => {
+			let res = JSON.parse(response);
+			if (res.success) {
+				let div = document.createElement('div');
+				div.innerHTML = res.html;
+				let chatBottom = document.getElementById("chatBottom");
+				if (chatBottom) {
+					let parent = chatBottom.parentNode;
+					parent.insertBefore(div, chatBottom);
+					let messages = parent.getElementsByClassName("message")
+					setTimeout(() => {
+						messages[messages.length - 1].classList.remove("hided");
+						messages[messages.length - 1].classList.remove("height0");
+						chatBottom.scrollIntoView()
+					}, 15);
+				}
+			}
+		});
+	}
+
+	handleFriendRequestMessage(data) {
+		if (this.user.id != data.friendRequest)
+			return ;
+		this.getApiResponseJson("/api/view/friendRequestView/", {from: data.from}).then((response) => {
+			let res = JSON.parse(response);
+			if (res.success) {
+				let notificationCenter = document.getElementById("notif")
+				if (notificationCenter) {
+					notificationCenter.innerHTML += res.html;
+					this.addNotificationEvents();
+				}
+			}
+		});
+	}
+
+	addNotificationEvents() {
+		let notificationCenter = document.getElementById("notif")
+		if (!notificationCenter)
+			return ;
+		let notif = notificationCenter.getElementsByClassName("notification")
+		for (let i=0; i < notif.length; i++) {
+			if (notif[i].classList.contains("hided")) {
+				setTimeout(() => {
+					notif[i].classList.remove("hided")
+				}, 15)
+				let acceptBtn = notif[i].childNodes[1].childNodes[1];
+				if (acceptBtn.classList.contains("accept"))
+					acceptBtn.addEventListener("click", this.acceptFriendRequest.bind(this), false);
+				else if (acceptBtn.classList.contains("join"))
+					acceptBtn.addEventListener("click", this.joinUnfinishedGame.bind(this), false);
+				let deleteBtn = notif[i].childNodes[1].childNodes[2];
+				if (deleteBtn.classList.contains("delete"))
+					deleteBtn.addEventListener("click", this.deleteFriendRequest.bind(this), false);
+				else if (deleteBtn.classList.contains("forfeit"))
+					deleteBtn.addEventListener("click", this.forfeitUnfinishedGame.bind(this), false);
+			}
+		}
+	}
+
+	joinUnfinishedGame(e) {
+		let gameType = e.target.dataset.type;
+		let gameId = e.target.dataset.game;
+		if (gameType == 0) // Local 1 vs AI
+		history.pushState("", "", "/play1vsAI/" + gameId);
+		else if (gameType == 1) // Local 1 vs 1
+		history.pushState("", "", "/play1vs1/" + gameId);
+		else if (gameType == 2) // Remote 1 vs 1
+		history.pushState("", "", "/remote1vs1/" + gameId);
+		let notif = e.target.parentNode.parentNode;
+		notif.classList.add("hided");
+		setTimeout(() => {
+			notif.remove();
+		}, 200)
+		this.router();
+	}
+
+	forfeitUnfinishedGame(e) {
+		let gameId = e.target.dataset.game;
+		this.getApiResponseJson("/api/game/forfeit/", {id: gameId}).then((response) => {
+			let res = JSON.parse(response)
+			if (res.success) {
+				let notif = e.target.parentNode.parentNode;
+				notif.classList.add("hided");
+				setTimeout(() => {
+					notif.remove();
+				}, 200)
+			}
+		})
+	}
+
+	acceptFriendRequest(e) {
+		this.getApiResponseJson("/api/user/acceptfriend/", {id: e.target.dataset.from}).then((response) => {
+			let res = JSON.parse(response);
+			if (res.success) {
+				this.chatSocket.send(JSON.stringify({
+					'updateFriends': true
+				}));
+				let notif = e.target.parentNode.parentNode;
+				notif.classList.add("hided");
+				setTimeout(() => {
+					notif.remove();
+				}, 200)
+			}
+		})
+	}
+
+	deleteFriendRequest(e) {
+		this.getApiResponseJson("/api/user/deleterequest/", {from: e.target.dataset.from}).then((response) => {
+			let res = JSON.parse(response);
+			if (res.success) {
+				let notif = e.target.parentNode.parentNode;
+				notif.classList.add("hided");
+				setTimeout(() => {
+					notif.remove();
+				}, 200)
+			}
+		})
+	}
+
+	searchUser(val) {
+		this.getApiResponseJson("/api/user/search/", {search: val}).then((response) => {
+			let res = JSON.parse(response);
+			if (res.success) {
+				let searchResult = document.getElementById("searchResult");
+				if (searchResult)
+					searchResult.innerHTML = res.html;
+				let btns = searchResult.getElementsByClassName("btn");
+				for (let i = 0; i < btns.length; i++) {
+					btns[i].addEventListener("click", (e) => {
+						if (e.target.dataset.type == "send") {
+							this.getApiResponseJson("/api/user/addfriend/", {id: btns[i].dataset.id}).then((response) => {
+								let res = JSON.parse(response);
+								if (res.success) {
+									let val = document.getElementById("addFriendInput").value;
+									if (val != "")
+										this.searchUser(val);
+									this.chatSocket.send(JSON.stringify({
+										'friendRequest': btns[i].dataset.id
+									}));
+								}
+							});
+						} else if (e.target.dataset.type == "unblock") {
+							this.getApiResponseJson("/api/user/unblock/", {id: btns[i].dataset.id}).then((response) => {
+								let res = JSON.parse(response);
+								if (res.success) {
+									this.searchUser(val);
+									let chat = document.getElementById("chatContainer").firstChild;
+									if (chat && chat.dataset.room == "Public")
+										this.displayChat("Public");
+								}
+							});
+						} else {
+							this.getApiResponseJson("/api/user/acceptfriend/", {id: btns[i].dataset.id}).then((response) => {
+								let res = JSON.parse(response);
+								if (res.success) {
+									this.updateConnectedUsers()
+									let val = document.getElementById("addFriendInput").value;
+									if (val != "")
+										this.searchUser(val);
+								}
+							})
+						}
+					})
+				}
+			}
+		});
+	}
+
+	updateConnectedUsers() {
+		let connectedUsers = document.getElementById("chatConnectedUsers");
+		if (!connectedUsers)
+			return ;
+		this.getApiResponse("/api/view/chatUserView/").then((response) => {
+			let res = JSON.parse(response);
+			if (res.success) {
+				if (connectedUsers) {
+					connectedUsers.innerHTML = res.html;
+				}
+				let usersDom = document.getElementsByClassName("user");
+				for (let i = 0; i < usersDom.length; i++) {
+					usersDom[i].addEventListener("click", (e) => {
+						let menu = document.getElementById("menu");
+						if (menu) {
+							menu.style.top = (e.clientY + 5) + "px";
+							menu.style.right = (window.innerWidth - e.clientX + 5) + "px";
+						}
+						let target = e.target;
+						for (let j = 0; j < usersDom.length; j++) {
+							if (usersDom[j] != target)
+								usersDom[j].classList.remove("selected");
+						}
+						target.classList.toggle("selected");
+						let menuBack = document.getElementById("menuBack")
+						menuBack.classList.remove("pe-none");
+						menu.classList.remove("displayNone");
+						menu.style.pointerEvents = "all";
+						setTimeout(() => {
+							menu.classList.remove("hided");
+						}, 15)
+						let delFriendBtn = document.getElementById("deleteFriend");
+						delFriendBtn.dataset.id = e.target.dataset.id
+					})
+				}
+			}
+		});
+	}
+
+	hideCreateGame() {
+		let createGame = document.getElementById("createGame");
+		if (createGame) {
+			createGame.classList.add("hided");
+			this.remove("createGame")
+		}
+	}
+
+	hideLoginForm() {
+		let loginForm = document.getElementById("loginForm");
+		if (loginForm) {
+			loginForm.classList.add("hided");
+			loginForm.classList.add("trXp100");
+			this.remove("loginForm")
+		}
+	}
+
+	getLoginForm() {
+		this.getApiResponse("/api/view/login/").then((response) => {
+			let res = JSON.parse(response);
+			if (res.success) {
+				let topContent = document.getElementById("topContent");
+				topContent.innerHTML = res.html;
+				let loginForm = document.getElementById("loginForm");
+				loginForm.classList.add("trXm100");
+				let form = document.getElementById("loginFormForm");
+				let formBtn = document.getElementById("loginFormSubmitBtn");
+				if (formBtn) {
+					document.getElementById("loginFormSubmitBtn").addEventListener("click", e => {
+						e.preventDefault();
+						let formData = new FormData(form);
+						this.getApiResponse("/api/user/signin/", formData).then((response) => {
+							let res = JSON.parse(response);
+							if (res.success) {
+								history.pushState("", "", "/");
+								this.router();
+								this.updateUser();
+							} else {
+								loginForm.classList.add("shake");
+								loginFormPassword.value = "";
+								let loginFormAlert = document.getElementById("loginFormAlert");
+								loginFormAlert.classList.remove("hided");
+								setTimeout(() => {
+									loginForm.classList.remove("shake");
+								}, 500);
+								setTimeout(() => {
+									loginFormAlert.classList.add("hided");
+								}, 500);
+							}
+						})
+					})
+				};
+				setTimeout(() => {
+					loginForm.classList.remove("hided");
+					loginForm.classList.remove("trXm100");
+				}, 15);
+			}
+		})
+	}
+
+	hideRegisterForm() {
+		let registerForm = document.getElementById("registerForm");
+		if (registerForm) {
+			registerForm.classList.add("hided");
+			registerForm.classList.add("trXp100");
+			this.remove("registerForm");
+		}
+	}
+
+	getRegisterForm() {
+		this.getApiResponse("/api/view/register/").then((response) => {
+			let res = JSON.parse(response);
+			if (res.success) {
+				this.updateTopContent(res.html);
+				this.showRegisterForm();
+				this.addRegisterFormSubmitListener();
+				this.addTogglePasswordButtons();
+				this.addProfilePictureChangeListener();
+			}
+		});
+	}
+
+	updateTopContent(html) {
+		let topContent = document.getElementById("topContent");
+		topContent.innerHTML = html;
+	}
+
+	showRegisterForm() {
+		let registerForm = document.getElementById("registerForm");
+		registerForm.classList.add("trXm100");
+		setTimeout(() => {
+			registerForm.classList.remove("hided");
+			registerForm.classList.remove("trXm100");
+		}, 15);
+	}
+
+	addRegisterFormSubmitListener() {
+		let form = document.getElementById("registerFormForm");
+		let formBtn = document.getElementById("registerFormSubmitBtn");
+		if (formBtn) {
+			formBtn.addEventListener("click", (e) => {
+				e.preventDefault();
+				let formData = new FormData(form);
+				this.getApiResponse("api/user/register/", formData).then((response) => {
+					let res = JSON.parse(response);
+					if (res.success) {
+						history.pushState("", "", "/");
+						this.router();
+						this.updateUser();
+					} else {
+						let registerForm = document.getElementById("registerForm");
+						registerForm.classList.add("shake");
+						document.getElementById("registerFormPassword").value = "";
+						document.getElementById("registerFormPasswordConfirm").value = "";
+						let registerFormAlert = document.getElementById("registerFormAlert");
+						registerFormAlert.textContent = res.message;
+						registerFormAlert.classList.remove("hided");
+						setTimeout(() => {
+							registerForm.classList.remove("shake");
+						}, 500);
+						setTimeout(() => {
+							registerFormAlert.classList.add("hided");
+						}, 5000);
+					}
+				});
+			});
+		}
+	}
+
+	addTogglePasswordButtons() {
+		const togglePasswordButtons = document.querySelectorAll('.toggle-password');
+		togglePasswordButtons.forEach((button) => {
+			button.addEventListener('click', function () {
+				const passwordField = this.previousElementSibling;
+				const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
+				passwordField.setAttribute('type', type);
+				const icon = this.querySelector('i');
+				icon.classList.toggle('bi-eye-slash');
+				icon.classList.toggle('bi-eye');
+			});
+		});
+	}
+
+	addProfilePictureChangeListener() {
+		let profilePictureInput = document.getElementById("registerFormProfilePicture");
+		let previewProfilePicture = document.getElementById("previewProfilePicture");
+		let registerFormAlert = document.getElementById("registerFormAlert");
+
+		profilePictureInput.addEventListener("change", function () {
+			if (this.files && this.files[0]) {
+				let file = this.files[0];
+
+				// Reset alert and preview
+				registerFormAlert.classList.add('hided');
+				registerFormAlert.textContent = '';
+				previewProfilePicture.innerHTML = '';
+
+				// File validation
+				const fileSizeLimit = 2 * 1024 * 1024; // 2MB
+				const allowedFileTypes = ['image/jpeg', 'image/png'];
+
+				if (!allowedFileTypes.includes(file.type)) {
+					registerFormAlert.textContent = 'Unsupported file type. Please upload an image file (JPEG, PNG).';
+					registerFormAlert.classList.remove('hided');
+					return;
+				}
+
+				if (file.size > fileSizeLimit) {
+					registerFormAlert.textContent = 'File size exceeds 2MB. Please upload a smaller image.';
+					registerFormAlert.classList.remove('hided');
+					return;
+				}
+
+				let reader = new FileReader();
+				reader.onload = function (e) {
+					previewProfilePicture.innerHTML = `<img src="${e.target.result}" class="img-fluid rounded rounded-circle border border-white" style="width: 150px; height: 150px;">`;
+				};
+				reader.readAsDataURL(file);
+			}
+		});
+	}
+
+	// Socket Utils
+	socketReset(socketName)
+	{
+		if (!this[socketName]) { // try catch maybe?
+			//console.log('socketReset -> ' + socketName + ' -> already null');
+			return;
+		}
+		//console.log('socketReset -> ' + socketName);
+		this[socketName].close();
+		this[socketName] = null;
+	}
+socketIsReady(socketName)
+{
+	return (this[socketName] && this[socketName].readyState === WebSocket.OPEN);
+}
+// Socket Utils End
+
+// ----------------------------------------------------------
+// ----------------------- SINGLETON -----------------------
+// ----------------------------------------------------------
+
+static get() {
+	if (!this.instance) {
+		this.instance = new App();
+	}
+	return (this.instance);
+}
+};
