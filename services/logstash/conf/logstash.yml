@@ -4,3 +4,6 @@ xpack.monitoring.elasticsearch.hosts:
 xpack.monitoring.enabled: true
 pipeline.batch.size: 125
 pipeline.batch.delay: 50
+xpack.monitoring.elasticsearch.username: "elastic"
+xpack.monitoring.elasticsearch.password: "DidierDidier"
+
