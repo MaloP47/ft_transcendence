@@ -11,10 +11,12 @@ echo "Starting Kibana..."
 echo "Kibana started."
 
 # Attendre que Kibana soit prêt
-while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' localhost:5601/api/status)" != "200" ]]; do 
-	echo "Waiting for Kibana to be available..."
-	sleep 5
-done
+# while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' localhost:5601/api/status)" != "200" ]]; do 
+# 	echo "Waiting for Kibana to be available..."
+# 	sleep 5
+# done
+
+sleep 5;
 
 if curl -s -X GET "localhost:5601/api/saved_objects/_find?type=index-pattern&search=filebeat-*&search_fields=title" | grep -q '"total":0'; then
 	# Ajouter l'index pattern
@@ -41,7 +43,18 @@ fi
 
 sleep 5;
 
-kill $(ps aux | grep 'kibana' | awk '{print $2}')
+echo "kibana status"
+
+# ps aux | grep 'kibana'
+
+ps aux | grep '/usr/share/kibana/bin/'
+
+
+kill $(ps aux | grep '/usr/share/kibana/bin/' | awk '{print $2}')
+
+echo "Kibana stopped ???"
+
+ps aux | grep 'kibana'
 
 exec kibana --allow-root
 
