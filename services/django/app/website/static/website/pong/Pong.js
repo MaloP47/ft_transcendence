@@ -207,13 +207,18 @@ export default class Pong {
 		//// Set data
 		if (this.isHost()) {
 			var type = 'multiDataHost';
+			// Ball
 			this.setMultiData('ball_pos', this.assets.ball.ball.position);
 			this.setMultiData('ball_vel', this.assets.ball.velocity);
 			this.setMultiData('p1_pos', this.assets.p1.bar.position);
 			this.setMultiData('p2_pos', this.assets.p2.bar.position);
+			// Score
+			this.setMultiData('p1_score', this.assets.p1.score);
+			this.setMultiData('p2_score', this.assets.p2.score);
+			this.setMultiData('winScore', this.winScore);
+			// Bonus
 			this.setMultiData('p1_bonus', this.assets.p1.bonus);
 			this.setMultiData('p2_bonus', this.assets.p2.bonus);
-			// Bonus
 			this.setMultiData('bonus_active', this.assets.bonus.active);
 			this.setMultiData('bonus_pos', this.assets.bonus.bonus.position);
 			this.setMultiData('bonus_startTime', this.assets.bonus.startTime);
@@ -245,12 +250,12 @@ export default class Pong {
 		{
 			this.multiData = data;
 			
-			// probably will be more complicated than this but...
+			// don't need endRoung YET but KEEP IT
 			//this.endRound = data.endRound;
-			// breaks:
-			// - impactParticles when getting a point
-			// fixes:
-			// - ballParticles when not moving
+			
+			this.assets.p1.score = data.p1_score;
+			this.assets.p2.score = data.p2_score;
+			this.winScore = data.winScore;
 		}
 	}
 	zeroVec3() {
@@ -270,7 +275,13 @@ export default class Pong {
 			't_ballParticles_pos': {x: 0, y: 0, z: 0},
 			't_ballFire': false,
 			't_ballFire_pos': {x: 0, y: 0, z: 0},
+			// Score
 			't_resetBall': false,
+			't_resetBall_player': 0, // not used yet
+			'p1_score': 0,
+			'p2_score': 0,
+			'winScore': 0,
+			// Bonuses
 			'bonus_active': false,
 			'bonus_pos': {x: 0, y: 0, z: 0},
 			'bonus_startTime': 0,
@@ -290,13 +301,14 @@ export default class Pong {
 				frozen: {on: false, end: false, time: 0.0001},
 				reversed: {on: false, end: false, time: 0.0001}
 			},
+
 			//'p2_bonus': this.assets.p2.bonus,
 		}
 	}
 	resetMultiData() {
 		// Only some stuff needs to be reset
-		this.setMultiData('t_endRound', false); // might need to be 0, 1 or 2, for updating points accordingly
-		this.setMultiData('t_resetBall', false); // might need to be 0, 1 or 2, for updating points accordingly
+		this.setMultiData('t_endRound', false);
+		this.setMultiData('t_resetBall', false);
 	}
 	isMulti() {
 		return (this.gameInfo.gameType == 2);

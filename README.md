@@ -36,6 +36,16 @@ Put here changes that will impact project mates
 - [x] play button in multi config redirecting to normal game
 ### Multiplayer
 - Stuff to create:
+    - dont know where yet:
+        - [x] update score remotely
+        - [ ] trigger `player` wins this game! text
+        - [ ] transition to AI game (right now when reloading a finished game it will still stream data from host, needs changes for both guest and host
+        - [ ] rotate game field 180 degrees and invert inputs if `isMultiNotHost()` (later to`isMultiGuest()`) (dont invert colors)
+        - [ ] game creation select player with searchPlayer in stateMachine (started making template already), need to change buttons behavior
+        - [ ] create template/view for pausing game when one of the two players is not connecte
+        - [ ] when p2 is handled remove public access to games, no more spectators (in `views.py`), `isSpectator()`
+        - [ ] resume game in terrain center and start timer
+        - [ ] disable `save()` function on games that are finished just in case
     - in `views.py`: (not right file name)
         - [x] `multiConfig()`
         - [x] added `gameType` to `getGame()`
@@ -50,7 +60,7 @@ Put here changes that will impact project mates
         - [ ] in Multiplayer config use `Name` field and custom search, no fancy list of matching names, shake red (like wrong password in login form, if player doesn't exist
     - in `templates`:
         - [x] `website/multiConfig.html`
-            - [?] add opponent selector like in tournament creator
+            - [ ] add opponent selector like in tournament creator
     - in `consumer.py`:
         - [ ] receive method seems to do everything, no if checks for type, ask guillaume
         - [ ] receive data in a smarter way for hostGameInfo only using a `type` field as a proof of concept
@@ -66,7 +76,7 @@ Put here changes that will impact project mates
                 - [ ] `preConfig()`
                 - [ ] `postConfig()`
     - in `ImpactParticles.js`:
-        - [ ] Particles dont always trigger or in the wrong place when ball resets
-        - [ ] bonuses seem to fuck up the particles on the guest
+        - [x] Particles dont always trigger or in the wrong place when ball resets
+        - [x] bonuses seem to fuck up the particles on the guest
         - [x] oooooh ball position is sent at the end of the loop but not particle creation
-        - [ ] now collisions are in good location but sometimes just dont happen... fix later
+        - [x] now collisions are in good location but sometimes just dont happen... fix later
