@@ -405,7 +405,7 @@ export default class Pong {
 		if (sec >= 0 && countdown && countdown.innerHTML != sec) {
 			// Multi trigger
 			this.setMultiData('t_countdown', sec);
-			console.log('Sending countdown trigger... -> ' + sec);
+			//console.log('Sending countdown trigger... -> ' + sec);
 
 			countdown.innerHTML = sec;
 			countdown.classList.remove("countdown");
@@ -427,7 +427,7 @@ export default class Pong {
 		}
 	}
 	animateCountdownMulti() {
-		console.log('Receiving countdown trigger! -> ' + this.multiData.t_countdown);
+		//console.log('Receiving countdown trigger! -> ' + this.multiData.t_countdown);
 		let countdown = document.getElementById("countdown");
 		countdown.innerHTML = this.multiData.t_countdown;
 
