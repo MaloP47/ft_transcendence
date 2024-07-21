@@ -63,7 +63,8 @@ export default class BallParticles {
 			else
 				var pos = this.pong.assets.ball.getPos();
 			this.ballParticles.push({
-				position: this.pong.assets.ball.getPos(),
+				//position: this.pong.assets.ball.getPos(),
+				position: pos,
 				velocity: this.pong.assets.ball.getVelocity(),
 				size: this.pong.scaleFactor,
 				life: 1.25,
@@ -110,10 +111,8 @@ export default class BallParticles {
 	}
 
 	update() {
-		// Only get these particles from server
 		if (!this.pong.endRound)
 			this.AddParticles();
-		
 		this.UpdateParticles(this.pong.elapsedTime / 1000.0);
 		this.UpdateGeometry();
 	}
