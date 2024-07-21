@@ -6,7 +6,7 @@
 /*   By: renstein <renstein@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/13 11:54:22 by gbrunet           #+#    #+#             */
-/*   Updated: 2024/07/19 16:21:15 by renstein         ###   ########.fr       */
+/*   Updated: 2024/07/21 20:24:48 by renstein         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,6 +60,7 @@ export default class App {
 			"/play1vs1": {title: "Transcendence - 1 VS 1 (local)", state: "Play1vs1"},
 			"/listTournaments": {title: "Transcendence - Tournaments", state: "listTournaments"},
 			"/createTournaments": {title: "Transcendence - Tournament creation", state: "createTournaments"},
+			"/profile": {title: "Transcendence - Profile", state: "Profile"},
 		}
 	}
 
@@ -106,6 +107,9 @@ export default class App {
 		} else if (path.indexOf("/play1vs1/") == 0) {
 			id = path.substring(10)
 			path = "/play1vs1"
+		} else if (path.indexOf("/profile/") == 0) {
+			id = path.substring(9)
+			path = "/profile"
 		} else if (path.indexOf("/getTournament/") == 0) {
 			id = path.substring(15)
 			path = "/listTournaments"
@@ -171,6 +175,14 @@ export default class App {
 						this.hideCreateGame();
 					this.getHomePage("createTournaments", id);
 					break;
+				case "Profile":
+					if (document.getElementById("registerForm"))
+						this.hideRegisterForm();
+					if (document.getElementById("loginForm"))
+						this.hideLoginForm();
+					if (document.getElementById("createGame"))
+						this.hideCreateGame();
+					this.getHomePage("profile", id);
 			}
 		} else {
 			history.replaceState("", "", "/");
@@ -282,8 +294,8 @@ export default class App {
 						profilMenu.innerHTML = res.html;
 						profilMenu.classList.remove("hided");
 					}
-				})
-		} else {
+				});
+			} else {
 			profilMenu.classList.add("hided");
 			setTimeout(() => {
 				profilMenu.innerHTML = "";
@@ -315,7 +327,7 @@ export default class App {
 		}, 200);
 	}
 
-	getHomePage(state, game_id) {
+	getHomePage(state, id) {
 		if (this.user.authenticated) {
 			if (this.chatSocket)
 				this.chatSocket.close();
@@ -358,52 +370,64 @@ export default class App {
 					} else if (state == "1vsAI" && !this.user.authenticated) {
 						history.replaceState("", "", "/");
 						this.router();
-					} else if (state == "1vsAI" && game_id == -1) {
+					} else if (state == "1vsAI" && id == -1) {
 						this.setPong("bg");
 						this.getLocalAiConfigPage();
-					} else if (state == "1vsAI" && game_id != -1) {
-						this.getLocalAiGame(game_id);
+					} else if (state == "1vsAI" && id != -1) {
+						this.getLocalAiGame(id);
 					} else if (state == "1vs1" && !this.user.authenticated) {
 						history.replaceState("", "", "/");
 						this.router();
-					} else if (state == "1vs1" && game_id == -1) {
+					} else if (state == "1vs1" && id == -1) {
 						this.setPong("bg");
 						this.getLocalConfigPage();
-					} else if (state == "1vs1" && game_id != -1) {
-						this.getLocalGame(game_id);
+					} else if (state == "1vs1" && id != -1) {
+						this.getLocalGame(id);
 					} else if (state == "listTournaments") {
 						this.setPong("bg");
-						this.getListTournaments(game_id);
+						this.getListTournaments(id);
 					} else if (state == "createTournaments") {
 						this.setPong("bg");
 						this.getCreateTournament();
+					}
+					} else if (state == "profile") {
+						this.setPong("bg");
+						this.getProfile(id);
 					}
 					let homeView = document.getElementById("homeView");
 					setTimeout(() => {
 						homeView.classList.remove("hided");
 					}, 15);
-				}
-			})
+				
+			});
 		} else {
 			if (state == "home") {
 				this.setPong("bg");
+				this.hideProfile();
 				this.getCreateGame();
-			} else if (state == "1vsAI" && game_id == -1) {
+			} else if (state == "1vsAI" && id == -1) {
 				this.setPong("bg");
 				this.hideLocalGame();
+				this.hideProfile();
 				this.getLocalAiConfigPage();
-			} else if (state == "1vsAI" && game_id != -1) {
+			} else if (state == "1vsAI" && id != -1) {
 				this.hideLocalConfigPage();
-				this.getLocalAiGame(game_id);
-			} else if (state == "1vs1" && game_id == -1) {
+				this.hideProfile();
+				this.getLocalAiGame(id);
+			} else if (state == "1vs1" && id == -1) {
 				this.setPong("bg");
 				this.hideLocalGame();
+				this.hideProfile();
 				this.getLocalConfigPage();
-			} else if (state == "1vs1" && game_id != -1) {
+			} else if (state == "1vs1" && id != -1) {
 				this.hideLocalConfigPage();
-				this.getLocalGame(game_id);
+				this.hideProfile();
+				this.getLocalGame(id);
+			} else if (state == "profile") {
+				this.setPong("bg");
+				this.getProfile(id);
 			} else if (state == "listTournaments") {
-				this.getListTournaments(game_id);
+				this.getListTournaments(id);
 			} else if (state == "createTournaments") {
 				this.getCreateTournament();
 			}
@@ -594,7 +618,7 @@ export default class App {
 					this.setPong("bg")
 				else
 					this.setPong("p1Game");
-				this.pong.game_id = id;
+				this.pong.id = id;
 				this.pong.gameInfo = res;
 				let homeContent = document.getElementById("homeContent");
 				if (document.getElementById("gameOverlay"))
@@ -643,7 +667,7 @@ export default class App {
 					this.setPong("bg")
 				else
 					this.setPong("p1Game");
-				this.pong.game_id = id;
+				this.pong.id = id;
 				this.pong.gameInfo = res;
 				let homeContent = document.getElementById("homeContent");
 				if (document.getElementById("gameOverlay"))
@@ -1685,6 +1709,52 @@ export default class App {
 					previewProfilePicture.innerHTML = `<img src="${e.target.result}" class="img-fluid rounded rounded-circle border border-white" style="width: 150px; height: 150px;">`;
 				};
 				reader.readAsDataURL(file);
+			}
+		});
+	}
+
+	hideProfile() {
+		let profileView = document.getElementById("profile");
+		if (!profileView)
+			return ;
+		profileView.classList.add("hided")
+		this.remove("profile")
+	}
+
+	getProfile(id) {
+		let homeContent = document.getElementById("homeContent");
+		if (!homeContent) return;
+
+		this.getApiResponseJson("/api/view/profile/" + id).then((response) => {
+			let res = JSON.parse(response);
+			if (res.success) {
+				homeContent.innerHTML = res.html;
+
+				let profileView = document.getElementById("profile");
+				if (!profileView) return;
+
+				setTimeout(() => {
+					profileView.classList.remove("hided");
+				}, 15);
+
+				const profilePictureInput = document.getElementById('id_profile_picture');
+				const previewContainer = document.querySelector('.rounded.rounded-circle');
+
+				if (profilePictureInput && previewContainer) {
+					const defaultImage = previewContainer.getAttribute('data-default-image');
+					profilePictureInput.addEventListener('change', function () {
+						const file = profilePictureInput.files[0];
+						if (file) {
+							const reader = new FileReader();
+							reader.onload = function (e) {
+								previewContainer.style.backgroundImage = `url(${e.target.result})`;
+							};
+							reader.readAsDataURL(file);
+						} else {
+							previewContainer.style.backgroundImage = `url(${defaultImage})`;
+						}
+					});
+				}
 			}
 		});
 	}

@@ -25,12 +25,12 @@ from django.conf import settings
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import get_user_model
 from website.forms import CustomUserCreationForm
-
+from .forms import editProfileForm
 
 def index(request):
 	return render(request, "website/index.html");
 
-def indexGame(request, game_id):
+def indexId(request, id):
 	return render(request, "website/index.html");
 
 def getUser(request):
@@ -605,3 +605,49 @@ def	setIdBc(request, tournament_id):
 			len = contract.functions.getTournamentLength().call()
 			tournament.idBC = len - 1
 			tournament.save()
+
+
+def profile(request, user_id):
+	if request.method == 'POST':
+		perso = True
+		if user_id != request.user.id:
+			perso = False
+			user = User.objects.get(id=user_id)
+		else:
+			user = request.user
+		singleGames = Game.objects.filter(Q(p1=user) | Q(p2=user)).order_by('-date')
+		p1vsAiWinCount = Game.objects.filter(p1=user, p2=None, p2Local='').filter(p1Score__gte=F('scoreToWin')).count()
+		p1vsAiLossCount = Game.objects.filter(p1=user, p2=None, p2Local='').filter(p2Score__gte=F('scoreToWin')).count()
+		p1vsAiWinForfeitCount = Game.objects.filter(p1=user, p2=None, p2Local='').filter(~Q(forfeit=user) & ~Q(forfeit=None)).count()
+		p1vsAiLossForfeitCount = Game.objects.filter(p1=user, p2=None, p2Local='').filter(forfeit=user).count()
+
+		p1vs1WinCount = Game.objects.filter(p1=user).filter(~Q(p2=None) | ~Q(p2Local='')).filter(p1Score__gte=F('scoreToWin')).count()
+		p1vs1LossCount = Game.objects.filter(p1=user).filter(~Q(p2=None) | ~Q(p2Local='')).filter(p2Score__gte=F('scoreToWin')).count()
+		p1vs1WinForfeitCount = Game.objects.filter(p1=user).filter(~Q(p2=None) | ~Q(p2Local='')).filter(~Q(forfeit=user) & ~Q(forfeit=None)).count()
+		p1vs1LossForfeitCount = Game.objects.filter(p1=user).filter(~Q(p2=None) | ~Q(p2Local='')).filter(forfeit=user).count()
+
+		p2vs1WinCount = Game.objects.filter(p2=user).filter(p2Score__gte=F('scoreToWin')).count()
+		p2vs1LossCount = Game.objects.filter(p2=user).filter(p1Score__gte=F('scoreToWin')).count()
+		p2vs1WinForfeitCount = Game.objects.filter(p2=user).filter(~Q(forfeit=user) & ~Q(forfeit=None)).count()
+		p2vs1LossForfeitCount = Game.objects.filter(p2=user).filter(forfeit=user).count()
+		return JsonResponse({
+			'success': True,
+			'html': render_to_string('website/profile.html', {
+				"user": user,
+				"perso": perso,
+				"singleGames": singleGames,
+				"aiWin": p1vsAiWinCount,
+				"aiLoss": p1vsAiLossCount,
+				"aiTot": p1vsAiWinCount + p1vsAiLossCount,
+				"aiWinForfeit": p1vsAiWinForfeitCount,
+				"aiLossForfeit": p1vsAiLossForfeitCount,
+				"aiForfeitTot": p1vsAiWinForfeitCount + p1vsAiLossForfeitCount,
+				"v1Win": p1vs1WinCount + p2vs1WinCount,
+				"v1Loss": p1vs1LossCount + p2vs1LossCount,
+				"v1Tot": p1vs1WinCount + p2vs1WinCount + p1vs1LossCount + p2vs1LossCount,
+				"v1WinForfeit": p1vs1WinForfeitCount + p2vs1WinForfeitCount,
+				"v1LossForfeit": p1vs1LossForfeitCount + p2vs1LossForfeitCount,
+				"v1ForfeitTot": p1vs1WinForfeitCount + p2vs1WinForfeitCount + p1vs1LossForfeitCount + p2vs1LossForfeitCount,
+				"form": editProfileForm({"username": user.username})
+			}),
+	})
