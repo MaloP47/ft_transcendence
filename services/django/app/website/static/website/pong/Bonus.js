@@ -66,7 +66,7 @@ export default class Bonus {
 	}
 
 	setActive(val) {
-				console.log(val)
+				//console.log(val)
 		if (val == false) {
 			this.active = false;
 			if (this.pong.endRound)
@@ -81,7 +81,7 @@ export default class Bonus {
 				this.setBonus(this.pong.assets.p1.bonus.frozen, this.pong.assets.p2.bonus.frozen)
 			else if (this.type == 4)
 				this.setBonus(this.pong.assets.p1.bonus.reversed, this.pong.assets.p2.bonus.reversed)
-			console.log("send bonus in 15 sec")
+			//console.log("send bonus in 15 sec")
 			this.nextTimeout = setTimeout(() => {
 				console.log("send bonus info now")
 				this.bonus.position.x = (Math.random() - 0.5) * 12;

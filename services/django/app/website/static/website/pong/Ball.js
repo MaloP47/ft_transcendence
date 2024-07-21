@@ -101,24 +101,14 @@ export default class Ball {
 		this.currentPos = this.ball.position.clone();
 	}
 	updateMulti() {
-		//console.log(this.pong.multiData);
-
-		//if (!this.pong.multiData.trigger_resetBall &&
-		//	this.pong.multiData.trigger_impactParticles)
-		//	this.pong.assets.impactParticles.AddParticles();
-
-		if (this.pong.multiData.trigger_impactParticles)
+		if (this.pong.multiData.t_impactParticles)
 			this.pong.assets.impactParticles.AddParticles();
 		this.velocity.x = this.pong.multiData.ball_vel.x;
 		this.velocity.y = this.pong.multiData.ball_vel.y;
 		this.ball.position.x = this.pong.multiData.ball_pos.x;
 		this.ball.position.y = this.pong.multiData.ball_pos.y;
-		//this.ball.speed = this.pong.multiData.ballspeed;
-		//if (this.pong.multiData.trigger_resetBall &&
-		//	this.pong.multiData.trigger_impactParticles)
-		//	this.pong.assets.impactParticles.AddParticles();
 
-		this.prevPos = this.currentPos.clone(); // comment this
+		this.prevPos = this.currentPos.clone();
 		this.currentPos = this.ball.position.clone();
 	}
 
@@ -138,7 +128,7 @@ export default class Ball {
 	resetBall(player) {
 
 		if (this.pong.isMultiHost())
-			this.pong.setMultiData('trigger_resetBall', true);
+			this.pong.setMultiData('t_resetBall', true);
 		//if (this.pong.isMultiNoHost())
 		//	return this.resetBallMulti();
 

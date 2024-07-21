@@ -43,8 +43,25 @@ export default class BallParticles {
 	}
 
 	AddParticles() {
+		// Multi Host
+		if (this.pong.isMultiHost()) {
+			this.pong.setMultiData('t_ballParticles', true);
+			this.pong.setMultiData('t_ballParticles_pos', this.pong.assets.ball.prevPos);
+		}
+		// Multi Guest
+		if (this.pong.isMultiNotHost() && !this.pong.multiData.t_ballParticles)
+			return ;
+		var trigger_multi = this.pong.isMultiNotHost() && this.pong.multiData.t_ballParticles;
+		if (trigger_multi)
+			var pospos = this.pong.multiData.t_ballParticles_pos;
+
 		if(this.pong.totalTime > this.lastEmit + this.nextEmit) {
 			this.lastEmit = this.pong.totalTime;
+
+			if (trigger_multi)
+				var pos = new THREE.Vector3(pospos.x, pospos.y, pospos.z);
+			else
+				var pos = this.pong.assets.ball.getPos();
 			this.ballParticles.push({
 				position: this.pong.assets.ball.getPos(),
 				velocity: this.pong.assets.ball.getVelocity(),
@@ -93,8 +110,10 @@ export default class BallParticles {
 	}
 
 	update() {
+		// Only get these particles from server
 		if (!this.pong.endRound)
 			this.AddParticles();
+		
 		this.UpdateParticles(this.pong.elapsedTime / 1000.0);
 		this.UpdateGeometry();
 	}

@@ -166,14 +166,21 @@ export default class Pong {
 
 		if (this.isMulti()) {
 			if (this.isHost()) {
+				//console.log(this.endRound);
 				this.sendMultiData();
 			}
 			//else {
 
 				//}
-			if (this.multiData['trigger_impactParticles']){
+			// shouldn't this be guest only?
+			if (this.multiData['t_impactParticles']){
 				setTimeout(() => {
-					this.setMultiData('trigger_impactParticles', false);
+					this.setMultiData('t_impactParticles', false);
+				}, 10);
+			}
+			if (this.multiData['t_ballParticles']){
+				setTimeout(() => {
+					this.setMultiData('t_ballParticles', false);
 				}, 10);
 			}
 		}
@@ -197,16 +204,16 @@ export default class Pong {
 			var type = 'multiDataHost';
 			this.setMultiData('ball_pos', this.assets.ball.ball.position);
 			this.setMultiData('ball_vel', this.assets.ball.velocity);
-			//this.setMultiData('ballspeed', this.assets.ball.speed);
 			this.setMultiData('p1_pos', this.assets.p1.bar.position);
 			this.setMultiData('p2_pos', this.assets.p2.bar.position);
-			//this.setMultiData('trigger_impactParticles', true); // Don't uncomment
 			this.setMultiData('p1_bonus', this.assets.p1.bonus);
 			this.setMultiData('p2_bonus', this.assets.p2.bonus);
+			// Bonus
 			this.setMultiData('bonus_active', this.assets.bonus.active);
 			this.setMultiData('bonus_pos', this.assets.bonus.bonus.position);
 			this.setMultiData('bonus_startTime', this.assets.bonus.startTime);
 			this.setMultiData('bonus_type', this.assets.bonus.type);
+			this.setMultiData('endRound', this.endRound);
 		}
 		//else if (isGuest()) {
 		//	type = 'multiGuestInfo'
@@ -232,7 +239,17 @@ export default class Pong {
 		if (!this.isHost())
 		{
 			this.multiData = data;
+			
+			// probably will be more complicated than this but...
+			//this.endRound = data.endRound;
+			// breaks:
+			// - impactParticles when getting a point
+			// fixes:
+			// - ballParticles when not moving
 		}
+	}
+	zeroVec3() {
+		return {x: 0, y: 0, z: 0};
 	}
 	initMultiData() {
 		this.multiData = {
@@ -241,9 +258,16 @@ export default class Pong {
 			//'ballspeed': 0,
 			'p1_pos': {x: 0, y: 0, z: 0},
 			'p2_pos': {x: 0, y: 0, z: 0},
-			'trigger_impactParticles': false,
-			'trigger_impactParticles_pos': {x: 0, y: 0, z: 0},
-			'trigger_resetBall': false, // might need to be 0, 1 or 2, for updating points accordingly
+			't_impactParticles': false,
+			't_impactParticles_pos': {x: 0, y: 0, z: 0},
+			't_ballParticles': false,
+			't_ballParticles_pos': {x: 0, y: 0, z: 0},
+			't_resetBall': false,
+			'bonus_active': false,
+			'bonus_pos': {x: 0, y: 0, z: 0},
+			'bonus_startTime': 0,
+			'bonus_type': 0,
+			't_endRound': false,
 			'p1_bonus': {
 				big: {on: false, end: false, time: 0.0001},
 				small: {on: false, end: false, time: 0.0001},
@@ -263,9 +287,8 @@ export default class Pong {
 	}
 	resetMultiData() {
 		// Only some stuff needs to be reset
-		// this.setMultiData('trigger_impactParticles', false);
-	//	this.setMultiData('trigger_impactParticles_pos', {x: 0, y: 0, z: 0});
-		this.setMultiData('trigger_resetBall', false); // might need to be 0, 1 or 2, for updating points accordingly
+		this.setMultiData('t_endRound', false); // might need to be 0, 1 or 2, for updating points accordingly
+		this.setMultiData('t_resetBall', false); // might need to be 0, 1 or 2, for updating points accordingly
 	}
 	isMulti() {
 		return (this.gameInfo.gameType == 2);

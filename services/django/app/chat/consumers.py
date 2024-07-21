@@ -35,23 +35,12 @@ class ChatConsumer(AsyncWebsocketConsumer):
 				# Need to restrict access to data too with rooms or groups or something
 				# Check if sender is really host or guest for example
 				await self.channel_layer.group_send(self.room_group_name, text_data_json)
+            # add if text_data_json['type'] == 'gameNotif':
 		else:
 			print('No type field in received data')
 
-		#try:
-		#	hostGameInfo = text_data_json['hostGameInfo']
-		#	ballpos = text_data_json['ballpos']
-		#	await self.channel_layer.group_send(
-		#		self.room_group_name,
-		#		{
-		#			'type': 'host_game_info',
-		#			'hostGameInfo': hostGameInfo,
-		#			'ballpos': ballpos,
-		#		}
-		#	)
-		#except:
-		#	pass
 		# Multiplayer logic --^
+        # la partie qui va pas --v
 		try:
 			gameNotif = text_data_json['gameNotif']
 			p1 = text_data_json['p1']
