@@ -10,14 +10,14 @@ KIBANA_PID=$!
 echo "Kibana started with PID $KIBANA_PID."
 
 Attendre que Kibana soit prêt
-while [[ "$(curl -u elastic:DidierDidier -s -o /dev/null -w ''%{http_code}'' localhost:5601/api/status)" != "200" ]]; do 
+while [[ "$(curl -u $ELASTIC_USERNAME:$ELASTIC_PASSWORD -s -o /dev/null -w ''%{http_code}'' localhost:5601/api/status)" != "200" ]]; do 
 	echo "Waiting for Kibana to be available..."
 	sleep 5
 done
 
-if curl -u elastic:DidierDidier -s -X GET "localhost:5601/api/saved_objects/_find?type=index-pattern&search=logs*&search_fields=title" | grep -q '"total":0'; then
+if curl -u $ELASTIC_USERNAME:$ELASTIC_PASSWORD -s -X GET "localhost:5601/api/saved_objects/_find?type=index-pattern&search=logs*&search_fields=title" | grep -q '"total":0'; then
 	# Ajouter l'index pattern
-	curl -u elastic:DidierDidier  -X POST "localhost:5601/api/saved_objects/index-pattern" \
+	curl -u $ELASTIC_USERNAME:$ELASTIC_PASSWORD  -X POST "localhost:5601/api/saved_objects/index-pattern" \
 		-H 'Content-Type: application/json' \
 		-H 'kbn-xsrf: true' \
 		-d '{"attributes":{"title":"logs*","timeFieldName":"@timestamp"}}'
@@ -27,8 +27,8 @@ else
 fi
 
 # Vérifier si le tableau de bord existe déjà
-if curl -u elastic:DidierDidier  -s -X GET "localhost:5601/api/saved_objects/_find?type=dashboard&search=Mon-Beau-Tableau" | grep -q '"total":0'; then
-	curl -u elastic:DidierDidier -X POST "http://localhost:5601/api/saved_objects/_import?overwrite=true" \
+if curl -u $ELASTIC_USERNAME:$ELASTIC_PASSWORD  -s -X GET "localhost:5601/api/saved_objects/_find?type=dashboard&search=Mon-Beau-Tableau" | grep -q '"total":0'; then
+	curl -u $ELASTIC_USERNAME:$ELASTIC_PASSWORD -X POST "http://localhost:5601/api/saved_objects/_import?overwrite=true" \
 	-H "kbn-xsrf: true" \
 	--form file=@/usr/share/kibana/dashboard.ndjson
 	echo "Dashboard 'Mon-Beau-Tableau' added."

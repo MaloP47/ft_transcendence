@@ -191,6 +191,7 @@ services:
       - kibana_data:/usr/share/kibana/data
       - ./services/kibana/conf/dashboard.json:/usr/share/kibana/dashboard.json
       - ./services/kibana/conf/kibana.yml:/usr/share/kibana/config/kibana.yml
+    env_file: .env
     networks:
       - transcendence
     healthcheck:

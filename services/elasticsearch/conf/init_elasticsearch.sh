@@ -1,5 +1,8 @@
 #!/bin/bash
 
+set -a
+source .env
+set +a
 
 /usr/share/elasticsearch/bin/elasticsearch &
 ELASTIC_PID=$!
@@ -18,24 +21,24 @@ echo "Elasticsearch is ready."
 echo "Creating user passwords..."
 
 /usr/share/elasticsearch/bin/elasticsearch-setup-passwords interactive -b <<EOF
-DidierDidier
-DidierDidier
-DidierDidier
-DidierDidier
-DidierDidier
-DidierDidier
-DidierDidier
-DidierDidier
-DidierDidier
-DidierDidier
-DidierDidier
-DidierDidier
+$ELASTIC_PASSWORD
+$ELASTIC_PASSWORD
+$ELASTIC_PASSWORD
+$ELASTIC_PASSWORD
+$ELASTIC_PASSWORD
+$ELASTIC_PASSWORD
+$ELASTIC_PASSWORD
+$ELASTIC_PASSWORD
+$ELASTIC_PASSWORD
+$ELASTIC_PASSWORD
+$ELASTIC_PASSWORD
+$ELASTIC_PASSWORD
 EOF
 
 
 echo "Creating index template..."
 
-curl -u elastic:DidierDidier -X PUT "localhost:9200/_ilm/policy/logs_policy" -H 'Content-Type: application/json' -d'
+curl -u $ELASTIC_USERNAME:$ELASTIC_PASSWORD -X PUT "localhost:9200/_ilm/policy/logs_policy" -H 'Content-Type: application/json' -d'
 {
 	"policy": {
 		"phases": {
@@ -61,7 +64,7 @@ curl -u elastic:DidierDidier -X PUT "localhost:9200/_ilm/policy/logs_policy" -H 
 
 echo "Creating index template..."
 
-curl -u elastic:DidierDidier -X PUT "localhost:9200/_index_template/logs_template" -H 'Content-Type: application/json' -d'
+curl -u $ELASTIC_USERNAME:$ELASTIC_PASSWORD -X PUT "localhost:9200/_index_template/logs_template" -H 'Content-Type: application/json' -d'
 {
 	"index_patterns": ["logs-*"],
 	"template": {
