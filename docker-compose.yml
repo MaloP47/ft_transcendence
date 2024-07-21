@@ -221,6 +221,11 @@ services:
       - "9300:9300"
     networks:
       - transcendence
+    healthcheck:
+      test: ["CMD-SHELL", "curl -u elastic:DidierDidier -fsSL http://localhost:9200/_cat/health | grep -vq 'red'"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
     # entrypoint: ["/bin/bash", "-c", "/usr/share/elasticsearch/bin/elasticsearch"]
     # restart: unless-stopped
     # user: "1000:1000"
@@ -244,8 +249,15 @@ services:
     ports:
       - "5044:5044"
     depends_on:
-      - elasticsearch
-    restart: unless-stopped
+      elasticsearch:
+        condition: service_healthy
+    # restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9600 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    # entrypoint: ["sh", "-c", "echo 'Waiting for Elasticsearch to be ready...'; sleep 5; /usr/local/bin/docker-entrypoint"]
 
   kibana:
     # image: docker.elastic.co/kibana/kibana:7.17.10
@@ -277,7 +289,8 @@ services:
       test: ["CMD", "curl", "-f", "http://localhost:5601"]
       interval: 30s
       timeout: 10s
-      retries: 5
+      retries: 3
+      start_period: 40s
     ports:
       - "5601:5601"
     depends_on:
@@ -299,7 +312,8 @@ services:
     networks:
       - transcendence
     depends_on:
-      - logstash
+      logstash:
+        condition: service_healthy
     restart: unless-stopped
 
 volumes:

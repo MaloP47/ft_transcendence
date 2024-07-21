@@ -8,6 +8,8 @@ USER root
 RUN chmod +x /usr/share/logstash/pipeline/logstash.conf
 RUN chmod +x /usr/share/logstash/config/logstash.yml
 
+RUN chown -R logstash:logstash /usr/share/logstash/pipeline/logstash.conf
+
 USER logstash
 
 ENTRYPOINT ["/usr/share/logstash/bin/logstash", "-f", "/usr/share/logstash/pipeline/logstash.conf"]

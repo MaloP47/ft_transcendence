@@ -12,7 +12,10 @@ until curl -s http://elasticsearch:9200; do
 	sleep 5
 done
 
+echo "Elasticsearch is ready."
 
+
+echo "Creating user passwords..."
 
 /usr/share/elasticsearch/bin/elasticsearch-setup-passwords interactive -b <<EOF
 DidierDidier
@@ -29,46 +32,56 @@ DidierDidier
 DidierDidier
 EOF
 
-# echo "Stopping Elasticsearch with PID $ELASTIC_PID."
 
-# kill $ELASTIC_PID
+echo "Creating index template..."
 
-# # Attendre que Elasticsearch soit arrêté
-# wait $ELASTIC_PID
+curl -u elastic:DidierDidier -X PUT "localhost:9200/_ilm/policy/logs_policy" -H 'Content-Type: application/json' -d'
+{
+	"policy": {
+		"phases": {
+		"hot": {
+			"min_age": "0ms",
+			"actions": {
+			"rollover": {
+				"max_age": "24h",
+				"max_size": "50gb"
+			}
+			}
+		},
+		"delete": {
+			"min_age": "24h",
+			"actions": {
+			"delete": {}
+			}
+		}
+		}
+	}
+}
+'
 
-# echo "Elasticsearch stopped."
+echo "Creating index template..."
 
-# # Vérifier qu'aucun processus Elasticsearch ne reste en cours
-# ps aux | grep '/usr/share/elasticsearch/bin/' | grep -v grep
+curl -u elastic:DidierDidier -X PUT "localhost:9200/_index_template/logs_template" -H 'Content-Type: application/json' -d'
+{
+	"index_patterns": ["logs-*"],
+	"template": {
+		"settings": {
+		"index.lifecycle.name": "logs_policy",
+		"index.lifecycle.rollover_alias": "logs"
+		},
+		"mappings": {
+		"properties": {
+			"@timestamp": {
+			"type": "date"
+			}
+		}
+		}
+	}
+}
+'
 
-# echo "Restarting Elasticsearch..."
 
 exec elasticsearch
-
-# exec "$@"
-# tail -f /dev/null
-
-# killall elasticsearch
-
-# elasticsearch-reset-password -i -u kibana <<EOF
-# DidierDidier
-# DidierDidier
-# EOF
-
-
-# bin/elasticsearch-setup-passwords interactive
-
-# Charger les indices, mappings, etc.
-# curl -X PUT "http://elasticsearch:9200/filebeat-*" -H 'Content-Type: application/json' -d'
-# {
-# 	"mappings": {
-# 		"properties": {
-# 		"@timestamp": { "type": "date" }
-# 		# Ajoutez d'autres mappings si nécessaire
-# 		}
-# 	}
-# }
-# '
 
 
 
