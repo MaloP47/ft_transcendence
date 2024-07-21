@@ -279,8 +279,8 @@ def registerUser(request):
 			try:
 				profile_picture = request.FILES.get('profilPicture')
 				if profile_picture:
-					if profile_picture.size > 2 * 1024 * 1024:
-						raise ValidationError('File size exceeds 2MB.')
+					if profile_picture.size > 1 * 1024 * 1024:
+						raise ValidationError('File size exceeds 1MB.')
 
 				# Check file type
 					if profile_picture.content_type not in ['image/jpeg', 'image/png', 'image/gif']:
@@ -298,6 +298,7 @@ def registerUser(request):
 					user.save()
 				user = authenticate(username=request.POST["username"], password=request.POST["password1"])
 				if user is not None:
+					login(request, user)
 					return JsonResponse({'success': True})
 				else:
 					return JsonResponse({'success': False, 'message': 'Authentication failed'})
