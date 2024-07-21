@@ -29,15 +29,17 @@ Put here changes that will impact project mates
     - TODO: remove temporary logout button from `templates/navbar.html`, and uncomment music.js but first fix the constant loop trying to play it
 - [ ] does forfeiting a game mark it as over?
 - [ ] join button not working? no error in chrome console
+- [ ] nginx 10s to close (not critical but worth investigating)
 ### Stuff to fix (my work)
 - [x] refreshing multi config page gives `Page not found (404)`
     - FIX: forgot to add `/multi` to urls path, not sure why it was working at all, probably because page is static
 - [x] play button in multi config redirecting to normal game
 ### Multiplayer
 - Stuff to create:
-    - in `models.py`:
+    - in `views.py`: (not right file name)
         - [x] `multiConfig()`
         - [x] added `gameType` to `getGame()`
+        - [ ] for multiplayer, only host should be allowed to save game
     - in `urls.py`:
         - [x] `/api/view/multiConfig/`
         - [x] `/api/game/new/multi/`
@@ -45,13 +47,16 @@ Put here changes that will impact project mates
         - [x] `getMultiConfigPage()`
         - [x] `getMultiGame()`
         - [x] `setMultiConfigInteraction()`
+        - [ ] in Multiplayer config use `Name` field and custom search, no fancy list of matching names, shake red (like wrong password in login form, if player doesn't exist
     - in `templates`:
         - [x] `website/multiConfig.html`
-            - [ ] add opponent selector like in tournament creator
+            - [?] add opponent selector like in tournament creator
     - in `consumer.py`:
         - [ ] receive method seems to do everything, no if checks for type, ask guillaume
         - [ ] receive data in a smarter way for hostGameInfo only using a `type` field as a proof of concept
     - in `Pong.js`:
+        - [ ] ask guillaume why `gameType` is not reset in `resetGameInfo()` and `toState()`
+            - I believe its causing some issues at the end of games
         - lots of multi utils functions added
         - [ ] variable that holds multi game info/data, `multiData`
             - These functions should set `multiData` properly if needed
@@ -60,3 +65,5 @@ Put here changes that will impact project mates
                 - [ ] `toState()`
                 - [ ] `preConfig()`
                 - [ ] `postConfig()`
+    - in `ImpactParticles.js`:
+        - [ ] Particles dont always trigger or in the wrong place when ball resets

@@ -113,30 +113,50 @@ def getGame(request):
 		if game.p2:
 			p2Id = game.p2.id
 			p2Username = game.p2.username
-		if game.p1 == request.user or game.p2 == request.user:
-			return JsonResponse({
-				'success': True,
-				'p1': {'id': p1Id, 'username': p1Username},
-				'p2': {'id': p2Id, 'username': p2Username},
-				'ai': game.ai,
-				'p1score': game.p1Score,
-				'p2score': game.p2Score,
-				'winScore': game.scoreToWin,
-				'ballSpeed': game.ballSpeed,
-				'bonuses': game.bonuses,
-				'p1Left': game.p1Left,
-				'p1Right': game.p1Right,
-				'p2Left': game.p2Left,
-				'p2Right': game.p2Right,
-				'date' : game.date,
-				'p2Local': game.p2Local,
-				'html': render_to_string('website/gameOverlay.html'),
-                'gameType': game.gameType,
-			});
-		else:
-			return JsonResponse({
-				'success': False,
-			})
+        # For testing only, put back request.user check later
+		return JsonResponse({
+			'success': True,
+			'p1': {'id': p1Id, 'username': p1Username},
+			'p2': {'id': p2Id, 'username': p2Username},
+			'ai': game.ai,
+			'p1score': game.p1Score,
+			'p2score': game.p2Score,
+			'winScore': game.scoreToWin,
+			'ballSpeed': game.ballSpeed,
+			'bonuses': game.bonuses,
+			'p1Left': game.p1Left,
+			'p1Right': game.p1Right,
+			'p2Left': game.p2Left,
+			'p2Right': game.p2Right,
+			'date' : game.date,
+			'p2Local': game.p2Local,
+			'html': render_to_string('website/gameOverlay.html'),
+            'gameType': game.gameType,
+		});
+		#if game.p1 == request.user or game.p2 == request.user:
+		#	return JsonResponse({
+		#		'success': True,
+		#		'p1': {'id': p1Id, 'username': p1Username},
+		#		'p2': {'id': p2Id, 'username': p2Username},
+		#		'ai': game.ai,
+		#		'p1score': game.p1Score,
+		#		'p2score': game.p2Score,
+		#		'winScore': game.scoreToWin,
+		#		'ballSpeed': game.ballSpeed,
+		#		'bonuses': game.bonuses,
+		#		'p1Left': game.p1Left,
+		#		'p1Right': game.p1Right,
+		#		'p2Left': game.p2Left,
+		#		'p2Right': game.p2Right,
+		#		'date' : game.date,
+		#		'p2Local': game.p2Local,
+		#		'html': render_to_string('website/gameOverlay.html'),
+        #        'gameType': game.gameType,
+		#	});
+		#else:
+		#	return JsonResponse({
+		#		'success': False,
+		#	})
 
 def searchPlayer(request):
 	if request.method == 'POST':

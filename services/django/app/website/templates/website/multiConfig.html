@@ -29,6 +29,17 @@
 		</div>
 		<div class="divider my-3"></div>
 		<h4 class="me-auto">Player 2</h4>
+
+		<!-- Adding player search -->
+		<div class="d-flex mb-2 align-items-center" style="width:475px">
+			<label for="addPlayer" style="width:175px" class="fs-5 form-label flex-shrink-0 me-2">Enemy:</label>
+			<input id="addPlayer" class="form-control roboto" placeholder="Search" />
+			<div style="margin-top: 40px">
+				<div id="playerResult" style="right: 0; width: 293px; z-index:10000" class="position-absolute me-4 p-2"></div>
+			</div>
+		</div>
+
+		<!-- Commenting out normal name field -->
 		<div class="d-flex w-100 align-items-center mb-2">
 			<span class="fs-5 me-auto">Name :</span>
 			<input id="p2Local" name="p2Local" type="text" style="width:290px; --bs-bg-opacity:0" class="form-control text-bg-dark border border-light">

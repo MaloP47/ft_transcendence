@@ -87,6 +87,7 @@ dev:
 	ln -s services/django/app django_app
 
 users:
-	-docker compose exec -e DJANGO_SUPERUSER_PASSWORD=bonjour123 django python manage.py createsuperuser --no-input --username noa --email noa@example.com
-	-docker compose exec -e DJANGO_SUPERUSER_PASSWORD=bonjour123 django python manage.py createsuperuser --no-input --username lala --email lala@example.com
-	-docker compose exec -e DJANGO_SUPERUSER_PASSWORD=bonjour123 django python manage.py createsuperuser --no-input --username hihi --email hihi@example.com
+	-docker compose exec -e DJANGO_SUPERUSER_PASSWORD=mdpdur42 django python manage.py createsuperuser --no-input --username noa --email noa@example.com
+	-docker compose exec -e DJANGO_SUPERUSER_PASSWORD=mdpdur42 django python manage.py createsuperuser --no-input --username lala --email lala@example.com
+	-docker compose exec -e DJANGO_SUPERUSER_PASSWORD=mdpdur42 django python manage.py createsuperuser --no-input --username hihi --email hihi@example.com
+	-docker compose exec -e DJANGO_SUPERUSER_PASSWORD=mdpdur42 django python manage.py createsuperuser --no-input --username kiki --email kiki@example.com

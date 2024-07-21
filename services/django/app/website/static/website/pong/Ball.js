@@ -46,6 +46,11 @@ export default class Ball {
 		if (this.pong.endRound) {
 			return ;
 		}
+
+		// Multi
+		if (this.pong.isMultiNotHost())
+			return this.updateMulti();
+
 		// Sides collisions
 		if (this.ball.position.x + this.velocity.x * this.speed * this.pong.elapsedTime / 10 > this.maxXPos
 				|| this.ball.position.x + this.velocity.x * this.speed * this.pong.elapsedTime / 10 < -this.maxXPos){
@@ -92,6 +97,19 @@ export default class Ball {
 		}
 		this.ball.position.x += this.velocity.x * this.speed * this.pong.elapsedTime / 10;
 		this.ball.position.y += this.velocity.y * this.speed * this.pong.elapsedTime / 10;
+		this.prevPos = this.currentPos.clone();
+		this.currentPos = this.ball.position.clone();
+	}
+	updateMulti() {
+		//console.log(this.pong.multiData);
+		this.velocity.x = this.pong.multiData.ballvel.x;
+		this.velocity.y = this.pong.multiData.ballvel.y;
+		this.ball.position.x = this.pong.multiData.ballpos.x;
+		this.ball.position.y = this.pong.multiData.ballpos.y;
+		//this.ball.speed = this.pong.multiData.ballspeed;
+		if (this.pong.multiData.trigger_impactParticles) 
+			this.pong.assets.impactParticles.AddParticles();
+
 		this.prevPos = this.currentPos.clone();
 		this.currentPos = this.ball.position.clone();
 	}

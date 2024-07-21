@@ -43,6 +43,10 @@ export default class ImpactParticles {
 	}
 
 	AddParticles() {
+		// multi
+		if (this.pong.isMultiHost())
+			this.pong.setMultiData('trigger_impactParticles', true);
+
 		for (let i = 0; i < 70; i++) {
 			const life = (Math.random() + 0.5) * 0.25;
 			var vel = new THREE.Vector3(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5);
