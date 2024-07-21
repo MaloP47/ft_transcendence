@@ -18,6 +18,7 @@ scrape_configs:
       - targets: ['grafana:3000']
 
   - job_name: 'django'
+    metrics_path: /metrics
     static_configs:
       - targets: ['django:8000']
 
