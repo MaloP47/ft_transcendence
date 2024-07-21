@@ -354,10 +354,9 @@ export default class App {
 				if (data.game_notif)
 					this.handleTournamentNotif(data);
 				// multi socket logic here --v
-				if (data.type && data.type == 'multiHostInfo') {
-					console.log('coucou');
-					console.log(data.ballpos);
-					//console.log(data);
+				if (data.type && data.type == 'multiDataHost') {
+					//console.log("sender -> " + data.sender);
+					this.pong.handleMultiData(data.data); // not sure how safe it is to access pong like that
 				}
 				// multi socket logic here --^
 			}.bind(this);
@@ -572,15 +571,18 @@ export default class App {
 		let playerResult = document.getElementById("playerResult");
 		if (playerResult)
 			playerResult.innerHTML = "";
-		nbPlayer = document.getElementById("nbPlayer");
+		//nbPlayer = document.getElementById("nbPlayer");
+		var nbPlayer = document.getElementById("nbPlayer");
 		nbPlayer.innerHTML = this.tournamentPlayers.length;
 		var html = "";
 		for (let j = 0; j < this.tournamentPlayers.length; j++) {
 			html += '<div id="player-' + this.tournamentPlayers[j].id + '" class="px-1 mx-1 border border-light rounded" style="--bs-border-opacity:0.25;">' + this.tournamentPlayers[j].name + '<button data-id="' + this.tournamentPlayers[j].id + '" class="btn btn-light delPlayerList" style="line-height: 12px; font-size:12px; padding: 0 4px 0 4px; margin-left: 8px">x</button></div>'
 		}
-		players = document.getElementById("players");
+		//players = document.getElementById("players");
+		var players = document.getElementById("players");
 		players.innerHTML = html;
-		createBtn = document.getElementById("createBtn");
+		//createBtn = document.getElementById("createBtn");
+		var createBtn = document.getElementById("createBtn");
 		var addPlayerInput = document.getElementById("addPlayer");
 		if (this.tournamentPlayers.length == 4) {
 			createBtn.disabled = false;
@@ -1062,6 +1064,16 @@ export default class App {
 					});
 				});
 			}
+			//document.getElementById("addPlayer").addEventListener("keyup", (e) => {
+			//	let val = document.getElementById("addPlayer").value;
+			//	if (val != "")
+			//		this.searchPlayer(val);
+			//	else {
+			//		let playerResult = document.getElementById("playerResult");
+			//		if (playerResult)
+			//			playerResult.innerHTML = "";
+			//	}
+			//})
 			let leftKey = document.getElementById("leftKey");
 			leftKey.addEventListener("click", async (e) => {
 				leftKey.innerHTML = "_";

@@ -26,6 +26,7 @@ export default class Pong {
 		this.initKeys();
 		this.initEvents();
 		this.initGameVariable();
+		this.initMultiData();
 		this.scene = new PongScene({pong: this});
 		this.assets = new PongAssets({pong: this});
 		this.transi = new PongTransi({pong: this});
@@ -96,7 +97,7 @@ export default class Pong {
 		this.scaleFactor = 0.75;
 		this.bonus = true;
 		this.resetGameInfo();
-		this.reset
+		//this.resetMultiData();
 	}
 
 	resetGameInfo() {
@@ -121,6 +122,7 @@ export default class Pong {
 			p2score: 0,
 			winScore: 10,
 			p2Local: '',
+			//gameType: ?????,
 		}
 	}
 
@@ -146,6 +148,7 @@ export default class Pong {
 				p2score: 0,
 				winScore: 10,
 				p2Local: '',
+				//gameType: ?????,
 			}
 			this.transi.to("toBg", 1500);
 		}
@@ -164,14 +167,16 @@ export default class Pong {
 		if (this.isMulti()) {
 			if (this.isHost()) {
 				this.sendMultiData();
-				// Dont reset data stupidly
-				// There shouldn't be missing fields now and then
 			}
-			//} else {
+			//else {
 
-			//}
+				//}
+			// Dont reset data stupidly
+			// There shouldn't be missing fields now and then
+			// Only some stuff needs to be rest like particles triggers
+			this.resetMultiData();
 		}
-		
+
 		requestAnimationFrame(this.update.bind(this));
 	}
 
@@ -188,7 +193,13 @@ export default class Pong {
 
 		//// Set data
 		if (this.isHost()) {
-			var type = 'multiHostInfo';
+			var type = 'multiDataHost';
+			this.setMultiData('ballpos', this.assets.ball.ball.position);
+			this.setMultiData('ballvel', this.assets.ball.velocity);
+			//this.setMultiData('ballspeed', this.assets.ball.speed);
+			this.setMultiData('p1pos', this.assets.p1.bar.position);
+			this.setMultiData('p2pos', this.assets.p2.bar.position);
+			//this.setMultiData('trigger_impactParticles', true); // Don't uncomment
 		}
 		//else if (isGuest()) {
 		//	type = 'multiGuestInfo'
@@ -198,17 +209,52 @@ export default class Pong {
 		//}
 
 		// Send data 
+		console.log('Host sending data!');
 		this.stateMachine.chatSocket.send(JSON.stringify({
 			'type': type,
-			'ballpos': this.assets.ball.ball.position,
-			//data: this.multiData,
+			//'sender': this.stateMachine.user.username, // tmp
+			data: this.multiData,
 		}));
+	}
+	setMultiData(key, value) {
+		this.multiData[key] = value;
+	}
+	handleMultiData(data) {
+		if (!this.isMulti())
+			return;
+		if (!this.isHost())
+		{
+			this.multiData = data;
+		}
+	}
+	initMultiData() {
+		this.multiData = {
+			'ballpos': {x: 0, y: 0, z: 0},
+			'ballvel': {x: 0, y: 0, z: 0},
+			//'ballspeed': 0,
+			'p1pos': {x: 0, y: 0, z: 0},
+			'p2pos': {x: 0, y: 0, z: 0},
+			'trigger_impactParticles': false,
+		}
+	}
+	resetMultiData() {
+		// Only some stuff needs to be reset
+		this.setMultiData('trigger_impactParticles', false);
 	}
 	isMulti() {
 		return (this.gameInfo.gameType == 2);
 	}
+	isMultiHost() {
+		return (this.gameInfo.gameType == 2 && this.isHost());
+	}
 	isMultiNotHost() {
 		return (this.gameInfo.gameType == 2 && !this.isHost());
+	}
+	isMultiGuest() {
+		return (this.gameInfo.gameType == 2 && this.isGuest());
+	}
+	isMultiNotGuest() {
+		return (this.gameInfo.gameType == 2 && this.isGuest());
 	}
 	isHost() {
 		return (this.stateMachine.user.id == this.gameInfo.p1.id);
