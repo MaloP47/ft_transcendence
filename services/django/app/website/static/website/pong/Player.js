@@ -126,8 +126,8 @@ export default class Player {
 			this.bonus = this.pong.multiData.p2_bonus;
 		}
 
-		console.log("guest bonuses ->");
-		console.log(this.bonus);
+	//	console.log("guest bonuses ->");
+	//	console.log(this.bonus);
 
 		// probably dont need to call that
 		//this.updateBonus(this.bonus.big, 200, 1);

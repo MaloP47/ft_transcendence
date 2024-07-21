@@ -66,6 +66,7 @@ export default class Bonus {
 	}
 
 	setActive(val) {
+				console.log(val)
 		if (val == false) {
 			this.active = false;
 			if (this.pong.endRound)
@@ -80,7 +81,9 @@ export default class Bonus {
 				this.setBonus(this.pong.assets.p1.bonus.frozen, this.pong.assets.p2.bonus.frozen)
 			else if (this.type == 4)
 				this.setBonus(this.pong.assets.p1.bonus.reversed, this.pong.assets.p2.bonus.reversed)
+			console.log("send bonus in 15 sec")
 			this.nextTimeout = setTimeout(() => {
+				console.log("send bonus info now")
 				this.bonus.position.x = (Math.random() - 0.5) * 12;
 				this.bonus.position.y = (Math.random() - 0.5) * 4;
 				if (this.bonus.position.y >= 0 && this.bonus.position.y < 0.5)
@@ -96,7 +99,19 @@ export default class Bonus {
 		}
 	}
 
+	updateMulti() {
+		this.active = this.pong.multiData.bonus_active;
+		this.bonus.position.x = this.pong.multiData.bonus_pos.x;
+		this.bonus.position.y = this.pong.multiData.bonus_pos.y;
+		this.startTime = this.pong.multiData.bonus_startTime;
+		this.type = this.pong.multiData.bonus_type;
+	}
+
 	update() {
+		// Multi
+		if (this.pong.isMultiNotHost())
+			this.updateMulti();
+		
 		if (!this.active){
 			if (this.bonus.scale.x > 0) {
 				this.bonus.scale.x -= this.pong.elapsedTime / 400;
