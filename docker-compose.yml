@@ -15,43 +15,17 @@ services:
     depends_on:
       db:
         condition: service_healthy
-      # rabbitmq:
-      #   condition: service_healthy
     restart: unless-stopped
-
-  # db:
-  #   container_name: postgres
-  #   image: postgres:alpine3.20
-  #   volumes:
-  #     - ./services/postgres/conf/postgresql.conf:/etc/postgresql/postgresql.conf
-  #     - postgres_data:/var/lib/postgresql/data/
-  #     # - logs_postgresql:/var/log/postgresql
-  #     - ./services/postgres/logs:/var/log/postgresql
-  #   networks:
-  #     - transcendence
-  #   expose:
-  #     - "5432"
-  #   healthcheck:
-  #     test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
-  #     interval: 4s
-  #     timeout: 2s
-  #     retries: 5
-  #     start_period: 2s
-  #   env_file: .env
-  #   restart: unless-stopped
-  #   command: ["postgres", "-c", "config_file=/etc/postgresql/postgresql.conf"]
 
   db:
     container_name: postgres
     build:
       context: services/postgres
       dockerfile: Dockerfile
-    # image: postgres:alpine3.20
     volumes:
       - ./services/postgres/conf/postgresql.conf:/etc/postgresql/postgresql.conf
       - postgres_data:/var/lib/postgresql/data/
       - logs_postgresql:/var/log/postgresql
-      # - ./services/postgres/logs:/var/log/postgresql
     networks:
       - transcendence
     expose:
@@ -85,26 +59,6 @@ services:
       - grafana
     restart: unless-stopped
 
-  # rabbitmq:
-  #   container_name: rabbitmq
-  #   image: rabbitmq:3.12.14-alpine
-  #   volumes:
-  #     - ./services/rabbitmq/conf/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
-  #     - ./services/rabbitmq/conf/definitions.json:/etc/rabbitmq/definitions.json
-  #     # - logs_rabbitmq:/var/log/rabbitmq/
-  #   networks:
-  #     - transcendence
-  #   ports:
-  #     - "5672:5672"
-  #     - "15672:15672"
-  #   healthcheck:
-  #     test: ["CMD-SHELL", "rabbitmqctl status"]
-  #     interval: 3s
-  #     timeout: 1s
-  #     retries: 10
-  #     start_period: 2s
-  #   restart: unless-stopped
-
   prometheus:
     container_name: prometheus
     image: prom/prometheus:v2.53.0
@@ -132,7 +86,6 @@ services:
       - ./services/grafana/conf/dashboard.yml:/etc/grafana/provisioning/dashboards/dashboard.yml
       - ./services/grafana/conf/dashboards:/etc/grafana/provisioning/dashboards
       - ./services/grafana/conf/grafana.ini:/etc/grafana/grafana.ini
-      - ./services/grafana/conf/notification.yml:/etc/grafana/provisioning/alerting/notification.yml
     env_file: .env
     restart: unless-stopped
 
@@ -187,7 +140,6 @@ services:
       
 
   elasticsearch:
-    # image: elasticsearch:7.12.1
     build:
       context: services/elasticsearch
       dockerfile: Dockerfile
@@ -198,24 +150,8 @@ services:
         - ELASTIC_PASSWORD=DidierDidier
         - xpack.security.enabled=true
         - xpack.monitoring.collection.enabled=true
-    #   - discovery.type=single-node
-    #   - xpack.security.enabled=true
-    #   - ELASTIC_USERNAME=jeanjean
-    #   - ELASTIC_PASSWORD=DidierDidier
-    #   - ELASTICSEARCH_USERNAME=jeanjean
-    #   - ELASTICSEARCH_PASSWORD=DidierDidier
-      # - ELASTIC_PASSWORD=DidierDidier
-      # - KIBANA_USERNAME=kibana
-      # - KIBANA_PASSWORD=DidierDidier
-    # ulimits:
-    #   memlock:
-    #     soft: -1
-    #     hard: -1
     volumes:
-      # - elasticsearch_data:/usr/share/elasticsearch/data
-      # - ./data/elasticsearch:/usr/share/elasticsearch/data
       - ./services/elasticsearch/conf/init_elasticsearch.sh:/usr/share/elasticsearch/init_elasticsearch.sh
-      # - ./services/elasticsearch/conf/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
     ports:
       - "9200:9200"
       - "9300:9300"
@@ -226,15 +162,9 @@ services:
       interval: 30s
       timeout: 10s
       retries: 5
-    # entrypoint: ["/bin/bash", "-c", "/usr/share/elasticsearch/bin/elasticsearch"]
-    # restart: unless-stopped
-    # user: "1000:1000"
-    # command: ["sh", "-c", "/usr/share/elasticsearch/bin/elasticsearch"]
-    # command: ["sh", "-c", "/usr/share/elasticsearch/bin/elasticsearch && /usr/share/elasticsearch/init_elasticsearch.sh"]
-    # command: ["sh", "-c", "/usr/share/elasticsearch/init_elasticsearch.sh"]
+    restart: unless-stopped
 
   logstash:
-    # image: docker.elastic.co/logstash/logstash:7.17.10
     build:
       context: services/logstash
       dockerfile: Dockerfile
@@ -251,36 +181,20 @@ services:
     depends_on:
       elasticsearch:
         condition: service_healthy
-    # restart: unless-stopped
+    restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:9600 || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 5
-    # entrypoint: ["sh", "-c", "echo 'Waiting for Elasticsearch to be ready...'; sleep 5; /usr/local/bin/docker-entrypoint"]
 
   kibana:
-    # image: docker.elastic.co/kibana/kibana:7.17.10
     build:
       context: services/kibana
       dockerfile: Dockerfile
     container_name: kibana
-    # environment:
-      # - ELASTIC_VERSION=$ELASTIC_VERSION
-      # - ELASTICSEARCH_USERNAME=elastic
-      # - ELASTICSEARCH_PASSWORD=$ELASTIC_PASSWORD
-      # - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
-      # - ELASTICSEARCH_URL=http://elasticsearch:9200
-      # - ELASTICSEARCH_HOSTS=["http://elasticsearch:9200"]
-      # - ELASTICSEARCH_USERNAME=jeanjean
-      # - ELASTICSEARCH_PASSWORD=Didier
-    # dns:
-    #   - 8.8.8.8
-    #   - 8.8.4.4
     volumes:
       - kibana_data:/usr/share/kibana/data
-      # - ./services/kibana/conf/import_dashboards.sh:/usr/share/kibana/import_dashboards.sh
-      # - ./services/kibana/conf/dashboards.ndjson:/usr/share/kibana/config/dashboards.ndjson
       - ./services/kibana/conf/dashboard.json:/usr/share/kibana/dashboard.json
       - ./services/kibana/conf/kibana.yml:/usr/share/kibana/config/kibana.yml
     networks:
@@ -295,9 +209,7 @@ services:
       - "5601:5601"
     depends_on:
       - elasticsearch
-    # restart: unless-stopped
-    # entrypoint: ["/bin/bash", "-c", "/usr/share/kibana/import_dashboards.sh"]
-
+    restart: unless-stopped
 
   filebeat:
     image: docker.elastic.co/beats/filebeat:7.17.10
@@ -305,10 +217,8 @@ services:
     volumes:
       - ./services/filebeat/conf/filebeat.yml:/usr/share/filebeat/filebeat.yml
       - logs_nginx:/var/log/nginx
-      # - ./services/postgres/logs:/var/log/postgresql
       - logs_postgresql:/var/log/postgresql
       - logs_django:/var/log/django
-
     networks:
       - transcendence
     depends_on:
@@ -322,16 +232,9 @@ volumes:
   prometheus_data:
   elasticsearch_data:
   kibana_data:
-    # driver: local
-    # driver_opts:
-    #   type: 'none'
-    #   o: 'bind'
-    #   device: '/path/to/your/data'
-    #   size: '5G'
   logs_django:
   logs_nginx:
   logs_postgresql:
-  # logs_rabbitmq:
 
 networks:
   transcendence:
