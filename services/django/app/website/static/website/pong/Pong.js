@@ -172,7 +172,7 @@ export default class Pong {
 			//else {
 
 				//}
-			// shouldn't this be guest only?
+			// shouldn't this be guest only? or host only? right now it's both
 			if (this.multiData['t_impactParticles']){
 				setTimeout(() => {
 					this.setMultiData('t_impactParticles', false);
@@ -181,6 +181,11 @@ export default class Pong {
 			if (this.multiData['t_ballParticles']){
 				setTimeout(() => {
 					this.setMultiData('t_ballParticles', false);
+				}, 10);
+			}
+			if (this.multiData['t_ballFire']){
+				setTimeout(() => {
+					this.setMultiData('t_ballFire', false);
 				}, 10);
 			}
 		}
@@ -253,15 +258,18 @@ export default class Pong {
 	}
 	initMultiData() {
 		this.multiData = {
+			// Ball
 			'ball_pos': {x: 0, y: 0, z: 0},
 			'ball_vel': {x: 0, y: 0, z: 0},
-			//'ballspeed': 0,
 			'p1_pos': {x: 0, y: 0, z: 0},
 			'p2_pos': {x: 0, y: 0, z: 0},
+			// Particles
 			't_impactParticles': false,
 			't_impactParticles_pos': {x: 0, y: 0, z: 0},
 			't_ballParticles': false,
 			't_ballParticles_pos': {x: 0, y: 0, z: 0},
+			't_ballFire': false,
+			't_ballFire_pos': {x: 0, y: 0, z: 0},
 			't_resetBall': false,
 			'bonus_active': false,
 			'bonus_pos': {x: 0, y: 0, z: 0},
