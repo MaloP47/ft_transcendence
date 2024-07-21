@@ -43,15 +43,28 @@ export default class ImpactParticles {
 	}
 
 	AddParticles() {
-		// multi
-		if (this.pong.isMultiHost())
+
+		// Multi Host
+		if (this.pong.isMultiHost()) {
 			this.pong.setMultiData('trigger_impactParticles', true);
+			this.pong.setMultiData('trigger_impactParticles_pos', this.pong.assets.ball.ball.position);
+		}
+		// Multi Guest
+		var trigger_multi = this.pong.isMultiNotHost() && this.pong.multiData.trigger_impactParticles;
+		if (trigger_multi)
+			var multi_pos = this.pong.multiData.trigger_impactParticles_pos;
 
 		for (let i = 0; i < 70; i++) {
 			const life = (Math.random() + 0.5) * 0.25;
 			var vel = new THREE.Vector3(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5);
+
+			if (trigger_multi)
+				var pos = new THREE.Vector3(multi_pos.x, multi_pos.y, multi_pos.z);
+			else
+				var pos = this.pong.assets.ball.getPos();
 			this.impactParticles.push({
-				position: this.pong.assets.ball.getPos(),
+				//position: this.pong.assets.ball.getPos(),
+				position: pos,
 				velocity: vel.multiplyScalar(0.3),
 				size: Math.random() * 0.75 * this.pong.scaleFactor,
 				life: life,

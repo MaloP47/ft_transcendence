@@ -67,3 +67,6 @@ Put here changes that will impact project mates
                 - [ ] `postConfig()`
     - in `ImpactParticles.js`:
         - [ ] Particles dont always trigger or in the wrong place when ball resets
+        - [ ] bonuses seem to fuck up the particles on the guest
+        - [x] oooooh ball position is sent at the end of the loop but not particle creation
+        - [ ] now collisions are in good location but sometimes just dont happen... fix later

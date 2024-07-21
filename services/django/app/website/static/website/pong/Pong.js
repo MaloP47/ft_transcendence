@@ -171,9 +171,6 @@ export default class Pong {
 			//else {
 
 				//}
-			// Dont reset data stupidly
-			// There shouldn't be missing fields now and then
-			// Only some stuff needs to be rest like particles triggers
 			this.resetMultiData();
 		}
 
@@ -194,12 +191,14 @@ export default class Pong {
 		//// Set data
 		if (this.isHost()) {
 			var type = 'multiDataHost';
-			this.setMultiData('ballpos', this.assets.ball.ball.position);
-			this.setMultiData('ballvel', this.assets.ball.velocity);
+			this.setMultiData('ball_pos', this.assets.ball.ball.position);
+			this.setMultiData('ball_vel', this.assets.ball.velocity);
 			//this.setMultiData('ballspeed', this.assets.ball.speed);
-			this.setMultiData('p1pos', this.assets.p1.bar.position);
-			this.setMultiData('p2pos', this.assets.p2.bar.position);
+			this.setMultiData('p1_pos', this.assets.p1.bar.position);
+			this.setMultiData('p2_pos', this.assets.p2.bar.position);
 			//this.setMultiData('trigger_impactParticles', true); // Don't uncomment
+			this.setMultiData('p1_bonus', this.assets.p1.bonus);
+			this.setMultiData('p2_bonus', this.assets.p1.bonus);
 		}
 		//else if (isGuest()) {
 		//	type = 'multiGuestInfo'
@@ -229,17 +228,36 @@ export default class Pong {
 	}
 	initMultiData() {
 		this.multiData = {
-			'ballpos': {x: 0, y: 0, z: 0},
-			'ballvel': {x: 0, y: 0, z: 0},
+			'ball_pos': {x: 0, y: 0, z: 0},
+			'ball_vel': {x: 0, y: 0, z: 0},
 			//'ballspeed': 0,
-			'p1pos': {x: 0, y: 0, z: 0},
-			'p2pos': {x: 0, y: 0, z: 0},
+			'p1_pos': {x: 0, y: 0, z: 0},
+			'p2_pos': {x: 0, y: 0, z: 0},
 			'trigger_impactParticles': false,
+			'trigger_impactParticles_pos': {x: 0, y: 0, z: 0},
+			'trigger_resetBall': false, // might need to be 0, 1 or 2, for updating points accordingly
+			'p1_bonus': {
+				big: {on: false, end: false, time: 0.0001},
+				small: {on: false, end: false, time: 0.0001},
+				line: {on: false, end: false, time: 0.0001},
+				frozen: {on: false, end: false, time: 0.0001},
+				reversed: {on: false, end: false, time: 0.0001}
+			},
+			'p2_bonus': {
+				big: {on: false, end: false, time: 0.0001},
+				small: {on: false, end: false, time: 0.0001},
+				line: {on: false, end: false, time: 0.0001},
+				frozen: {on: false, end: false, time: 0.0001},
+				reversed: {on: false, end: false, time: 0.0001}
+			},
+			//'p2_bonus': this.assets.p2.bonus,
 		}
 	}
 	resetMultiData() {
 		// Only some stuff needs to be reset
 		this.setMultiData('trigger_impactParticles', false);
+		this.setMultiData('trigger_impactParticles_pos', {x: 0, y: 0, z: 0});
+		this.setMultiData('trigger_resetBall', false); // might need to be 0, 1 or 2, for updating points accordingly
 	}
 	isMulti() {
 		return (this.gameInfo.gameType == 2);
