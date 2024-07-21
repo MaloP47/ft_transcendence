@@ -113,50 +113,50 @@ def getGame(request):
 		if game.p2:
 			p2Id = game.p2.id
 			p2Username = game.p2.username
-        # For testing only, put back request.user check later
-		return JsonResponse({
-			'success': True,
-			'p1': {'id': p1Id, 'username': p1Username},
-			'p2': {'id': p2Id, 'username': p2Username},
-			'ai': game.ai,
-			'p1score': game.p1Score,
-			'p2score': game.p2Score,
-			'winScore': game.scoreToWin,
-			'ballSpeed': game.ballSpeed,
-			'bonuses': game.bonuses,
-			'p1Left': game.p1Left,
-			'p1Right': game.p1Right,
-			'p2Left': game.p2Left,
-			'p2Right': game.p2Right,
-			'date' : game.date,
-			'p2Local': game.p2Local,
-			'html': render_to_string('website/gameOverlay.html'),
-            'gameType': game.gameType,
-		});
-		#if game.p1 == request.user or game.p2 == request.user:
-		#	return JsonResponse({
-		#		'success': True,
-		#		'p1': {'id': p1Id, 'username': p1Username},
-		#		'p2': {'id': p2Id, 'username': p2Username},
-		#		'ai': game.ai,
-		#		'p1score': game.p1Score,
-		#		'p2score': game.p2Score,
-		#		'winScore': game.scoreToWin,
-		#		'ballSpeed': game.ballSpeed,
-		#		'bonuses': game.bonuses,
-		#		'p1Left': game.p1Left,
-		#		'p1Right': game.p1Right,
-		#		'p2Left': game.p2Left,
-		#		'p2Right': game.p2Right,
-		#		'date' : game.date,
-		#		'p2Local': game.p2Local,
-		#		'html': render_to_string('website/gameOverlay.html'),
-        #        'gameType': game.gameType,
-		#	});
-		#else:
-		#	return JsonResponse({
-		#		'success': False,
-		#	})
+		# For testing only, put back request.user check later
+		#return JsonResponse({
+		#	'success': True,
+		#	'p1': {'id': p1Id, 'username': p1Username},
+		#	'p2': {'id': p2Id, 'username': p2Username},
+		#	'ai': game.ai,
+		#	'p1score': game.p1Score,
+		#	'p2score': game.p2Score,
+		#	'winScore': game.scoreToWin,
+		#	'ballSpeed': game.ballSpeed,
+		#	'bonuses': game.bonuses,
+		#	'p1Left': game.p1Left,
+		#	'p1Right': game.p1Right,
+		#	'p2Left': game.p2Left,
+		#	'p2Right': game.p2Right,
+		#	'date' : game.date,
+		#	'p2Local': game.p2Local,
+		#	'html': render_to_string('website/gameOverlay.html'),
+		#	'gameType': game.gameType,
+		#});
+		if game.p1 == request.user or game.p2 == request.user:
+			return JsonResponse({
+				'success': True,
+				'p1': {'id': p1Id, 'username': p1Username},
+				'p2': {'id': p2Id, 'username': p2Username},
+				'ai': game.ai,
+				'p1score': game.p1Score,
+				'p2score': game.p2Score,
+				'winScore': game.scoreToWin,
+				'ballSpeed': game.ballSpeed,
+				'bonuses': game.bonuses,
+				'p1Left': game.p1Left,
+				'p1Right': game.p1Right,
+				'p2Left': game.p2Left,
+				'p2Right': game.p2Right,
+				'date' : game.date,
+				'p2Local': game.p2Local,
+				'html': render_to_string('website/gameOverlay.html'),
+				 'gameType': game.gameType,
+			});
+		else:
+			return JsonResponse({
+				'success': False,
+			})
 
 def searchPlayer(request):
 	if request.method == 'POST':
@@ -215,7 +215,14 @@ def gameNew1vs1(request):
 def gameNewMulti(request):
 	if request.method == 'POST':
 		data = json.loads(request.POST["data"]);
-		game = Game(p1=request.user, ai=data['ai'], scoreToWin=data['winScore'], ballSpeed=data['startSpeed'], bonuses=data['bonuses'], p1Left=data['leftKey'], p1Right=data['rightKey'], p2Left=data['leftKey2'], p2Right=data['rightKey2'], p2Local=data['p2Local'], gameType=2)
+		config = data['config']
+		p2 = User.objects.get(id=data['p2']['id'])
+		if request.user == p2:
+			return JsonResponse({
+				'success': False,
+			});
+		game = Game(p1=request.user, p2=p2, ai=config['ai'], scoreToWin=config['winScore'], ballSpeed=config['startSpeed'], bonuses=config['bonuses'], p1Left=config['leftKey'], p1Right=config['rightKey'], p2Left=config['leftKey2'], p2Right=config['rightKey2'], p2Local=config['p2Local'], gameType=2)
+		#game = Game(p1=request.user, ai=data['ai'], scoreToWin=data['winScore'], ballSpeed=data['startSpeed'], bonuses=data['bonuses'], p1Left=data['leftKey'], p1Right=data['rightKey'], p2Left=data['leftKey2'], p2Right=data['rightKey2'], p2Local=data['p2Local'], gameType=2)
 		game.save()
 		return JsonResponse({
 			'success': True,
@@ -448,7 +455,7 @@ def multiConfig(request):
 	if request.method == 'POST':
 		return JsonResponse({
 			'success': True,
-			'html': render_to_string('website/multiConfig.html'),
+			'html': render_to_string('website/multiConfig.html', {'user': request.user}),
 		})
 
 def createGame(request):
