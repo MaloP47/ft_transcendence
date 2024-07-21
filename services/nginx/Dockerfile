@@ -1,4 +1,3 @@
-
 # Image used from Dockerhub
 FROM nginx:stable-alpine3.19-otel
 
@@ -11,8 +10,8 @@ RUN apk add openssl
 
 # TSL Setup
 RUN mkdir -p /etc/nginx/ssl
-RUN openssl req -x509 -nodes -out /etc/nginx/ssl/inception.crt \
-        -keyout /etc/nginx/ssl/inception.key -subj \
+RUN openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+        -keyout /etc/nginx/ssl/inception.key -out /etc/nginx/ssl/inception.crt -subj \
         "/C=FR/ST=IleDeFrance/L=Paris/O=42/OU=42/CN=guderram.42.fr/UID=guderram"
 
 # nginx config setup
@@ -23,6 +22,12 @@ COPY conf/nginx.conf /etc/nginx/nginx.conf
 RUN mkdir -p /var/www/html
 RUN chmod 755 /var/www/html
 RUN chown -R www-data:www-data /var/www/html
+
+# Removing symbolic links and creating log files
+RUN rm /var/log/nginx/access.log /var/log/nginx/error.log
+RUN touch /var/log/nginx/access.log /var/log/nginx/error.log
+RUN chmod 755 /var/log/nginx
+RUN chown www-data:www-data /var/log/nginx/access.log /var/log/nginx/error.log
 
 # Start nginx
 ENTRYPOINT ["nginx", "-g", "daemon off;"]

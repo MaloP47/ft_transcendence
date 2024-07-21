@@ -1,0 +1,14 @@
+global:
+  resolve_timeout: 5m
+
+route:
+  receiver: 'discord'
+  group_by: ['alertname']
+  repeat_interval: 10m
+  group_wait: 1s
+  group_interval: 1s
+
+receivers:
+  - name: 'discord'
+    webhook_configs:
+      - url: 'http://discord-alerts:9094'

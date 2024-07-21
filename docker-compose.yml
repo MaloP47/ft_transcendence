@@ -1,28 +1,34 @@
 services:
   django:
     container_name: django
-    build: ./services/django
-    expose:
-      - "8000"
-    #    command: ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+    build: ./services/django/
+    # command: ["python", "manage.py", "runserver", "0.0.0.0:8000"]
     volumes:
       - ./services/django/app:/code
+      - logs_django:/var/log/django
     networks:
-      transcendence:
-    env_file:
-      - .env
-    restart: unless-stopped
+      - transcendence
+    expose:
+      - "8000"
     depends_on:
       db:
         condition: service_healthy
+    env_file: .env
+    restart: unless-stopped
 
   db:
     container_name: postgres
-    image: postgres:alpine3.20
+    build:
+      context: services/postgres
+      dockerfile: Dockerfile
     volumes:
+      - ./services/postgres/conf/postgresql.conf:/etc/postgresql/postgresql.conf
       - postgres_data:/var/lib/postgresql/data/
+      - logs_postgresql:/var/log/postgresql
     networks:
       - transcendence
+    expose:
+      - "5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
       interval: 4s
@@ -30,24 +36,200 @@ services:
       retries: 5
       start_period: 2s
     env_file: .env
+    user: ${POSTGRES_USER}
     restart: unless-stopped
+    command: ["postgres", "-c", "config_file=/etc/postgresql/postgresql.conf"]
 
   nginx:
     container_name: nginx
-    build: services/nginx
+    build:
+      context: services/nginx
+      dockerfile: Dockerfile
     volumes:
       - ./services/nginx/conf:/etc/nginx/conf.d
+      - logs_nginx:/var/log/nginx
     networks:
-      transcendence:
+      - transcendence
     ports:
       - "1443:443"
       - "1080:80"
     depends_on:
       - django
+      - grafana
     restart: unless-stopped
 
-networks:
-  transcendence:
+  prometheus:
+    container_name: prometheus
+    image: prom/prometheus:v2.53.0
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.retention.time=24h
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./services/prometheus/conf/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./services/prometheus/conf/alerts.rules.yml:/etc/prometheus/alerts.rules.yml
+    networks:
+      - transcendence
+    restart: unless-stopped
+
+  grafana:
+    container_name: grafana
+    image: grafana/grafana:11.1.0
+    networks:
+      - transcendence
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./services/grafana/conf/datasource.yml:/etc/grafana/provisioning/datasources/datasource.yml
+      - ./services/grafana/conf/dashboard.yml:/etc/grafana/provisioning/dashboards/dashboard.yml
+      - ./services/grafana/conf/dashboards:/etc/grafana/provisioning/dashboards
+      - ./services/grafana/conf/grafana.ini:/etc/grafana/grafana.ini
+    env_file: .env
+    restart: unless-stopped
+
+  postgres-exporter:
+    container_name: postgres-exporter
+    image: prometheuscommunity/postgres-exporter:v0.15.0
+    environment:
+      DATA_SOURCE_NAME: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}?sslmode=disable"
+      CONFIG_FILE: /etc/postgres_exporter/postgres_exporter.yml
+    volumes:
+      - ./services/postgres_exporter/conf/postgres_exporter.yml:/postgres_exporter.yml
+    ports:
+      - "9187:9187"
+    networks:
+      - transcendence
+    depends_on:
+      - db
+    restart: unless-stopped
+
+  nginx-exporter:
+    container_name: nginx-exporter
+    image: nginx/nginx-prometheus-exporter:1.2.0
+    command: [  "--nginx.scrape-uri", "https://nginx:443/stub_status",
+                "--no-nginx.ssl-verify",
+                "--nginx.timeout=1s"]
+    networks:
+      - transcendence
+    ports:
+      - "9113:9113"
+    restart: unless-stopped
+
+  alertmanager:
+    container_name: alertmanager
+    image: prom/alertmanager:v0.27.0
+    volumes:
+      - ./services/alertmanager/conf/alertmanager.yml:/etc/alertmanager/alertmanager.yml
+    networks:
+      - transcendence
+    ports:
+      - '9093:9093'
+    restart: unless-stopped
+
+  discord-alerts:
+    image: benjojo/alertmanager-discord:latest
+    container_name: discord-alerts
+    restart: unless-stopped
+    ports:
+      - 9094:9094
+    env_file: .env
+    networks:
+      - transcendence
+      
+
+  elasticsearch:
+    build:
+      context: services/elasticsearch
+      dockerfile: Dockerfile
+    container_name: elasticsearch
+    env_file: .env
+    volumes:
+      - ./services/elasticsearch/conf/init_elasticsearch.sh:/usr/share/elasticsearch/init_elasticsearch.sh
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    networks:
+      - transcendence
+    healthcheck:
+      test: ["CMD-SHELL", "curl -u elastic:DidierDidier -fsSL http://localhost:9200/_cat/health | grep -vq 'red'"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: unless-stopped
+
+  logstash:
+    build:
+      context: services/logstash
+      dockerfile: Dockerfile
+    container_name: logstash
+    env_file: .env
+    volumes:
+      - ./services/logstash/conf/logstash.yml:/usr/share/logstash/config/logstash.yml
+      - ./services/logstash/conf/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+    networks:
+      - transcendence
+    ports:
+      - "5044:5044"
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9600 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  kibana:
+    build:
+      context: services/kibana
+      dockerfile: Dockerfile
+    container_name: kibana
+    volumes:
+      - kibana_data:/usr/share/kibana/data
+      - ./services/kibana/conf/dashboard.json:/usr/share/kibana/dashboard.json
+      - ./services/kibana/conf/kibana.yml:/usr/share/kibana/config/kibana.yml
+    env_file: .env
+    networks:
+      - transcendence
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5601"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    ports:
+      - "5601:5601"
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    restart: unless-stopped
+
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:7.17.10
+    container_name: filebeat
+    volumes:
+      - ./services/filebeat/conf/filebeat.yml:/usr/share/filebeat/filebeat.yml
+      - logs_nginx:/var/log/nginx
+      - logs_postgresql:/var/log/postgresql
+      - logs_django:/var/log/django
+    networks:
+      - transcendence
+    depends_on:
+      logstash:
+        condition: service_healthy
+    restart: unless-stopped
 
 volumes:
   postgres_data:
+  grafana_data:
+  prometheus_data:
+  elasticsearch_data:
+  kibana_data:
+  logs_django:
+  logs_nginx:
+  logs_postgresql:
+
+networks:
+  transcendence:
