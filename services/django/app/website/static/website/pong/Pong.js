@@ -171,7 +171,11 @@ export default class Pong {
 			//else {
 
 				//}
-			this.resetMultiData();
+			if (this.multiData['trigger_impactParticles']){
+				setTimeout(() => {
+					this.setMultiData('trigger_impactParticles', false);
+				}, 10);
+			}
 		}
 
 		requestAnimationFrame(this.update.bind(this));
@@ -198,7 +202,11 @@ export default class Pong {
 			this.setMultiData('p2_pos', this.assets.p2.bar.position);
 			//this.setMultiData('trigger_impactParticles', true); // Don't uncomment
 			this.setMultiData('p1_bonus', this.assets.p1.bonus);
-			this.setMultiData('p2_bonus', this.assets.p1.bonus);
+			this.setMultiData('p2_bonus', this.assets.p2.bonus);
+			this.setMultiData('bonus_active', this.assets.bonus.active);
+			this.setMultiData('bonus_pos', this.assets.bonus.bonus.position);
+			this.setMultiData('bonus_startTime', this.assets.bonus.startTime);
+			this.setMultiData('bonus_type', this.assets.bonus.type);
 		}
 		//else if (isGuest()) {
 		//	type = 'multiGuestInfo'
@@ -208,7 +216,7 @@ export default class Pong {
 		//}
 
 		// Send data 
-		console.log('Host sending data!');
+		//console.log('Host sending data!');
 		this.stateMachine.chatSocket.send(JSON.stringify({
 			'type': type,
 			//'sender': this.stateMachine.user.username, // tmp
@@ -255,8 +263,8 @@ export default class Pong {
 	}
 	resetMultiData() {
 		// Only some stuff needs to be reset
-		this.setMultiData('trigger_impactParticles', false);
-		this.setMultiData('trigger_impactParticles_pos', {x: 0, y: 0, z: 0});
+		// this.setMultiData('trigger_impactParticles', false);
+	//	this.setMultiData('trigger_impactParticles_pos', {x: 0, y: 0, z: 0});
 		this.setMultiData('trigger_resetBall', false); // might need to be 0, 1 or 2, for updating points accordingly
 	}
 	isMulti() {
