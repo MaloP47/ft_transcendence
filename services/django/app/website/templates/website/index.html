@@ -1,50 +1,34 @@
 {% load static %}
 <!doctype html>
 <html lang="en-US">
-    <head>
-        <script type="importmap">
-        {
-            "imports": {
-                "three": "{% static 'website/three/three.module.min.js' %}",
-                "three/addons/": "{% static 'website/three/jsm/' %}"
-            }
-        }
-        </script>
-        <meta charset="utf-8" />
-        <title>Transcendence</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="stylesheet" href="{% static 'website/bootstrap/bootstrap.min.css' %}">
-        <link rel="stylesheet" href="{% static 'website/style/style.css' %}">
-        <link rel="stylesheet" href="{% static 'website/bootstrap/bootstrap-icons-1.11.3/font/bootstrap-icons.min.css' %}">
-        <link rel="icon" type="image/x-icon" href="{% static 'favicon.ico' %}">
-    </head>
-    {% csrf_token %}
-    <body class="bg-black text-light">
-        {% include "website/canvas.html" %}
-        <div id="topContent" class="position-fixed w-100 h-100">
-            {% block body %}
-            {% endblock %}
-        </div>
-        {% include "website/navbar.html" %}
-        
-        <script src="{% static 'website/bootstrap/bootstrap.bundle.min.js' %}" crossorigin="anonymous"></script>
-        <script type="module" src="{% static 'website/main.js' %}"></script>
+	<head>
+		<script type="importmap">
+		{
+			"imports": {
+				"three": "{% static 'website/three/three.module.min.js' %}",
+				"three/addons/": "{% static 'website/three/jsm/' %}"
+			}
+		}
+		</script>
+		<meta charset="utf-8" />
+		<title>Transcendence</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<link rel="stylesheet" href="{% static 'website/bootstrap/bootstrap.min.css' %}">
+		<link rel="stylesheet" href="{% static 'website/style/style.css' %}">
+		<link rel="stylesheet" href="{% static 'website/bootstrap/bootstrap-icons-1.11.3/font/bootstrap-icons.min.css' %}">
+		<link rel="icon" type="image/x-icon" href="{% static 'favicon.ico' %}">
 
-            {% block 'body' %}
-            {% endblock %}
-        </div>
-        <!-- <button id="btnTestMint" class="btn btn-success" style="position:absolute; top:10%; left:50%" href="#">Mint</button>
-        <script src="{% static 'website/bootstrap/bootstrap.bundle.min.js' %}" crossorigin="anonymous"></script>
-        <button id="btnTestGet" class="btn btn-success" style="position:absolute; top:10%; left:55%" href="#">Get</button> -->
-        <script src="{% static 'website/bootstrap/bootstrap.bundle.min.js' %}" crossorigin="anonymous"></script>
-        <script type="module" src="{% static 'website/main.js' %}"></script>
+	</head>
+	{% csrf_token %}
+	<body class="bg-black text-light">
+		{% include "website/canvas.html" %}
+		<div id="topContent" class="position-fixed w-100 h-100">
+			{% block 'body' %}
+			{% endblock %}
+		</div>
+		{% include "website/navbar.html" %}
+		<script src="{% static 'website/bootstrap/bootstrap.bundle.min.js' %}" crossorigin="anonymous"></script>
+		<script type="module" src="{% static 'website/main.js' %}"></script>
 
-         <audio id="audio_transcendence" src="{% static 'mp3/Transcendence.mp3' %}" loop></audio>
-      
-        <!-- Button to toggle the audio -->
-        <button id="toggleButton" class="btn btn-dark btn-sm" style="position:fixed; top:10px; right:10px; z-index:1000;">
-            <i id="toggleIcon" class="bi bi-play-fill"></i>
-        </button>
-        <script src="{% static 'website/music/music.js' %}"></script>
-    </body>
+	</body>
 </html>

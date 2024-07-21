@@ -1,14 +1,14 @@
-// ************************************************************************** //
-//                                                                            //
-//                                                        :::      ::::::::   //
-//   StateMachine.js                                    :+:      :+:    :+:   //
-//                                                    +:+ +:+         +:+     //
-//   By: gbrunet <gbrunet@student.42.fr>            +#+  +:+       +#+        //
-//                                                +#+#+#+#+#+   +#+           //
-//   Created: 2024/06/13 11:54:22 by gbrunet           #+#    #+#             //
-//   Updated: 2024/07/19 11:12:20 by gbrunet          ###   ########.fr       //
-//                                                                            //
-// ************************************************************************** //
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   StateMachine.js                                    :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: renstein <renstein@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/06/13 11:54:22 by gbrunet           #+#    #+#             */
+/*   Updated: 2024/07/19 16:21:15 by renstein         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
 import Pong from '../pong/Pong.js';
 
@@ -428,7 +428,7 @@ export default class App {
 			}
 		});
 	}
-	
+
 	setTournamentConfigInteraction() {
 		let config = {
 			winScore: 10,
@@ -719,7 +719,7 @@ export default class App {
 			});
 		}
 	}
-	
+
 	hideLocalConfigPage() {
 		let configView = document.getElementById("aiConfig");
 		if (!configView)
@@ -1533,6 +1533,7 @@ export default class App {
 				loginForm.classList.add("trXm100");
 				let form = document.getElementById("loginFormForm");
 				let formBtn = document.getElementById("loginFormSubmitBtn");
+				this.addTogglePasswordButtons();
 				if (formBtn) {
 					document.getElementById("loginFormSubmitBtn").addEventListener("click", e => {
 						e.preventDefault();
@@ -1612,7 +1613,7 @@ export default class App {
 				this.getApiResponse("api/user/register/", formData).then((response) => {
 					let res = JSON.parse(response);
 					if (res.success) {
-						history.pushState("", "", "/login");
+						history.pushState("", "", "/");
 						this.router();
 						this.updateUser();
 					} else {
@@ -1664,7 +1665,7 @@ export default class App {
 				previewProfilePicture.innerHTML = '';
 
 				// File validation
-				const fileSizeLimit = 2 * 1024 * 1024; // 2MB
+				const fileSizeLimit = 1 * 1024 * 1024; // 1MB
 				const allowedFileTypes = ['image/jpeg', 'image/png'];
 
 				if (!allowedFileTypes.includes(file.type)) {
@@ -1674,7 +1675,7 @@ export default class App {
 				}
 
 				if (file.size > fileSizeLimit) {
-					registerFormAlert.textContent = 'File size exceeds 2MB. Please upload a smaller image.';
+					registerFormAlert.textContent = 'File size exceeds 1MB. Please upload a smaller image.';
 					registerFormAlert.classList.remove('hided');
 					return;
 				}
