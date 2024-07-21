@@ -34,6 +34,8 @@ Put here changes that will impact project mates
 - [x] refreshing multi config page gives `Page not found (404)`
     - FIX: forgot to add `/multi` to urls path, not sure why it was working at all, probably because page is static
 - [x] play button in multi config redirecting to normal game
+- [ ] when refreshing host particles stay on guest
+- [ ] sometimes joining multi game creates ai game
 ### Multiplayer
 - Stuff to create:
     - dont know where yet:
