@@ -225,9 +225,6 @@ export default class Ball {
 	resetBallMulti() {
 		//this.pong.endRound = true; // might not be safe?
 		if (!this.pong.bg) {
-			// score up should already be updated in handleMultiData()
-			//this.pong.assets.p1.score = this.pong.multiData.p1_score;
-			//this.pong.assets.p2.score = this.pong.multiData.p2_score;
 			let p1score = document.getElementById("p1score");
 			if (p1score)
 				p1score.innerHTML = this.pong.assets.p1.score;

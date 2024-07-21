@@ -166,28 +166,14 @@ export default class Pong {
 
 		if (this.isMulti()) {
 			if (this.isHost()) {
-				//console.log(this.endRound);
 				this.sendMultiData();
 			}
-			//else {
+			else {
+				//console.log(this.multiData.t_countdown);
+			}
 
-				//}
-			// shouldn't this be guest only? or host only? right now it's both
-			if (this.multiData['t_impactParticles']){
-				setTimeout(() => {
-					this.setMultiData('t_impactParticles', false);
-				}, 10);
-			}
-			if (this.multiData['t_ballParticles']){
-				setTimeout(() => {
-					this.setMultiData('t_ballParticles', false);
-				}, 10);
-			}
-			if (this.multiData['t_ballFire']){
-				setTimeout(() => {
-					this.setMultiData('t_ballFire', false);
-				}, 10);
-			}
+			// Reset
+			this.resetMultiData();
 		}
 
 		requestAnimationFrame(this.update.bind(this));
@@ -224,6 +210,8 @@ export default class Pong {
 			this.setMultiData('bonus_startTime', this.assets.bonus.startTime);
 			this.setMultiData('bonus_type', this.assets.bonus.type);
 			this.setMultiData('endRound', this.endRound);
+			// Other
+			this.setMultiData('start', this.start);
 		}
 		//else if (isGuest()) {
 		//	type = 'multiGuestInfo'
@@ -253,9 +241,14 @@ export default class Pong {
 			// don't need endRoung YET but KEEP IT
 			//this.endRound = data.endRound;
 			
+			// Score
 			this.assets.p1.score = data.p1_score;
 			this.assets.p2.score = data.p2_score;
 			this.winScore = data.winScore;
+			// Other
+			this.start = data.start;
+			if (data.t_countdown != -1)
+				this.animateCountdownMulti();
 		}
 	}
 	zeroVec3() {
@@ -301,14 +294,38 @@ export default class Pong {
 				frozen: {on: false, end: false, time: 0.0001},
 				reversed: {on: false, end: false, time: 0.0001}
 			},
-
-			//'p2_bonus': this.assets.p2.bonus,
+			// Other
+			'start': false,
+			't_countdown': -1,
 		}
 	}
 	resetMultiData() {
 		// Only some stuff needs to be reset
 		this.setMultiData('t_endRound', false);
 		this.setMultiData('t_resetBall', false);
+		this.setMultiData('t_countdown', -1); // or timer?
+
+		// Time sensitive
+		if (this.multiData['t_impactParticles']){
+			setTimeout(() => {
+				this.setMultiData('t_impactParticles', false);
+			}, 10);
+		}
+		if (this.multiData['t_ballParticles']){
+			setTimeout(() => {
+				this.setMultiData('t_ballParticles', false);
+			}, 10);
+		}
+		if (this.multiData['t_ballFire']){
+			setTimeout(() => {
+				this.setMultiData('t_ballFire', false);
+			}, 10);
+		}
+		//if (this.multiData['t_countdown']){
+		//	setTimeout(() => {
+		//		this.setMultiData('t_countdown', 0);
+		//	}, 10);
+		//}
 	}
 	isMulti() {
 		return (this.gameInfo.gameType == 2);
@@ -365,6 +382,17 @@ export default class Pong {
 			this.assets.p2.AI = true;
 		if (this.countTimeout)
 			clearTimeout(this.countTimeout)
+
+		// Multi skip countdown
+		if (this.isMultiNotHost()) {
+			if (this.multiData.t_countdown != -1) {
+				this.animateCountdownMulti();
+			}
+			return ;
+		}
+		// ball is locked for some reason
+
+		// Countdown
 		if (!(this.gameInfo.p1score >= this.winScore || this.gameInfo.p2score >= this.winScore)) {
 			this.countTimeout = setTimeout(() => {
 				this.animateCountdown(5);	
@@ -375,6 +403,10 @@ export default class Pong {
 	animateCountdown(sec) {
 		let countdown = document.getElementById("countdown");
 		if (sec >= 0 && countdown && countdown.innerHTML != sec) {
+			// Multi trigger
+			this.setMultiData('t_countdown', sec);
+			console.log('Sending countdown trigger... -> ' + sec);
+
 			countdown.innerHTML = sec;
 			countdown.classList.remove("countdown");
 			setTimeout(()=>{
@@ -393,5 +425,17 @@ export default class Pong {
 				}
 			}, 500);
 		}
+	}
+	animateCountdownMulti() {
+		console.log('Receiving countdown trigger! -> ' + this.multiData.t_countdown);
+		let countdown = document.getElementById("countdown");
+		countdown.innerHTML = this.multiData.t_countdown;
+
+		countdown.classList.remove("countdown");
+		setTimeout(()=>{
+			countdown.classList.add("countdown");
+		}, 15)
+		countdown.classList.remove("countdown");
+		
 	}
 }
