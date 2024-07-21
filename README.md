@@ -40,8 +40,11 @@ Put here changes that will impact project mates
 - Stuff to create:
     - dont know where yet:
         - [x] update score remotely
-        - [ ] trigger `player` wins this game! text
-        - [ ] transition to AI game (right now when reloading a finished game it will still stream data from host, needs changes for both guest and host
+        - [x] countdown
+        - [x] trigger `player` wins this game! text
+        - [ ] reloading finished game:
+            - [ ] Problem 1: if host reloads his finished game it will be an AI background game but guest will stream that game
+            - [ ] Problem 2: countdown plays for some reason
         - [ ] rotate game field 180 degrees and invert inputs if `isMultiNotHost()` (later to`isMultiGuest()`) (dont invert colors)
         - [ ] game creation select player with searchPlayer in stateMachine (started making template already), need to change buttons behavior
         - [ ] create template/view for pausing game when one of the two players is not connecte

@@ -232,58 +232,30 @@ export default class Ball {
 			if (p2score)
 				p2score.innerHTML = this.pong.assets.p2.score;
 		}
-		//if (!this.pong.bg && (this.pong.assets.p1.score >= this.pong.winScore || this.pong.assets.p2.score >= this.pong.winScore)) {
-		//	let endDiv = document.getElementById("countdown");
-		//	if (endDiv) {
-		//		let p1 = "A.I.";
-		//		if (!this.pong.assets.p1.AI)
-		//			p1 = this.pong.p1Infos.username;
-		//		let p2 = "A.I.";
-		//		if (!this.pong.assets.p2.AI && this.pong.p2Local == '')
-		//			p2 = this.pong.p2Infos.username;
-		//		else if (this.pong.p2Local != '')
-		//			p2 = this.pong.p2Local;
-		//		let gameVs = "<span class='fs-2 text-light-emphasis'>" + p1 + " vs " + p2 + "</span>";
-		//		if (this.pong.assets.p1.score > this.pong.assets.p2.score) {
-		//			endDiv.innerHTML = gameVs + "<p style='font-size:5rem; margin-top: -30px'>" + p1 + " wins this game !</p>"
-		//		} else {
-		//			endDiv.innerHTML = gameVs + "<p style='font-size:5rem; margin-top: -30px'>" + p2 + " wins this game !</p>"
-		//		}
-		//		endDiv.classList.remove("countdown");
-		//		endDiv.style.fontSize = "5rem";
-		//		endDiv.classList.add("visible");
-		//	}
-		//} else {
-		//	this.nextTimeout = setTimeout(() => {
-		//		this.initAngle = Math.random() * 90;
-		//		this.velocity = new THREE.Vector3(0, 0, 0);
-		//		if (player == 1) {
-		//			this.velocity.x = Math.sin((this.initAngle + 135) * Math.PI / 180);
-		//			this.velocity.y = Math.cos((this.initAngle + 135) * Math.PI / 180);
-		//		} else {
-		//			this.velocity.x = Math.sin((this.initAngle - 45) * Math.PI / 180);
-		//			this.velocity.y = Math.cos((this.initAngle - 45) * Math.PI / 180);
-		//		}
-		//		this.pong.endRound = false;
-		//		this.speed = this.initSpeed;
-		//		if (this.pong.assets.bonus) {
-		//			this.pong.assets.bonus.bonus.position.x = (Math.random() - 0.5) * 12;
-		//			this.pong.assets.bonus.bonus.position.y = (Math.random() - 0.5) * 4;
-		//			this.pong.assets.bonus.startTime = 0;
-		//			this.pong.assets.bonus.type = Math.floor(Math.random() * 5);
-		//		}
-		//		if (this.pong.assets.p1.AI) {
-		//			this.pong.assets.p1.stopAI();
-		//			this.pong.assets.p1.startAI();
-		//		}
-		//		if (this.pong.assets.p2.AI) {
-		//			this.pong.assets.p2.stopAI();
-		//			this.pong.assets.p2.startAI();
-		//		}
-		//	}, 1000);
-		//}
+		if (!this.pong.bg && (this.pong.assets.p1.score >= this.pong.winScore || this.pong.assets.p2.score >= this.pong.winScore)) {
+			let endDiv = document.getElementById("countdown");
+			if (endDiv) {
+				let p1 = "A.I.";
+				if (!this.pong.assets.p1.AI)
+					p1 = this.pong.p1Infos.username;
+				let p2 = "A.I.";
+				if (!this.pong.assets.p2.AI && this.pong.p2Local == '')
+					p2 = this.pong.p2Infos.username;
+				else if (this.pong.p2Local != '')
+					p2 = this.pong.p2Local;
+				let gameVs = "<span class='fs-2 text-light-emphasis'>" + p1 + " vs " + p2 + "</span>";
+				if (this.pong.assets.p1.score > this.pong.assets.p2.score) {
+					endDiv.innerHTML = gameVs + "<p style='font-size:5rem; margin-top: -30px'>" + p1 + " wins this game !</p>"
+				} else {
+					endDiv.innerHTML = gameVs + "<p style='font-size:5rem; margin-top: -30px'>" + p2 + " wins this game !</p>"
+				}
+				endDiv.classList.remove("countdown");
+				endDiv.style.fontSize = "5rem";
+				endDiv.classList.add("visible");
+			}
+		}
 	}
-	
+
 	checkCollisionPlayer(player) {
 		let x = this.getPos().x;
 		let pong = this.pong;
