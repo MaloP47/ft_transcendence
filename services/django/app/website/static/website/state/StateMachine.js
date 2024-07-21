@@ -518,7 +518,7 @@ export default class App {
 						this.chatSocket.send(JSON.stringify({
 							'gameNotif': res.g1,
 							'p1': res.p1,
-							'p2': res.p1,
+							'p2': res.p2,
 						}));
 						this.chatSocket.send(JSON.stringify({
 							'gameNotif': res.g2,
@@ -565,6 +565,39 @@ export default class App {
 			}
 		});
 	}
+	searchPlayerMulti(val) {
+		// prevent adding yourself as an opponent
+		// - custom `/api/multi/playerSearch` view, dont show in results
+		// - protect /api/game/new/multi from putting same person against each other, send back not success
+		this.getApiResponseJson("/api/tournament/playerSearch/", {search: val}).then((response) => {
+			let res = JSON.parse(response);
+			if (res.success) {
+				let playerResult = document.getElementById("playerResult");
+				if (playerResult)
+					playerResult.innerHTML = res.html;
+				let btns = playerResult.getElementsByClassName("btn");
+				for (let i = 0; i < btns.length; i++) {
+					// disable button if same as host, can't play against yourself
+					if (this.user.id == btns[i].dataset.id) {
+						btns[i].disabled = true;
+						continue;
+					}
+					btns[i].addEventListener("click", (e) => {
+						if (this.user.id == btns[i].dataset.id)
+							return ;
+						this.playerMulti = {
+							id: btns[i].dataset.id,
+							name: btns[i].dataset.name,
+						}
+						this.updatePlayerMulti(); // change field 
+						setTimeout(()=>{
+							this.configureDeleteMultiPlayer()
+						}, 100)
+					})
+				}
+			}
+		});
+	}
 
 	updatePlayerList() {
 		document.getElementById("addPlayer").value = "";
@@ -592,6 +625,26 @@ export default class App {
 			addPlayerInput.disabled = false;
 		}
 	}
+	updatePlayerMulti() {
+		document.getElementById("addPlayer").value = "";
+		let playerResult = document.getElementById("playerResult");
+		if (playerResult)
+			playerResult.innerHTML = "";
+		var player2Field = document.getElementById("player2Field");
+		if (this.playerMulti != 0)
+			player2Field.innerHTML = this.playerMulti.name;
+		else
+			player2Field.innerHTML = ""; // this will make it small
+		var playBtn = document.getElementById("playBtn");
+		var addPlayerInput = document.getElementById("addPlayer");
+		if (this.playerMulti != 0) {
+			playBtn.disabled = false;
+			addPlayerInput.disabled = true;
+		} else {
+			playBtn.disabled = true;
+			addPlayerInput.disabled = false;
+		}
+	}
 
 	configureDeleteTournamentPlayers() {
 		var addPlayerInput = document.getElementById("addPlayer");
@@ -607,6 +660,18 @@ export default class App {
 					}, 100)
 				})
 			}
+		}
+	}
+	configureDeleteMultiPlayer() {
+		let btn = document.getElementById("player2Field");
+		if (btn.type == 'submit') {
+			btn.addEventListener("click", (e) => {
+				this.playerMulti = 0;
+				this.updatePlayerMulti()
+				setTimeout(()=>{
+					this.configureDeleteMultiPlayer()
+				}, 100)
+			})
 		}
 	}
 
@@ -939,6 +1004,7 @@ export default class App {
 						return ;
 					configView.classList.remove("hided");
 					this.setMultiConfigInteraction();
+					//this.setTournamentConfigInteraction();
 				}, 200);
 			}
 		});
@@ -1035,10 +1101,11 @@ export default class App {
 			ai: 1,
 			leftKey: 65,
 			rightKey: 68,
-			leftKey2: 37,
-			rightKey2: 39,
+			leftKey2: 37, // disable local p2 controls
+			rightKey2: 39, // disable local p2 controls
 			p2Local: '',
 		}
+		this.playerMulti = 0;
 		let configView = document.getElementById("config");
 		if (configView.dataset.events != "done") {
 			configView.dataset.events = "done";
@@ -1064,52 +1131,30 @@ export default class App {
 					});
 				});
 			}
-			//document.getElementById("addPlayer").addEventListener("keyup", (e) => {
-			//	let val = document.getElementById("addPlayer").value;
-			//	if (val != "")
-			//		this.searchPlayer(val);
-			//	else {
-			//		let playerResult = document.getElementById("playerResult");
-			//		if (playerResult)
-			//			playerResult.innerHTML = "";
-			//	}
-			//})
-			let leftKey = document.getElementById("leftKey");
-			leftKey.addEventListener("click", async (e) => {
-				leftKey.innerHTML = "_";
-				await this.waitKeypress("leftKey");
-				config.leftKey = leftKey.dataset.code;
+			document.getElementById("addPlayer").addEventListener("keyup", (e) => {
+				let val = document.getElementById("addPlayer").value;
+				if (val != "")
+					this.searchPlayerMulti(val);
+					//this.searchPlayer(val);
+				else {
+					let playerResult = document.getElementById("playerResult");
+					if (playerResult)
+						playerResult.innerHTML = "";
+				}
 			})
-			let rightKey = document.getElementById("rightKey");
-			rightKey.addEventListener("click", async (e) => {
-				rightKey.innerHTML = "_";
-				await this.waitKeypress("rightKey");
-				config.rightKey = rightKey.dataset.code;
-			})
-			if (document.querySelector('input[name="p2Local"]')) {
-				document.querySelector('input[name="p2Local"]').addEventListener("input", function(e) {
-					config.p2Local = e.target.value;
-				});
-			}
-			let leftKey2 = document.getElementById("leftKey2");
-			leftKey2.addEventListener("click", async (e) => {
-				leftKey2.innerHTML = "_";
-				await this.waitKeypress("leftKey2");
-				config.leftKey2 = leftKey2.dataset.code;
-			})
-			let rightKey2 = document.getElementById("rightKey2");
-			rightKey2.addEventListener("click", async (e) => {
-				rightKey2.innerHTML = "_";
-				await this.waitKeypress("rightKey2");
-				config.rightKey2 = rightKey2.dataset.code;
-			})
+
 			let playBtn = document.getElementById("playBtn")
-			playBtn.addEventListener("click", (e) => {
+			playBtn.addEventListener("click", (e) => { // FINAL THING: set this.playerMulti as p2 info
 				if (config.p2Local == "")
-					config.p2Local = "Local P2"
-				this.getApiResponseJson("/api/game/new/multi/", config).then((response) => {
-				let res = JSON.parse(response);
-				if (res.success) {
+					config.p2Local = this.playerMulti.name;
+				this.getApiResponseJson("/api/game/new/multi/", {config: config, p2: this.playerMulti}).then((response) => {
+					let res = JSON.parse(response);
+					if (res.success) {
+						this.chatSocket.send(JSON.stringify({
+							'gameNotif': res.g1,
+							'p1': res.p1,
+							'p2': res.p2,
+						}));
 						let config = document.getElementById("config");
 						config.classList.add("hided")
 						this.remove("config")
