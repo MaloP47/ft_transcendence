@@ -1,0 +1,150 @@
+<div id="profile" class="d-flex hided flex-column justify-content-center align-items-center position-fixed w-100" style="z-index:300">
+	{% csrf_token %}
+	<div class="p-3 px-4 bg-blur-5 rounded border border-light d-flex flex-column align-items-center position-fixed overflow-auto" style="--bs-border-opacity:0.25;max-height:calc(100% - 150px); min-width: calc(100% - 300px)">
+		<h2 class="mb-3">{{ user.username }}</h2>
+	{% if perso %}
+
+	<div class="rounded rounded-circle m-2 mb-3 border border-white flex-shrink-0 " \
+		 style="background-image: url('{{ user.profilPicture.url }}'); background-size: cover; --bs-border-opacity:0.2; width:150px; height:150px;"
+		 id="previewProfilePicture"
+		 data-default-image="{{ user.profilPicture.url }}">
+		</div>
+		<form method="post" enctype="multipart/form-data"id="profileFormForm">
+		<div class="mb-3"style="width:400px">
+			{{ form.profile_picture }}
+		</div>
+		<div class="input-group mb-3" style="width:400px">
+			<span class="input-group-text" style="--bs-bg-opacity: .5; --bs-border-opacity: .1; width:85px">Username</span>
+			{{form.username}}
+		</div>
+		<div class="input-group mb-3" style="width:400px">
+			<span class="input-group-text" style="--bs-bg-opacity: .5; --bs-border-opacity: .1; width:85px">Email</span>
+			{{form.email}}
+		</div>
+		<div class="input-group mb-3" style="width:400px">
+			<span class="input-group-text"style="--bs-bg-opacity: .5; --bs-border-opacity: .1; width:85px">Password</span>
+			{{form.password}}
+			<button class="btn btn-outline-secondary toggle-password" type="button">
+				<i class="bi bi-eye-slash"></i>
+			</button>
+		</div>
+		<div class="input-group mb-3" style="width:400px">
+			<span class="input-group-text"style="--bs-bg-opacity: .5; --bs-border-opacity: .1; width:85px">Confirm</span>
+			{{form.confirm_password}}
+			<button class="btn btn-outline-secondary toggle-password" type="button">
+				<i class="bi bi-eye-slash"></i>
+			</button>
+		</div>
+		<button type="submit" class="btn btn-primary mt-3"id="profileFormSubmitBtn">Save Changes</button>
+	</form>
+	<div id="profileFormAlert" class="alert alert-danger mb-2 hided" style="width: 100%; font-size: 0.875rem; padding: 0.5rem;"></div>
+		<h3>Statistics</h3>
+		<table class="table table-dark table-striped table-hover table-sm">
+			<thead>
+				<tr>
+					<th style="width: 30%" scope="col">Game type</th>
+					<th style="width: 23%" scope="col">Win</th>
+					<th style="width: 23%" scope="col">Loss</th>
+					<th style="width: 24%" scope="col">Total</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td>1 vs A.I.</th>
+					<td>{{aiWin}}</th>
+					<td>{{aiLoss}}</th>
+					<td>{{aiTot}}</th>
+				</tr>
+				<tr>
+					<td>1 vs A.I. (forfeit)</th>
+					<td>{{aiWinForfeit}}</th>
+					<td>{{aiLossForfeit}}</th>
+					<td>{{aiForfeitTot}}</th>
+				</tr>
+				<tr>
+					<td>1 vs 1</th>
+					<td>{{v1Win}}</th>
+					<td>{{v1Loss}}</th>
+					<td>{{v1Tot}}</th>
+				</tr>
+				<tr>
+					<td>1 vs 1 (forfeit)</th>
+					<td>{{v1WinForfeit}}</th>
+					<td>{{v1LossForfeit}}</th>
+					<td>{{v1ForfeitTot}}</th>
+				</tr>
+			</tbody>
+		</table>
+		<h3>Historic</h3>
+		<table class="table table-dark table-striped table-hover table-sm">
+			<thead>
+				<tr>
+					<th style="width: 30%" scope="col">Date</th>
+					<th style="width: 23%" scope="col">Opponent</th>
+					<th style="width: 23%" scope="col">Score to win</th>
+					<th style="width: 24%" scope="col">Score</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for g in singleGames %}
+				{% if g.p1Score >= g.scoreToWin or g.p2Score >= g.scoreToWin  or g.forfeit != None %}
+					<tr>
+						<td>{{g.date}}</td>
+						{% if g.p1 != user %}
+							{% if g.p1 == None %}
+								<td>A.I.</td>
+							{% else %}
+								<td>{{g.p1}}</td>
+							{% endif %}
+						{% else %}
+							{% if g.p2 == None and g.p2Local != '' %}
+								<td>{{g.p2Local}}</td>
+							{% elif g.p2 == None %}
+								<td>A.I.</td>
+							{% else %}
+								<td>{{g.p2}}</td>
+							{% endif %}
+						{% endif %}
+						<td>{{g.scoreToWin}}</td>
+						{% if g.forfeit != None %}
+							{% if g.forfeit == user %}
+						<td class="text-danger">
+							{% else %}
+						<td class="text-success">
+							{% endif %}
+						{% else %}
+							{% if g.p1Score >= g.scoreToWin %}
+								{% if g.p1 == user %}
+						<td class="text-success">
+								{% else %}
+						<td class="text-danger">
+								{% endif %}
+							{% else %}
+								{% if g.p2 == user %}
+						<td class="text-success">
+								{% else %}
+						<td class="text-danger">
+								{% endif %}
+							{% endif %}
+						{% endif %}
+							{{g.p1Score}} - {{g.p2Score}}
+							{% if g.forfeit %}
+								(forfeit)
+							{% endif %}
+						</td>
+					</tr>
+					{% endif %}
+				{% endfor %}
+			</tbody>
+		</table>
+	{% else %}
+	{{perso}}
+	{% endif %}
+	</div>
+</div>
+<style>
+	.form-control {
+		width: 100%; /* Make inputs full-width */
+		height: 38px; /* Ensure consistent height */
+	}
+</style>

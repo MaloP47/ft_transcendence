@@ -31,7 +31,7 @@ urlpatterns = [
 	path('api/view/localAiConfig/', views.localAiConfig, name="localAiConfig"),
 	path('api/view/localConfig/', views.localConfig, name="localConfig"),
 	path('api/view/multiConfig/', views.multiConfig, name="multiConfig"),
-	path('api/view/profilMenu/', views.profilMenu, name="profilMenu"),
+	path('api/view/profileMenu/', views.profileMenu, name="profileMenu"),
 	path('api/view/login/', views.loginForm, name="loginForm"),
 	path('api/view/register/', views.registerForm, name="registerForm"),
 	path('api/view/home/', views.homeView, name="homeView"),
@@ -41,6 +41,7 @@ urlpatterns = [
 	path('api/view/chatMessageView/', views.chatMessageView, name="chatMessageView"),
 	path('api/view/friendRequestView/', views.friendRequestView, name="friendRequestView"),
 	path('api/view/gameRequestView/', views.gameRequestView, name="gameRequestView"),
+	path('api/view/profile/<int:user_id>', views.profile, name="profile"),
 
 	path('api/view/tournamentEnd/', views.createTournament, name="blockchain"),
 	path('api/view/getTournament/<int:tournament_id>', views.viewTournament, name="blockchainView"),
@@ -56,6 +57,7 @@ urlpatterns = [
 	path('play1vsAI/<int:game_id>', views.indexGame, name="indexGame"),
 	path('play1vs1', views.index, name="index"),
 	path('play1vs1/<int:game_id>', views.indexGame, name="indexGame"),
+	path('profile/<int:game_id>', views.indexGame, name="indexGame"),
 	path('multi', views.index, name="index"),
 	path('multi/<int:game_id>', views.indexGame, name="indexGame"),
 

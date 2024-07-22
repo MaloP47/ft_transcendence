@@ -61,6 +61,7 @@ export default class App {
 			"/multi": {title: "Transcendence - 1 VS 1 (multiplayer)", state: "PlayMulti"},
 			"/listTournaments": {title: "Transcendence - Tournaments", state: "listTournaments"},
 			"/createTournaments": {title: "Transcendence - Tournament creation", state: "createTournaments"},
+			"/profile": {title: "Transcendence - Profile", state: "Profile"},
 		}
 	}
 
@@ -125,6 +126,9 @@ export default class App {
 		} else if (this.path.indexOf("/multi/") == 0) {
 			this.id = this.path.substring(7)
 			this.path = "/multi"
+		} else if (this.path.indexOf("/profile/") == 0) {
+			this.id = this.path.substring(9)
+			this.path = "/profile"
 		} else if (this.path.indexOf("/getTournament/") == 0) {
 			this.id = this.path.substring(15)
 			this.path = "/listTournaments"
@@ -150,6 +154,9 @@ export default class App {
 					break;
 				case "Play1vs1":
 					this.getHomePage("1vs1", this.id);
+					break;
+				case "Profile":
+					this.getHomePage("profile", this.id);
 					break;
 				case "PlayMulti":
 					this.getHomePage("multi", this.id);
@@ -264,7 +271,7 @@ export default class App {
 	toggleProfilMenu() {
 		let profilMenu = document.getElementById("profilMenu");
 		if (this.user.authenticated) {
-			this.getApiResponse("/api/view/profilMenu/")
+			this.getApiResponse("/api/view/profileMenu/")
 				.then((response) => {
 					let res = JSON.parse(response);
 					if (res.success) {
@@ -384,27 +391,37 @@ export default class App {
 		} else {
 			if (state == "home") {
 				this.setPong("bg");
+				this.hideProfile();
 				this.getCreateGame();
 			} else if (state == "1vsAI" && game_id == -1) {
 				this.setPong("bg");
 				this.hideLocalGame();
+				this.hideProfile();
 				this.getLocalAiConfigPage();
 			} else if (state == "1vsAI" && game_id != -1) {
 				this.hideLocalConfigPage();
+				this.hideProfile();
 				this.getLocalAiGame(game_id);
 			} else if (state == "1vs1" && game_id == -1) {
 				this.setPong("bg");
 				this.hideLocalGame();
+				this.hideProfile();
 				this.getLocalConfigPage();
 			} else if (state == "1vs1" && game_id != -1) {
 				this.hideLocalConfigPage();
+				this.hideProfile();
 				this.getLocalGame(game_id);
+			} else if (state == "profile") {
+				this.setPong("bg");
+				this.getProfile(game_id);
 			} else if (state == "multi" && game_id == -1) {
 				this.setPong("bg");
+				this.hideProfile();
 				this.hideLocalGame();
 				this.getMultiConfigPage();
 			} else if (state == "multi" && game_id != -1) {
 				this.hideLocalConfigPage();
+				this.hideProfile();
 				this.getMultiGame(game_id);
 			} else if (state == "listTournaments") {
 				this.getListTournaments(game_id);
@@ -2049,6 +2066,107 @@ export default class App {
 				let reader = new FileReader();
 				reader.onload = function (e) {
 					previewProfilePicture.innerHTML = `<img src="${e.target.result}" class="img-fluid rounded rounded-circle border border-white" style="width: 150px; height: 150px;">`;
+				};
+				reader.readAsDataURL(file);
+			}
+		});
+	}
+
+
+
+	hideProfile() {
+		let profileView = document.getElementById("profile");
+		if (!profileView)
+			return ;
+		profileView.classList.add("hided")
+		this.remove("profile")
+	}
+
+	getProfile(id) {
+		let homeContent = document.getElementById("homeContent");
+		if (!homeContent) return;
+
+		this.getApiResponse("/api/view/profile/" + id).then((response) => {
+			let res = JSON.parse(response);
+			if (res.success) {
+				homeContent.innerHTML = res.html;
+				let profileView = document.getElementById("profile");
+				if (!profileView) return;
+				setTimeout(() => {
+					profileView.classList.remove("hided");
+				}, 15);
+
+				// this.updateTopContent(res.html);
+				// this.showProfileForm();
+				this.addProfileFormSubmitListener(id);
+				this.addProfilePictureChangeListener();
+			}
+		});
+	}
+
+	addProfileFormSubmitListener(id) {
+		let form = document.getElementById("profileFormForm");
+		let formBtn = document.getElementById("profileFormSubmitBtn");
+		if (formBtn) {
+			formBtn.addEventListener("click", (e) => {
+				e.preventDefault();
+				let formData = new FormData(form);
+				this.getApiResponse("/api/user/profile/"+ id, formData).then((response) => {
+					let res = JSON.parse(response);
+					if (res.success) {
+						this.getProfile(res.id);
+						alert('Profile updated successfully!');
+					} else {
+						let profileForm = document.getElementById("profile");
+						// profileForm.classList.add("shake");
+						let profileFormAlert = document.getElementById("profileFormAlert");
+						profileFormAlert.textContent = res.message;
+						profileFormAlert.classList.remove("hided");
+						// setTimeout(() => {
+						// 	profileForm.classList.remove("shake");
+						// }, 500);
+						setTimeout(() => {
+							profileFormAlert.classList.add("hided");
+						}, 5000);
+					}
+				});
+			});
+		}
+	}
+
+	addProfilePictureChangeListener() {
+		// let profilePictureInput = document.getElementById("profileFormProfilePicture");
+		let previewProfilePicture = document.getElementById("previewProfilePicture");
+		let profileFormAlert = document.getElementById("profileFormAlert");
+
+		previewProfilePicture.addEventListener("change", function () {
+			if (this.files && this.files[0]) {
+				let file = this.files[0];
+
+				// Reset alert and preview
+				profileFormAlert.classList.add('hided');
+				profileFormAlert.textContent = '';
+				previewProfilePicture.innerHTML = '';
+
+				// File validation
+				const fileSizeLimit = 1 * 1024 * 1024; // 1MB
+				const allowedFileTypes = ['image/jpeg', 'image/png', 'image/gif'];
+
+				if (!allowedFileTypes.includes(file.type)) {
+					profileFormAlert.textContent = 'Unsupported file type. Please upload an image file (JPEG, PNG, GIF).';
+					profileFormAlert.classList.remove('hided');
+					return;
+				}
+
+				if (file.size > fileSizeLimit) {
+					profileFormAlert.textContent = 'File size exceeds 1MB. Please upload a smaller image.';
+					profileFormAlert.classList.remove('hided');
+					return;
+				}
+
+				let reader = new FileReader();
+				reader.onload = function (e) {
+					previewProfilePicture.style.backgroundImage = `url(${e.target.result})`;
 				};
 				reader.readAsDataURL(file);
 			}
