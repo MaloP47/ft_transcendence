@@ -46,6 +46,7 @@ services:
       dockerfile: Dockerfile
     volumes:
       - ./services/nginx/conf:/etc/nginx/conf.d
+      - ./services/django/app:/var/www/html
       - logs_nginx:/var/log/nginx
     networks:
       - transcendence
