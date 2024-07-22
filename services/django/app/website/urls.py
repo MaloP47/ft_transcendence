@@ -57,9 +57,9 @@ urlpatterns = [
 	path('play1vs1', views.index, name="index"),
 	path('play1vs1/<int:id>', views.indexId, name="indexId"),
 	path('profile/<int:id>', views.indexId, name="indexId"),
-	path('play1vs1/<int:game_id>', views.indexId, name="indexGame"),
+	path('play1vs1/<int:id>', views.indexId, name="indexGame"),
 	path('multi', views.index, name="index"),
-	path('multi/<int:game_id>', views.indexId, name="indexGame"),
+	path('multi/<int:id>', views.indexId, name="indexGame"),
 
 	path('listTournaments', views.index, name="index"),
 	path('createTournaments', views.index, name="index"),

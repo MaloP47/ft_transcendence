@@ -331,6 +331,8 @@ export default class App {
 	}
 
 	getHomePage(state, game_id) {
+		if (game_id == undefined)
+			game_id = -1;
 		if (this.user.authenticated) {
 			if (this.chatSocket)
 				this.chatSocket.close();
