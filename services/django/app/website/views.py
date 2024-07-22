@@ -236,8 +236,6 @@ def gameNewMultiChat(request):
 			});
 		game = Game(p1=request.user, p2=p2, ai=config['ai'], scoreToWin=config['winScore'], ballSpeed=config['startSpeed'], bonuses=config['bonuses'], p1Left=config['leftKey'], p1Right=config['rightKey'], p2Left=config['leftKey2'], p2Right=config['rightKey2'], p2Local='', gameType=2)
 		game.save()
-		print("asds   d   "+str(p2.id))
-		print("sdfsdfsdf  "+str(request.user.id))
 		return JsonResponse({
 			'success': True,
 			'g1': game.id,
