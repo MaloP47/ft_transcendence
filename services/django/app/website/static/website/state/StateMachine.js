@@ -410,7 +410,7 @@ export default class App {
 					setTimeout(() => {
 						homeView.classList.remove("hided");
 					}, 15);
-
+				}
 			});
 		} else {
 			if (state == "home") {
@@ -597,7 +597,7 @@ export default class App {
 							id: btns[i].dataset.id,
 							name: btns[i].dataset.name,
 						}
-						this.updatePlayerMulti(); // change field 
+						this.updatePlayerMulti(); // change field
 					})
 				}
 			}
@@ -2024,7 +2024,7 @@ export default class App {
 			}
 		});
 	}
-  
+
 	//-------------------------------------------------------
 	// --------------------- SINGLETON ----------------------
 	//-------------------------------------------------------
