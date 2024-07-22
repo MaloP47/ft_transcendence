@@ -387,9 +387,9 @@ export default class Pong {
 			}
 			return ;
 		}
-		// ball is locked for some reason
 
 		// Countdown
+		// move this inside update
 		if (!(this.gameInfo.p1score >= this.winScore || this.gameInfo.p2score >= this.winScore)) {
 			this.countTimeout = setTimeout(() => {
 				this.animateCountdown(5);	

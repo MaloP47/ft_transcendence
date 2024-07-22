@@ -351,7 +351,6 @@ export default class App {
 				if (data.game_notif)
 					this.handleTournamentNotif(data);
 				if (data.type && (data.type == 'multiDataHost' || data.type == 'multiDataGuest')) {
-					//this.pong.handleMultiData(data.type, data.data); // not sure how safe it is to access pong like that
 					if (data.data.game_id == game_id)
 						this.pong.handleMultiData(data.type, data.data); // not sure how safe it is to access pong like that
 				}
