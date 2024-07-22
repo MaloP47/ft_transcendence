@@ -330,7 +330,7 @@ export default class App {
 		}, 200);
 	}
 
-	getHomePage(state, id) {
+	getHomePage(state, game_id) {
 		if (this.user.authenticated) {
 			if (this.chatSocket)
 				this.chatSocket.close();
@@ -404,13 +404,13 @@ export default class App {
 						this.getCreateTournament();
 					} else if (state == "profile") {
 						this.setPong("bg");
-						this.getProfile(id);
+						this.getProfile(game_id);
 					}
 					let homeView = document.getElementById("homeView");
 					setTimeout(() => {
 						homeView.classList.remove("hided");
 					}, 15);
-
+				}
 			});
 		} else {
 			if (state == "home") {

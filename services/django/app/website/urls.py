@@ -14,7 +14,7 @@ urlpatterns = [
 	path('api/user/acceptfriend/', views.acceptFriend, name="acceptFriend"),
 	path('api/user/deleterequest/', views.deleteRequest, name="deleteRequest"),
 	path('api/user/', views.getUser, name="getUser"),
-  path('api/user/profile/<int:user_id>', views.profileEdit, name="profileEdit"),
+	path('api/user/profile/<int:user_id>', views.profileEdit, name="profileEdit"),
 
 
 	path('api/game/get/', views.getGame, name="getGame"),
@@ -40,7 +40,7 @@ urlpatterns = [
 	path('api/view/chatMessageView/', views.chatMessageView, name="chatMessageView"),
 	path('api/view/friendRequestView/', views.friendRequestView, name="friendRequestView"),
 	path('api/view/gameRequestView/', views.gameRequestView, name="gameRequestView"),
-  path('api/view/profile/<int:user_id>', views.profile, name="profile"),
+	path('api/view/profile/<int:user_id>', views.profile, name="profile"),
 
 	path('api/view/tournamentEnd/', views.createTournament, name="blockchain"),
 	path('api/view/getTournament/<int:tournament_id>', views.viewTournament, name="blockchainView"),
@@ -53,13 +53,13 @@ urlpatterns = [
 	path('login', views.index, name="index"),
 	path('register', views.index, name="index"),
 	path('play1vsAI', views.index, name="index"),
-  path('play1vsAI/<int:id>', views.indexId, name="indexId"),
+	path('play1vsAI/<int:id>', views.indexId, name="indexId"),
 	path('play1vs1', views.index, name="index"),
-  path('play1vs1/<int:id>', views.indexId, name="indexId"),
-  path('profile/<int:id>', views.indexId, name="indexId"),
-  path('play1vs1/<int:game_id>', views.indexGame, name="indexGame"),
+	path('play1vs1/<int:id>', views.indexId, name="indexId"),
+	path('profile/<int:id>', views.indexId, name="indexId"),
+	path('play1vs1/<int:game_id>', views.indexId, name="indexGame"),
 	path('multi', views.index, name="index"),
-  path('multi/<int:game_id>', views.indexGame, name="indexGame"),
+	path('multi/<int:game_id>', views.indexId, name="indexGame"),
 
 	path('listTournaments', views.index, name="index"),
 	path('createTournaments', views.index, name="index"),
