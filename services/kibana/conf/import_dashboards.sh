@@ -31,10 +31,20 @@ if curl -u $ELASTIC_USERNAME:$ELASTIC_PASSWORD  -s -X GET "localhost:5601/api/sa
 	curl -u $ELASTIC_USERNAME:$ELASTIC_PASSWORD -X POST "http://localhost:5601/api/saved_objects/_import?overwrite=true" \
 	-H "kbn-xsrf: true" \
 	--form file=@/usr/share/kibana/dashboard.ndjson
-	echo "Dashboard 'Mon-Beau-Tableau' added."
+	echo "Dashboard 'transcendence1' added."
 else
 	echo "Dashboard 'My Filebeat Dashboard' already exists."
 fi
+
+if curl -u $ELASTIC_USERNAME:$ELASTIC_PASSWORD  -s -X GET "localhost:5601/api/saved_objects/_find?type=dashboard&search=django" | grep -q '"total":0'; then
+	curl -u $ELASTIC_USERNAME:$ELASTIC_PASSWORD -X POST "http://localhost:5601/api/saved_objects/_import?overwrite=true" \
+	-H "kbn-xsrf: true" \
+	--form file=@/usr/share/kibana/dashboard2.ndjson
+	echo "Dashboard 'django' added."
+else
+	echo "Dashboard 'My Filebeat Dashboard' already exists."
+fi
+
 
 sleep 5
 

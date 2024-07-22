@@ -188,7 +188,8 @@ services:
     container_name: kibana
     volumes:
       - kibana_data:/usr/share/kibana/data
-      - ./services/kibana/conf/dashboard.json:/usr/share/kibana/dashboard.json
+      - ./services/kibana/conf/dashboard.ndjson:/usr/share/kibana/dashboard.ndjson
+      - ./services/kibana/conf/dashboard2.ndjson:/usr/share/kibana/dashboard2.ndjson
       - ./services/kibana/conf/kibana.yml:/usr/share/kibana/config/kibana.yml
     env_file: .env
     networks:
