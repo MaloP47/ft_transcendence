@@ -599,7 +599,7 @@ export default class App {
 							id: btns[i].dataset.id,
 							name: btns[i].dataset.name,
 						}
-						this.updatePlayerMulti(); // change field 
+						this.updatePlayerMulti(); // change field
 					})
 				}
 			}
@@ -1823,7 +1823,7 @@ export default class App {
 				this.showRegisterForm();
 				this.addRegisterFormSubmitListener();
 				this.addTogglePasswordButtons();
-				this.addProfilePictureChangeListener();
+				this.addRegisterPictureChangeListener();
 			}
 		});
 	}
@@ -1889,7 +1889,7 @@ export default class App {
 		});
 	}
 
-	addProfilePictureChangeListener() {
+	addRegisterPictureChangeListener() {
 		let profilePictureInput = document.getElementById("registerFormProfilePicture");
 		let previewProfilePicture = document.getElementById("previewProfilePicture");
 		let registerFormAlert = document.getElementById("registerFormAlert");
@@ -1924,6 +1924,17 @@ export default class App {
 					previewProfilePicture.innerHTML = `<img src="${e.target.result}" class="img-fluid rounded rounded-circle border border-white" style="width: 150px; height: 150px;">`;
 				};
 				reader.readAsDataURL(file);
+				reader.onerror = function () {
+					registerFormAlert.textContent = 'Error reading file.';
+					registerFormAlert.classList.remove('hided');
+				};
+
+				try {
+					reader.readAsDataURL(file);
+				} catch (error) {
+					registerFormAlert.textContent = `Error reading file: ${error.message}`;
+					registerFormAlert.classList.remove('hided');
+				}
 			}
 		});
 	}
@@ -2026,7 +2037,7 @@ export default class App {
 			}
 		});
 	}
-  
+
 	//-------------------------------------------------------
 	// --------------------- SINGLETON ----------------------
 	//-------------------------------------------------------
