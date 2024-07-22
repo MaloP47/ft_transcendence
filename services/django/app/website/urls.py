@@ -14,6 +14,8 @@ urlpatterns = [
 	path('api/user/acceptfriend/', views.acceptFriend, name="acceptFriend"),
 	path('api/user/deleterequest/', views.deleteRequest, name="deleteRequest"),
 	path('api/user/', views.getUser, name="getUser"),
+    path('api/user/profile/<int:user_id>', views.profileEdit, name="profileEdit"),
+
 
 	path('api/game/get/', views.getGame, name="getGame"),
 	path('api/game/save/', views.saveGame, name="saveGame"),
@@ -53,7 +55,7 @@ urlpatterns = [
 	path('play1vs1', views.index, name="index"),
    	path('play1vs1/<int:id>', views.indexId, name="indexId"),
     path('profile/<int:id>', views.indexId, name="indexId"),
-    
+
 	path('listTournaments', views.index, name="index"),
 	path('createTournaments', views.index, name="index"),
 	path('api/view/listTournaments/', views.listTournaments, name="listTournaments"),

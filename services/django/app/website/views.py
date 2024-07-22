@@ -548,7 +548,7 @@ def viewTournament(request, tournament_id):
 
 			if tournament_id is None:
 				return JsonResponse({'success': False, 'status': 'error', 'message': 'Missing tournament ID'})
-			
+
 			if not isinstance(tournament_id, int) or tournament_id < 0:
 				return JsonResponse({'success': False, 'status': 'error', 'message': 'Invalid (negative) tournament ID'})
 
@@ -591,7 +591,8 @@ def getTournamentWinner(request):
 				'success': False,
 				'html': render_to_string('website/tournamentWinner.html', {'winner': winner, 'winner_wins': winner_wins, 'winner_losses': winner_losses})
 			})
-		
+
+
 	##----------------------------------------------------------//
 	##						TOURNAMENT							//
 	##----------------------------------------------------------//
@@ -649,6 +650,42 @@ def profile(request, user_id):
 				"v1WinForfeit": p1vs1WinForfeitCount + p2vs1WinForfeitCount,
 				"v1LossForfeit": p1vs1LossForfeitCount + p2vs1LossForfeitCount,
 				"v1ForfeitTot": p1vs1WinForfeitCount + p2vs1WinForfeitCount + p1vs1LossForfeitCount + p2vs1LossForfeitCount,
-				"form": editProfileForm({"username": user.username})
+				"form": editProfileForm({"username": user.username, "email": user.email})
 			}),
 	})
+def profileEdit(request):
+    if request.method == 'POST':
+        profile_form = editProfileForm(request.POST, request.FILES, instance=request.user)
+        if profile_form.is_valid():
+            try:
+                profile_picture = request.FILES.get('profilPicture')
+                if profile_picture:
+                    if profile_picture.size > 1 * 1024 * 1024:
+                        raise ValidationError('File size exceeds 1MB.')
+
+                    if profile_picture.content_type not in ['image/jpeg', 'image/png', 'image/gif']:
+                        raise ValidationError('Unsupported file type. Please upload an image file (JPEG, PNG, GIF).')
+
+                    try:
+                        profile_picture.open()
+                        profile_picture.read()
+                    except Exception as e:
+                        raise ValidationError(f'Error reading file: {str(e)}')
+
+                user = profile_form.save()
+                user = authenticate(username=request.POST["username"], password=request.POST["password"])
+                if user is not None:
+                    return JsonResponse({'success': True})
+                else:
+                    return JsonResponse({'success': False, 'message': 'Profile change failed'})
+            except ValidationError as e:
+                return JsonResponse({'success': False, 'message': str(e)})
+
+        errors = profile_form.errors.get_json_data()
+        error_messages = []
+        for field, field_errors in errors.items():
+            for error in field_errors:
+                error_messages.append(error['message'])
+        return JsonResponse({'success': False, 'message': ' '.join(error_messages)})
+
+    return JsonResponse({'success': False, 'message': 'Invalid request method'})

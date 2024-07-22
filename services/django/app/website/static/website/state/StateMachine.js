@@ -6,7 +6,7 @@
 /*   By: renstein <renstein@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/13 11:54:22 by gbrunet           #+#    #+#             */
-/*   Updated: 2024/07/21 20:24:48 by renstein         ###   ########.fr       */
+/*   Updated: 2024/07/22 13:03:22 by renstein         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -398,7 +398,7 @@ export default class App {
 					setTimeout(() => {
 						homeView.classList.remove("hided");
 					}, 15);
-				
+
 			});
 		} else {
 			if (state == "home") {
@@ -1721,40 +1721,146 @@ export default class App {
 		this.remove("profile")
 	}
 
+	// getProfile(id) {
+	// 	let homeContent = document.getElementById("homeContent");
+	// 	if (!homeContent) return;
+
+	// 	this.getApiResponseJson("/api/view/profile/" + id).then((response) => {
+	// 		let res = JSON.parse(response);
+	// 		if (res.success) {
+	// 			homeContent.innerHTML = res.html;
+
+	// 			let profileView = document.getElementById("profile");
+	// 			if (!profileView) return;
+
+	// 			setTimeout(() => {
+	// 				profileView.classList.remove("hided");
+	// 			}, 15);
+
+	// 			const profilePictureInput = document.getElementById('id_profile_picture');
+	// 			const previewContainer = document.querySelector('.rounded.rounded-circle');
+
+	// 			if (profilePictureInput && previewContainer) {
+	// 				const defaultImage = previewContainer.getAttribute('data-default-image');
+	// 				profilePictureInput.addEventListener('change', function () {
+	// 					const file = profilePictureInput.files[0];
+	// 					if (file) {
+	// 						const reader = new FileReader();
+	// 						reader.onload = function (e) {
+	// 							previewContainer.style.backgroundImage = `url(${e.target.result})`;
+	// 						};
+	// 						reader.readAsDataURL(file);
+	// 					} else {
+	// 						previewContainer.style.backgroundImage = `url(${defaultImage})`;
+	// 					}
+	// 				});
+	// 			}
+	// 		}
+	// 	});
+	// }
+
 	getProfile(id) {
 		let homeContent = document.getElementById("homeContent");
 		if (!homeContent) return;
 
-		this.getApiResponseJson("/api/view/profile/" + id).then((response) => {
+		this.getApiResponse("/api/view/profile/" + id).then((response) => {
 			let res = JSON.parse(response);
 			if (res.success) {
 				homeContent.innerHTML = res.html;
-
 				let profileView = document.getElementById("profile");
 				if (!profileView) return;
-
 				setTimeout(() => {
 					profileView.classList.remove("hided");
 				}, 15);
 
-				const profilePictureInput = document.getElementById('id_profile_picture');
-				const previewContainer = document.querySelector('.rounded.rounded-circle');
+				// this.updateTopContent(res.html);
+				// this.showProfileForm();
+				this.addProfileFormSubmitListener(id);
+				this.addProfilePictureChangeListener();
+			}
+		});
+	}
 
-				if (profilePictureInput && previewContainer) {
-					const defaultImage = previewContainer.getAttribute('data-default-image');
-					profilePictureInput.addEventListener('change', function () {
-						const file = profilePictureInput.files[0];
-						if (file) {
-							const reader = new FileReader();
-							reader.onload = function (e) {
-								previewContainer.style.backgroundImage = `url(${e.target.result})`;
-							};
-							reader.readAsDataURL(file);
-						} else {
-							previewContainer.style.backgroundImage = `url(${defaultImage})`;
-						}
-					});
+	// updateTopContent(html) {
+	// 	let topContent = document.getElementById("topContent");
+	// 	topContent.innerHTML = html;
+	// }
+
+	// showProfileForm() {
+	// 	let profileForm = document.getElementById("profile");
+	// 	profileForm.classList.add("trXm100");
+	// 	setTimeout(() => {
+	// 		profileForm.classList.remove("hided");
+	// 		profileForm.classList.remove("trXm100");
+	// 	}, 15);
+	// }
+
+	addProfileFormSubmitListener(id) {
+		let form = document.getElementById("profileFormForm");
+		let formBtn = document.getElementById("profileFormSubmitBtn");
+		if (formBtn) {
+			formBtn.addEventListener("click", (e) => {
+				e.preventDefault();
+				let formData = new FormData(form);
+				this.getApiResponse("/api/user/profile/"+ id, formData).then((response) => {
+					let res = JSON.parse(response);
+					if (res.success) {
+						history.pushState("", "", "/");
+						this.router();
+						this.updateUser();
+					} else {
+						let profileForm = document.getElementById("profileForm");
+						profileForm.classList.add("shake");
+						let profileFormAlert = document.getElementById("profileFormAlert");
+						profileFormAlert.textContent = res.message;
+						profileFormAlert.classList.remove("hided");
+						setTimeout(() => {
+							profileForm.classList.remove("shake");
+						}, 500);
+						setTimeout(() => {
+							profileFormAlert.classList.add("hided");
+						}, 5000);
+					}
+				});
+			});
+		}
+	}
+
+	addProfilePictureChangeListener() {
+		// let profilePictureInput = document.getElementById("profileFormProfilePicture");
+		let previewProfilePicture = document.getElementById("previewProfilePicture");
+		let profileFormAlert = document.getElementById("profileFormAlert");
+
+		previewProfilePicture.addEventListener("change", function () {
+			if (this.files && this.files[0]) {
+				let file = this.files[0];
+
+				// Reset alert and preview
+				profileFormAlert.classList.add('hided');
+				profileFormAlert.textContent = '';
+				previewProfilePicture.innerHTML = '';
+
+				// File validation
+				const fileSizeLimit = 1 * 1024 * 1024; // 1MB
+				const allowedFileTypes = ['image/jpeg', 'image/png', 'image/gif'];
+
+				if (!allowedFileTypes.includes(file.type)) {
+					profileFormAlert.textContent = 'Unsupported file type. Please upload an image file (JPEG, PNG, GIF).';
+					profileFormAlert.classList.remove('hided');
+					return;
 				}
+
+				if (file.size > fileSizeLimit) {
+					profileFormAlert.textContent = 'File size exceeds 1MB. Please upload a smaller image.';
+					profileFormAlert.classList.remove('hided');
+					return;
+				}
+
+				let reader = new FileReader();
+				reader.onload = function (e) {
+					previewProfilePicture.style.backgroundImage = `url(${e.target.result})`;
+				};
+				reader.readAsDataURL(file);
 			}
 		});
 	}

@@ -25,6 +25,7 @@ class editProfileForm(forms.Form):
 	email = forms.EmailField(
         widget=forms.EmailInput(
             attrs={
+				'placeholder': 'email',
                 'class': 'form-control',
             }
         )
