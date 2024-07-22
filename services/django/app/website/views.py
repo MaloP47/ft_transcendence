@@ -222,6 +222,27 @@ def gameNew1vs1(request):
 			'success': True,
 			'id': game.id,
 		});
+
+def gameNewMultiChat(request):
+	if request.method == 'POST':
+		data = json.loads(request.POST["data"]);
+		config = data['config']
+		p2 = User.objects.get(id=data['p2'])
+		if request.user == p2:
+			return JsonResponse({
+				'success': False,
+			});
+		game = Game(p1=request.user, p2=p2, ai=config['ai'], scoreToWin=config['winScore'], ballSpeed=config['startSpeed'], bonuses=config['bonuses'], p1Left=config['leftKey'], p1Right=config['rightKey'], p2Left=config['leftKey2'], p2Right=config['rightKey2'], p2Local='', gameType=2)
+		game.save()
+		print("asds   d   "+str(p2.id))
+		print("sdfsdfsdf  "+str(request.user.id))
+		return JsonResponse({
+			'success': True,
+			'g1': game.id,
+			'p1': request.user.id,
+			'p2': p2.id,
+		});
+
 def gameNewMulti(request):
 	if request.method == 'POST':
 		data = json.loads(request.POST["data"]);
@@ -232,7 +253,6 @@ def gameNewMulti(request):
 				'success': False,
 			});
 		game = Game(p1=request.user, p2=p2, ai=config['ai'], scoreToWin=config['winScore'], ballSpeed=config['startSpeed'], bonuses=config['bonuses'], p1Left=config['leftKey'], p1Right=config['rightKey'], p2Left=config['leftKey2'], p2Right=config['rightKey2'], p2Local=config['p2Local'], gameType=2)
-		#game = Game(p1=request.user, ai=data['ai'], scoreToWin=data['winScore'], ballSpeed=data['startSpeed'], bonuses=data['bonuses'], p1Left=data['leftKey'], p1Right=data['rightKey'], p2Left=data['leftKey2'], p2Right=data['rightKey2'], p2Local=data['p2Local'], gameType=2)
 		game.save()
 		return JsonResponse({
 			'success': True,

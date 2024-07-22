@@ -6,7 +6,7 @@
 //   By: gbrunet <gbrunet@student.42.fr>            +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2024/07/22 11:54:11 by gbrunet           #+#    #+#             //
-//   Updated: 2024/07/22 12:02:35 by gbrunet          ###   ########.fr       //
+//   Updated: 2024/07/22 21:52:23 by gbrunet          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -1317,7 +1317,7 @@ export default class App {
 								chatMenu.style.top = (e.clientY + 5) + "px";
 								chatMenu.style.right = (window.innerWidth - e.clientX + 5) + "px";
 								chatMenu.innerHTML = res.html;
-								let sendPlay = document.getElementById("chatSendPlay")
+								this.chatMenuSendPlay();
 								this.chatMenuDeleteFriend();
 								this.chatMenuAddFriend();
 								this.chatMenuBlockUser();
@@ -1548,6 +1548,7 @@ export default class App {
 										chatMenu.style.right = (window.innerWidth - e.clientX + 5) + "px";
 										chatMenu.innerHTML = res.html;
 										let sendPlay = document.getElementById("chatSendPlay")
+										this.chatMenuSendPlay();
 										this.chatMenuDeleteFriend();
 										this.chatMenuAddFriend();
 										this.chatMenuBlockUser();
@@ -1562,46 +1563,6 @@ export default class App {
 								});
 							})
 						}
-
-
-
-
-/*
-				let messages = chatContainer.getElementsByClassName("message__avatar")
-				for (let i = 0; i < messages.length; i++) {
-					if (messages[i].dataset.user == this.user.id)
-						continue ;
-					messages[i].addEventListener("click", (e) => {
-						this.getApiResponseJson("/api/view/chatMenu/", {id: e.target.dataset.user}).then((response) => {
-							let res = JSON.parse(response);
-							if (res.success) {
-								let chatMenu = document.getElementById("chatMenu")
-								if (!chatMenu)
-									return ;
-								chatMenu.style.top = (e.clientY + 5) + "px";
-								chatMenu.style.right = (window.innerWidth - e.clientX + 5) + "px";
-								chatMenu.innerHTML = res.html;
-								let sendPlay = document.getElementById("chatSendPlay")
-								this.chatMenuDeleteFriend();
-								this.chatMenuAddFriend();
-								this.chatMenuBlockUser();
-								let menuBack = document.getElementById("menuBack")
-								menuBack.classList.remove("pe-none");
-								chatMenu.classList.remove("displayNone");
-								chatMenu.style.pointerEvents = "all";
-								setTimeout(() => {
-									chatMenu.classList.remove("hided");
-								}, 15)
-							}
-						});
-					})
-				}
-*/
-
-
-
-
-
 						chatBottom.scrollIntoView()
 					}, 15);
 				}
@@ -1609,8 +1570,59 @@ export default class App {
 		});
 	}
 
+	chatMenuSendPlay() {
+		let config = {
+			winScore: 10,
+			startSpeed: 8,
+			bonuses: true,
+			ai: 1,
+			leftKey: 65,
+			rightKey: 68,
+			leftKey2: 37, // disable local p2 controls
+			rightKey2: 39, // disable local p2 controls
+		}
+		let sendPlay = document.getElementById("chatSendPlay");
+		if (!sendPlay)
+			return ;
+		sendPlay.addEventListener("click", (e) => {
+			this.getApiResponseJson("/api/game/new/multi_chat/", {config: config, p2: e.target.dataset.id}).then((response) => {
+				let res = JSON.parse(response);
+				if (res.success) {
+					this.chatSocket.send(JSON.stringify({
+						'gameNotif': res.g1,
+						'p1': res.p1,
+						'p2': res.p2,
+					}));
+					history.pushState("", "", "/multi/" + res.g1);
+					this.router();
+				}
+			});
+		});
+
+/*
+			this.getApiResponseJson("/api/user/addfriend/", {id: e.target.dataset.id}).then((response) => {
+				let res = JSON.parse(response);
+				if (res.success) {
+					this.chatSocket.send(JSON.stringify({
+						'friendRequest': e.target.dataset.id
+					}));
+					let menu = document.getElementById("chatMenu");
+					if (!menu)
+						return ;
+					menu.classList.add("hided");
+					menu.style.pointerEvents = ("none");
+					this.displayNone("chatMenu")
+					let menuBack = document.getElementById("menuBack");
+					menuBack.classList.add("hided");
+					menuBack.classList.add("pe-none");
+				}
+			});
+		});
+*/
+	}
+
 	handleTournamentNotif(data) {
-		if (this.user.id != data.p1 && this.user.id != data.p2)
+		if (!(this.user.id == data.p1 || this.user.id == data.p2))
 			return ;
 		this.getApiResponseJson("/api/view/gameRequestView/", {id: data.game_notif}).then((response) => {
 			let res = JSON.parse(response);
@@ -1684,7 +1696,6 @@ export default class App {
 				else if (deleteBtn.classList.contains("forfeit"))
 					deleteBtn.addEventListener("click", this.forfeitUnfinishedGame.bind(this), false);
 			} else {
-				console.log("salut")
 				if (notif[i].dataset
 					&& parseInt(notif[i].dataset.gametype) == 0
 					&& this.path == "/play1vsAI"

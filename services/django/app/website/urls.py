@@ -20,6 +20,7 @@ urlpatterns = [
 	path('api/game/new/1vsAI/', views.gameNew1vsAi, name="gameNew1vsAi"),
 	path('api/game/new/1vs1/', views.gameNew1vs1, name="gameNew1vs1"),
 	path('api/game/new/multi/', views.gameNewMulti, name="gameNewMulti"),
+	path('api/game/new/multi_chat/', views.gameNewMultiChat, name="gameNewMultiChat"),
 	path('api/game/forfeit/', views.gameForfeit, name="gameForfeit"),
 	path('api/game/unfinished/', views.getUnfinishedGames, name="getUnfinishedGames"),
 	path('api/game/notif/<int:game_id>', views.getGameNotif, name="getGameNotif"),
