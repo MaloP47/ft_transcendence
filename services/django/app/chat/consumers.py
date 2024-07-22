@@ -19,12 +19,28 @@ class ChatConsumer(AsyncWebsocketConsumer):
 	async def disconnect(self, close_code):
 		await self.channel_layer.group_discard(
 			self.room_group_name,
+			#self.room_group_name, # here you can create 2 rooms
 			self.channel_name
 		)
 		await ChatConsumer.updateOnline(self, False)
 
+	# This NEEDS to be changed, add a common `type` field or something with value hostGameInfo, gameNotif, friendRequest, etc.
+	# And I don't mean the `type` in `group_send`
+	# This might cause severe lag, not sure, basically there's a way to avoid all these try except easily
 	async def receive(self, text_data):
 		text_data_json = json.loads(text_data)
+		# Multiplayer logic --v
+		if 'type' in text_data_json:
+			if text_data_json['type'] == 'multiDataHost': 
+				await self.channel_layer.group_send(self.room_group_name, text_data_json) # add url multi/<room_id> to room_group_name
+			if text_data_json['type'] == 'multiDataGuest': 
+				await self.channel_layer.group_send(self.room_group_name, text_data_json)
+            # add if text_data_json['type'] == 'gameNotif':
+		else:
+			print('No type field in received data')
+
+		# Multiplayer logic --^
+        # la partie qui va pas --v
 		try:
 			gameNotif = text_data_json['gameNotif']
 			p1 = text_data_json['p1']
@@ -84,6 +100,19 @@ class ChatConsumer(AsyncWebsocketConsumer):
 			)
 		except:
 			pass
+
+	async def multiDataHost(self, event):
+		await self.send(text_data=json.dumps(event))
+	async def multiDataGuest(self, event):
+		await self.send(text_data=json.dumps(event))
+
+	#async def host_game_info(self, event):
+	#	hostGameInfo = event['hostGameInfo']
+	#	ballpos = event['ballpos']
+	#	await self.send(text_data=json.dumps({
+	#		'hostGameInfo': hostGameInfo,
+	#		'ballpos': ballpos,
+	#	}))
 
 	async def chat_message(self, event):
 		message = event['message']

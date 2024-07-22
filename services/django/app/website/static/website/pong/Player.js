@@ -69,6 +69,10 @@ export default class Player {
 	}
 
 	update() {
+		// Multi
+		if (this.pong.isMultiNotHost())
+			return this.updateMulti();
+
 		const maxPos = this.maxPos - this.bonus.big.time + this.bonus.small.time / 2;
 
 		if (this.player == 1) {
@@ -108,6 +112,29 @@ export default class Player {
 		this.updateBonus(this.bonus.frozen, 200, 1);
 		this.updateBonus(this.bonus.line, 100, 10);
 		this.updateBonus(this.bonus.reversed, 200, 1);
+	}
+	updateMulti() {
+		if (this.player == 1) {
+			this.bar.position.x = this.pong.multiData.p1_pos.x;
+			this.bar.position.y = this.pong.multiData.p1_pos.y;
+			this.currentPos = this.bar.position.clone(); 
+			this.bonus = this.pong.multiData.p1_bonus;
+		} else {
+			this.bar.position.x = this.pong.multiData.p2_pos.x;
+			this.bar.position.y = this.pong.multiData.p2_pos.y;
+			this.currentPos = this.bar.position.clone(); 
+			this.bonus = this.pong.multiData.p2_bonus;
+		}
+
+	//	console.log("guest bonuses ->");
+	//	console.log(this.bonus);
+
+		// probably dont need to call that
+		//this.updateBonus(this.bonus.big, 200, 1);
+		//this.updateBonus(this.bonus.small, 200, 1);
+		//this.updateBonus(this.bonus.frozen, 200, 1);
+		//this.updateBonus(this.bonus.line, 100, 10);
+		//this.updateBonus(this.bonus.reversed, 200, 1);
 	}
 	
 	getPos() { return(this.bar.position.clone()); }

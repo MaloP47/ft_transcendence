@@ -1,15 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   StateMachine.js                                    :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: renstein <renstein@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/06/13 11:54:22 by gbrunet           #+#    #+#             */
-/*   Updated: 2024/07/22 14:56:24 by renstein         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 import Pong from '../pong/Pong.js';
 
 function sleep(ms) {
@@ -58,6 +46,7 @@ export default class App {
 			"/register": {title: "Transcendence - Register", state: "Register"},
 			"/play1vsAI": {title: "Transcendence - 1 VS A.I.", state: "Play1vsAI"},
 			"/play1vs1": {title: "Transcendence - 1 VS 1 (local)", state: "Play1vs1"},
+			"/multi": {title: "Transcendence - 1 VS 1 (multiplayer)", state: "PlayMulti"},
 			"/listTournaments": {title: "Transcendence - Tournaments", state: "listTournaments"},
 			"/createTournaments": {title: "Transcendence - Tournament creation", state: "createTournaments"},
 			"/profile": {title: "Transcendence - Profile", state: "Profile"},
@@ -110,6 +99,9 @@ export default class App {
 		} else if (path.indexOf("/profile/") == 0) {
 			id = path.substring(9)
 			path = "/profile"
+		} else if (path.indexOf("/multi/") == 0) {
+			id = path.substring(7)
+			path = "/multi"
 		} else if (path.indexOf("/getTournament/") == 0) {
 			id = path.substring(15)
 			path = "/listTournaments"
@@ -157,6 +149,17 @@ export default class App {
 						this.hideListTournaments();
 					this.getHomePage("1vs1", id);
 					break;
+				case "PlayMulti":
+					if (document.getElementById("registerForm"))
+						this.hideRegisterForm();
+					if (document.getElementById("loginForm"))
+						this.hideLoginForm();
+					if (document.getElementById("createGame"))
+						this.hideCreateGame();
+					if (document.getElementById("listTournaments"))
+						this.hideListTournaments();
+					this.getHomePage("multi", id);
+					break;
 				case "listTournaments":
 					if (document.getElementById("registerForm"))
 						this.hideRegisterForm();
@@ -190,9 +193,9 @@ export default class App {
 		}
 	}
 
-	//----------------------------------------------------------//
-	//					DJANGO-JS COMMUNICATION					//
-	//----------------------------------------------------------//
+	// -----------------------------------------------------------
+	// ----------------- DJANGO-JS COMMUNICATION -----------------
+	// -----------------------------------------------------------
 
 	getCookie(name) {
 		let cookieValue = null;
@@ -273,9 +276,9 @@ export default class App {
 		return await this.makeApiRequestJson(url, json);
 	}
 
-	//----------------------------------------------------------//
-	//						VIEW UPDATE							//
-	//----------------------------------------------------------//
+	// ---------------------------------------------------------
+	// ---------------------- VIEW UPDATE ----------------------
+	// ---------------------------------------------------------
 
 	setPong(state) {
 		if (!this.pong)
@@ -337,8 +340,6 @@ export default class App {
 
 			this.chatSocket.onmessage = function(e) {
 				const data = JSON.parse(e.data);
-				console.log("oui")
-				console.log(data)
 				if (data.need_update) {
 					this.updateConnectedUsers();
 					this.updateRooms();
@@ -349,6 +350,10 @@ export default class App {
 					this.handleFriendRequestMessage(data);
 				if (data.game_notif)
 					this.handleTournamentNotif(data);
+				if (data.type && (data.type == 'multiDataHost' || data.type == 'multiDataGuest')) {
+					//console.log("sender -> " + data.sender);
+					this.pong.handleMultiData(data.type, data.data); // not sure how safe it is to access pong like that
+				}
 			}.bind(this);
 		}
 
@@ -370,26 +375,33 @@ export default class App {
 					} else if (state == "1vsAI" && !this.user.authenticated) {
 						history.replaceState("", "", "/");
 						this.router();
-					} else if (state == "1vsAI" && id == -1) {
+					} else if (state == "1vsAI" && game_id == -1) {
 						this.setPong("bg");
 						this.getLocalAiConfigPage();
-					} else if (state == "1vsAI" && id != -1) {
+					} else if (state == "1vsAI" && game_id != -1) {
 						this.getLocalAiGame(id);
 					} else if (state == "1vs1" && !this.user.authenticated) {
 						history.replaceState("", "", "/");
 						this.router();
-					} else if (state == "1vs1" && id == -1) {
+					} else if (state == "1vs1" && game_id == -1) {
 						this.setPong("bg");
 						this.getLocalConfigPage();
-					} else if (state == "1vs1" && id != -1) {
-						this.getLocalGame(id);
+					} else if (state == "1vs1" && game_id != -1) {
+						this.getLocalGame(game_id);
+					} else if (state == "multi" && !this.user.authenticated) {
+						history.replaceState("", "", "/");
+						this.router();
+					} else if (state == "multi" && game_id == -1) {
+						this.setPong("bg");
+						this.getMultiConfigPage();
+					} else if (state == "multi" && game_id != -1) {
+						this.getMultiGame(game_id);
 					} else if (state == "listTournaments") {
 						this.setPong("bg");
-						this.getListTournaments(id);
+						this.getListTournaments(game_id);
 					} else if (state == "createTournaments") {
 						this.setPong("bg");
 						this.getCreateTournament();
-					}
 					} else if (state == "profile") {
 						this.setPong("bg");
 						this.getProfile(id);
@@ -405,29 +417,38 @@ export default class App {
 				this.setPong("bg");
 				this.hideProfile();
 				this.getCreateGame();
-			} else if (state == "1vsAI" && id == -1) {
+			} else if (state == "1vsAI" && game_id == -1) {
 				this.setPong("bg");
 				this.hideLocalGame();
 				this.hideProfile();
 				this.getLocalAiConfigPage();
-			} else if (state == "1vsAI" && id != -1) {
+			} else if (state == "1vsAI" && game_id != -1) {
 				this.hideLocalConfigPage();
 				this.hideProfile();
-				this.getLocalAiGame(id);
-			} else if (state == "1vs1" && id == -1) {
+				this.getLocalAiGame(game_id);
+			} else if (state == "1vs1" && game_id == -1) {
 				this.setPong("bg");
 				this.hideLocalGame();
 				this.hideProfile();
 				this.getLocalConfigPage();
-			} else if (state == "1vs1" && id != -1) {
+			} else if (state == "1vs1" && game_id != -1) {
 				this.hideLocalConfigPage();
 				this.hideProfile();
-				this.getLocalGame(id);
+				this.getLocalGame(game_id);
 			} else if (state == "profile") {
 				this.setPong("bg");
-				this.getProfile(id);
+				this.getProfile(game_id);
+			} else if (state == "multi" && game_id == -1) {
+				this.setPong("bg");
+				this.hideProfile();
+				this.hideLocalGame();
+				this.getMultiConfigPage();
+			} else if (state == "multi" && game_id != -1) {
+				this.hideLocalConfigPage();
+				this.hideProfile();
+				this.getMultiGame(game_id);
 			} else if (state == "listTournaments") {
-				this.getListTournaments(id);
+				this.getListTournaments(game_id);
 			} else if (state == "createTournaments") {
 				this.getCreateTournament();
 			}
@@ -505,7 +526,7 @@ export default class App {
 						this.chatSocket.send(JSON.stringify({
 							'gameNotif': res.g1,
 							'p1': res.p1,
-							'p2': res.p1,
+							'p2': res.p2,
 						}));
 						this.chatSocket.send(JSON.stringify({
 							'gameNotif': res.g2,
@@ -552,21 +573,52 @@ export default class App {
 			}
 		});
 	}
+	searchPlayerMulti(val) {
+		// prevent adding yourself as an opponent
+		// - custom `/api/multi/playerSearch` view, dont show in results
+		// - protect /api/game/new/multi from putting same person against each other, send back not success
+		this.getApiResponseJson("/api/tournament/playerSearch/", {search: val}).then((response) => {
+			let res = JSON.parse(response);
+			if (res.success) {
+				let playerResult = document.getElementById("playerResult");
+				if (playerResult)
+					playerResult.innerHTML = res.html;
+				let btns = playerResult.getElementsByClassName("btn");
+				for (let i = 0; i < btns.length; i++) {
+					// disable button if same as host, can't play against yourself
+					if (this.user.id == btns[i].dataset.id) {
+						btns[i].disabled = true;
+						continue;
+					}
+					btns[i].addEventListener("click", (e) => {
+						if (this.user.id == btns[i].dataset.id)
+							return ;
+						this.playerMulti = {
+							id: btns[i].dataset.id,
+							name: btns[i].dataset.name,
+						}
+						this.updatePlayerMulti(); // change field 
+					})
+				}
+			}
+		});
+	}
 
 	updatePlayerList() {
 		document.getElementById("addPlayer").value = "";
 		let playerResult = document.getElementById("playerResult");
 		if (playerResult)
 			playerResult.innerHTML = "";
-		nbPlayer = document.getElementById("nbPlayer");
+		//nbPlayer = document.getElementById("nbPlayer");
+		var nbPlayer = document.getElementById("nbPlayer");
 		nbPlayer.innerHTML = this.tournamentPlayers.length;
 		var html = "";
 		for (let j = 0; j < this.tournamentPlayers.length; j++) {
 			html += '<div id="player-' + this.tournamentPlayers[j].id + '" class="px-1 mx-1 border border-light rounded" style="--bs-border-opacity:0.25;">' + this.tournamentPlayers[j].name + '<button data-id="' + this.tournamentPlayers[j].id + '" class="btn btn-light delPlayerList" style="line-height: 12px; font-size:12px; padding: 0 4px 0 4px; margin-left: 8px">x</button></div>'
 		}
-		players = document.getElementById("players");
+		var players = document.getElementById("players");
 		players.innerHTML = html;
-		createBtn = document.getElementById("createBtn");
+		var createBtn = document.getElementById("createBtn");
 		var addPlayerInput = document.getElementById("addPlayer");
 		if (this.tournamentPlayers.length == 4) {
 			createBtn.disabled = false;
@@ -574,6 +626,26 @@ export default class App {
 		} else {
 			createBtn.disabled = true;
 			addPlayerInput.disabled = false;
+		}
+	}
+
+	updatePlayerMulti() {
+		let addPlayer = document.getElementById("addPlayer");
+		addPlayer.value = "";
+		let playerResult = document.getElementById("playerResult");
+		if (playerResult)
+			playerResult.innerHTML = "";
+		if (this.playerMulti != 0) {
+			addPlayer.placeholder = this.playerMulti.name;
+		}
+		else {
+			addPlayer.placeholder = "Search";
+		}
+		var playBtn = document.getElementById("playBtn");
+		if (this.playerMulti != 0) {
+			playBtn.disabled = false;
+		} else {
+			playBtn.disabled = true;
 		}
 	}
 
@@ -620,6 +692,57 @@ export default class App {
 					this.setPong("p1Game");
 				this.pong.id = id;
 				this.pong.gameInfo = res;
+				let homeContent = document.getElementById("homeContent");
+				if (document.getElementById("gameOverlay"))
+					return ;
+				homeContent.innerHTML += res.html;
+				let gameOverlay = document.getElementById("gameOverlay")
+				if (gameOverlay.dataset.loaded != "true") {
+					gameOverlay.dataset.loaded = "true";
+					document.getElementById("p1score").innerHTML = res.p1score
+					document.getElementById("p2score").innerHTML = res.p2score
+					if (res.p1score >= res.winScore || res.p2score >= res.winScore) {
+						let endDiv = document.getElementById("countdown");
+						if (endDiv) {
+							let p1 = "A.I.";
+							if (res.p1.id != -1)
+								p1 = res.p1.username;
+							let p2 = res.p2Local;
+							if (res.p2.id != -1)
+								p2 = res.p2.username;
+							let gameVs = "<span class='fs-2 text-light-emphasis'>" + p1 + " vs " + p2 + "</span>";
+							if (res.p1score > res.p2score)
+								endDiv.innerHTML = gameVs + "<p style='font-size:5rem; margin-top: -30px'>" + p1 + " wins this game !</p>"
+							else
+								endDiv.innerHTML = gameVs + "<p style='font-size:5rem; margin-top: -30px'>" + p2 + " wins this game !</p>"
+							endDiv.classList.remove("coundown");
+							endDiv.style.fontSize = "5rem"
+							endDiv.classList.add("visible");
+						}
+						console.log('game is finished...')
+					} else {
+						this.pong.config = res;
+					}
+				}
+			} else {
+				history.replaceState("", "", "/");
+				this.router();
+			}
+		});
+	}
+
+	getMultiGame(id) {
+		this.getApiResponseJson("/api/game/get/", {id: id}).then((response) => {
+			let res = JSON.parse(response);
+			if (res.success) {
+				if (res.winScore <= res.p1score || res.winScore <= res.p2score)
+					this.setPong("bg")
+				else
+					this.setPong("p1Game");
+				this.pong.game_id = id;
+				this.pong.gameInfo = res;
+				// set pong event handlers here
+				this.pong.initEvents();
 				let homeContent = document.getElementById("homeContent");
 				if (document.getElementById("gameOverlay"))
 					return ;
@@ -861,6 +984,25 @@ export default class App {
 			}
 		});
 	}
+	getMultiConfigPage() {
+		let homeContent = document.getElementById("homeContent");
+		if (!homeContent)
+			return ;
+		this.getApiResponse("/api/view/multiConfig/").then((response) => {
+			let res = JSON.parse(response);
+			if (res.success) {
+				homeContent.innerHTML += res.html;
+				setTimeout(() => {
+					let configView = document.getElementById("config");
+					if (!configView)
+						return ;
+					configView.classList.remove("hided");
+					this.setMultiConfigInteraction();
+					//this.setTournamentConfigInteraction();
+				}, 200);
+			}
+		});
+	}
 
 	setConfigInteraction() {
 		let config = {
@@ -939,6 +1081,77 @@ export default class App {
 						config.classList.add("hided")
 						this.remove("config")
 						history.pushState("", "", "/play1vs1/" + res.id);
+						this.router();
+					}
+				});
+			});
+		}
+	}
+	setMultiConfigInteraction() {
+		let config = {
+			winScore: 10,
+			startSpeed: 8,
+			bonuses: true,
+			ai: 1,
+			leftKey: 65,
+			rightKey: 68,
+			leftKey2: 37, // disable local p2 controls
+			rightKey2: 39, // disable local p2 controls
+			p2Local: '',
+		}
+		this.playerMulti = 0;
+		let configView = document.getElementById("config");
+		if (configView.dataset.events != "done") {
+			configView.dataset.events = "done";
+			let winScore = document.getElementById("winScore");
+			let winScoreText = document.getElementById("winScoreText");
+			winScore.addEventListener('input', (e) => {
+				winScoreText.innerHTML = winScore.value;
+				config.winScore = winScore.value;
+			});
+			let startSpeed = document.getElementById("startSpeed");
+			let startSpeedText = document.getElementById("startSpeedText");
+			startSpeed.addEventListener('input', (e) => {
+				startSpeedText.innerHTML = startSpeed.value;
+				config.startSpeed = startSpeed.value;
+			});
+			if (document.querySelector('input[name="bonuses"]')) {
+				document.querySelectorAll('input[name="bonuses"]').forEach((elem) => {
+					elem.addEventListener("change", function(event) {
+						if (event.target.value == 'on')
+							config.bonuses = true;
+						else
+							config.bonuses = false;
+					});
+				});
+			}
+			document.getElementById("addPlayer").addEventListener("keyup", (e) => {
+				let val = document.getElementById("addPlayer").value;
+				if (val != "")
+					this.searchPlayerMulti(val);
+				else {
+					let playerResult = document.getElementById("playerResult");
+					if (playerResult)
+						playerResult.innerHTML = "";
+				}
+			})
+
+			let playBtn = document.getElementById("playBtn")
+			playBtn.addEventListener("click", (e) => {
+				if (config.p2Local == "")
+					config.p2Local = this.playerMulti.name;
+				this.getApiResponseJson("/api/game/new/multi/", {config: config, p2: this.playerMulti}).then((response) => {
+					let res = JSON.parse(response);
+					if (res.success) {
+						this.chatSocket.send(JSON.stringify({
+							'gameNotif': res.g1,
+							'p1': res.p1,
+							'p2': res.p2,
+						}));
+						let config = document.getElementById("config");
+						config.classList.add("hided")
+						this.remove("config")
+						history.pushState("", "", "/multi/" + res.id);
 						this.router();
 					}
 				});
@@ -1721,44 +1934,6 @@ export default class App {
 		this.remove("profile")
 	}
 
-	// getProfile(id) {
-	// 	let homeContent = document.getElementById("homeContent");
-	// 	if (!homeContent) return;
-
-	// 	this.getApiResponseJson("/api/view/profile/" + id).then((response) => {
-	// 		let res = JSON.parse(response);
-	// 		if (res.success) {
-	// 			homeContent.innerHTML = res.html;
-
-	// 			let profileView = document.getElementById("profile");
-	// 			if (!profileView) return;
-
-	// 			setTimeout(() => {
-	// 				profileView.classList.remove("hided");
-	// 			}, 15);
-
-	// 			const profilePictureInput = document.getElementById('id_profile_picture');
-	// 			const previewContainer = document.querySelector('.rounded.rounded-circle');
-
-	// 			if (profilePictureInput && previewContainer) {
-	// 				const defaultImage = previewContainer.getAttribute('data-default-image');
-	// 				profilePictureInput.addEventListener('change', function () {
-	// 					const file = profilePictureInput.files[0];
-	// 					if (file) {
-	// 						const reader = new FileReader();
-	// 						reader.onload = function (e) {
-	// 							previewContainer.style.backgroundImage = `url(${e.target.result})`;
-	// 						};
-	// 						reader.readAsDataURL(file);
-	// 					} else {
-	// 						previewContainer.style.backgroundImage = `url(${defaultImage})`;
-	// 					}
-	// 				});
-	// 			}
-	// 		}
-	// 	});
-	// }
-
 	getProfile(id) {
 		let homeContent = document.getElementById("homeContent");
 		if (!homeContent) return;
@@ -1780,20 +1955,6 @@ export default class App {
 			}
 		});
 	}
-
-	// updateTopContent(html) {
-	// 	let topContent = document.getElementById("topContent");
-	// 	topContent.innerHTML = html;
-	// }
-
-	// showProfileForm() {
-	// 	let profileForm = document.getElementById("profile");
-	// 	profileForm.classList.add("trXm100");
-	// 	setTimeout(() => {
-	// 		profileForm.classList.remove("hided");
-	// 		profileForm.classList.remove("trXm100");
-	// 	}, 15);
-	// }
 
 	addProfileFormSubmitListener(id) {
 		let form = document.getElementById("profileFormForm");
@@ -1863,10 +2024,10 @@ export default class App {
 			}
 		});
 	}
-
-	//----------------------------------------------------------//
-	//						 SINGLETON							//
-	//----------------------------------------------------------//
+  
+	//-------------------------------------------------------
+	// --------------------- SINGLETON ----------------------
+	//-------------------------------------------------------
 
 	static get() {
 		if (!this.instance) {

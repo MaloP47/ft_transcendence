@@ -45,7 +45,7 @@ class Game(models.Model):
 	p1Right = models.IntegerField(default=68)
 	p2Left = models.IntegerField(default=37)
 	p2Right = models.IntegerField(default=39)
-	gameType = models.IntegerField(default=0) # 0->local vs AI // 1->local 1 vs 1 // 2->remote 1 vs 1
+	gameType = models.IntegerField(default=0) # 0->local vs AI // 1->local 1 vs 1 // 2->multi 1 vs 1
 	gameOver = models.BooleanField(default=False)
 	tournamentGame = models.BooleanField(default=False)
 	winner = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
