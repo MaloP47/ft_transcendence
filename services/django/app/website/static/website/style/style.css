@@ -6,9 +6,14 @@
 /*   By: renstein <renstein@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/07 09:37:34 by gbrunet           #+#    #+#             */
-/*   Updated: 2024/07/19 16:21:40 by renstein         ###   ########.fr       */
+/*   Updated: 2024/07/21 13:48:43 by renstein         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
+
+#profile {
+	transition: opacity 200ms;
+}
+
 
 @font-face {
 	font-family: "Bebas Neue";
