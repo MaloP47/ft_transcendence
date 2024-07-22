@@ -338,12 +338,10 @@ export default class App {
 					this.handleFriendRequestMessage(data);
 				if (data.game_notif)
 					this.handleTournamentNotif(data);
-				// multi socket logic here --v
-				if (data.type && data.type == 'multiDataHost') {
+				if (data.type && (data.type == 'multiDataHost' || data.type == 'multiDataGuest')) {
 					//console.log("sender -> " + data.sender);
-					this.pong.handleMultiData(data.data); // not sure how safe it is to access pong like that
+					this.pong.handleMultiData(data.type, data.data); // not sure how safe it is to access pong like that
 				}
-				// multi socket logic here --^
 			}.bind(this);
 		}
 
@@ -734,6 +732,8 @@ export default class App {
 					this.setPong("p1Game");
 				this.pong.game_id = id;
 				this.pong.gameInfo = res;
+				// set pong event handlers here
+				this.pong.initEvents();
 				let homeContent = document.getElementById("homeContent");
 				if (document.getElementById("gameOverlay"))
 					return ;
