@@ -2,7 +2,6 @@ services:
   django:
     container_name: django
     build: ./services/django/
-    # command: ["python", "manage.py", "runserver", "0.0.0.0:8000"]
     volumes:
       - ./services/django/app:/code
       - logs_django:/var/log/django
@@ -152,7 +151,7 @@ services:
     networks:
       - transcendence
     healthcheck:
-      test: ["CMD-SHELL", "curl -u elastic:DidierDidier -fsSL http://localhost:9200/_cat/health | grep -vq 'red'"]
+      test: ["CMD-SHELL", "curl -u ${ELASTIC_USERNAME}:${ELASTIC_PASSWORD} -fsSL http://localhost:9200/_cat/health | grep -vq 'red'"]
       interval: 30s
       timeout: 10s
       retries: 5
