@@ -1,15 +1,3 @@
-# **************************************************************************** #
-#																			   #
-#														  :::	   ::::::::    #
-#	 views.py											:+:		 :+:	:+:    #
-#													  +:+ +:+		  +:+	   #
-#	 By: gbrunet <gbrunet@student.42.fr>			+#+  +:+	   +#+		   #
-#												  +#+#+#+#+#+	+#+			   #
-#	 Created: 2024/06/12 14:48:57 by gbrunet		   #+#	  #+#			   #
-#	 Updated: 2024/06/12 14:59:45 by gbrunet		  ###	########.fr		   #
-#																			   #
-# **************************************************************************** #
-
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.contrib.auth import login, logout, authenticate
@@ -27,6 +15,11 @@ from django.contrib.auth import get_user_model
 from website.forms import CustomUserCreationForm
 from rest_framework import viewsets
 from .serializers import YourModelSerializer
+
+from .forms import editProfileForm
+from django.core.exceptions import ValidationError
+from django.core.serializers import serialize
+
 
 class YourModelViewSet(viewsets.ModelViewSet):
     queryset = YourModel.objects.all()
@@ -90,6 +83,27 @@ def gameForfeit(request):
 		return JsonResponse({
 			'success': True,
 		})
+
+def getGameNotif(request, game_id):
+	if request.method == 'POST':
+		game = Game.objects.get(id=game_id)
+		return JsonResponse({
+			'success': True,
+			'html': render_to_string('website/unfinishedGameView.html', {"g": game, "user": request.user}),
+		})
+
+def getUnfinishedGames(request):
+	if request.method == 'POST':
+		if request.user.is_authenticated:
+			unfinished_games = Game.objects.filter(Q(p1=request.user) | Q(p2=request.user)).exclude(scoreToWin__lte=F('p1Score')).exclude(scoreToWin__lte=F('p2Score')).exclude(forfeit__isnull=False)
+			unfinishedGames = serialize("json", unfinished_games)
+			unfinishedGames = json.loads(unfinishedGames)
+		else:
+			unfinishedGames = []
+		return JsonResponse({
+			'success': True,
+			'games': unfinishedGames,
+		});
 
 def saveGame(request):
 	if request.method == 'POST':
@@ -218,6 +232,27 @@ def gameNew1vs1(request):
 			'success': True,
 			'id': game.id,
 		});
+
+def gameNewMultiChat(request):
+	if request.method == 'POST':
+		data = json.loads(request.POST["data"]);
+		config = data['config']
+		p2 = User.objects.get(id=data['p2'])
+		if request.user == p2:
+			return JsonResponse({
+				'success': False,
+			});
+		game = Game(p1=request.user, p2=p2, ai=config['ai'], scoreToWin=config['winScore'], ballSpeed=config['startSpeed'], bonuses=config['bonuses'], p1Left=config['leftKey'], p1Right=config['rightKey'], p2Left=config['leftKey2'], p2Right=config['rightKey2'], p2Local='', gameType=2)
+		game.save()
+		print("asds   d   "+str(p2.id))
+		print("sdfsdfsdf  "+str(request.user.id))
+		return JsonResponse({
+			'success': True,
+			'g1': game.id,
+			'p1': request.user.id,
+			'p2': p2.id,
+		});
+
 def gameNewMulti(request):
 	if request.method == 'POST':
 		data = json.loads(request.POST["data"]);
@@ -228,7 +263,6 @@ def gameNewMulti(request):
 				'success': False,
 			});
 		game = Game(p1=request.user, p2=p2, ai=config['ai'], scoreToWin=config['winScore'], ballSpeed=config['startSpeed'], bonuses=config['bonuses'], p1Left=config['leftKey'], p1Right=config['rightKey'], p2Left=config['leftKey2'], p2Right=config['rightKey2'], p2Local=config['p2Local'], gameType=2)
-		#game = Game(p1=request.user, ai=data['ai'], scoreToWin=data['winScore'], ballSpeed=data['startSpeed'], bonuses=data['bonuses'], p1Left=data['leftKey'], p1Right=data['rightKey'], p2Left=data['leftKey2'], p2Right=data['rightKey2'], p2Local=data['p2Local'], gameType=2)
 		game.save()
 		return JsonResponse({
 			'success': True,
@@ -294,7 +328,7 @@ def acceptFriend(request):
 			'success': True,
 		});
 
-def profilMenu(request):
+def profileMenu(request):
 	if request.method == 'POST':
 		return JsonResponse({
 			'success': True,
@@ -322,8 +356,8 @@ def registerUser(request):
 			try:
 				profile_picture = request.FILES.get('profilPicture')
 				if profile_picture:
-					if profile_picture.size > 2 * 1024 * 1024:
-						raise ValidationError('File size exceeds 2MB.')
+					if profile_picture.size > 1 * 1024 * 1024:
+						raise ValidationError('File size exceeds 1MB.')
 
 				# Check file type
 					if profile_picture.content_type not in ['image/jpeg', 'image/png', 'image/gif']:
@@ -341,6 +375,7 @@ def registerUser(request):
 					user.save()
 				user = authenticate(username=request.POST["username"], password=request.POST["password1"])
 				if user is not None:
+					login(request, user)
 					return JsonResponse({'success': True})
 				else:
 					return JsonResponse({'success': False, 'message': 'Authentication failed'})
@@ -596,7 +631,6 @@ def viewTournament(request, tournament_id):
 
 			if tournament_id is None:
 				return JsonResponse({'success': False, 'status': 'error', 'message': 'Missing tournament ID'})
-			
 			if not isinstance(tournament_id, int) or tournament_id < 0:
 				return JsonResponse({'success': False, 'status': 'error', 'message': 'Invalid (negative) tournament ID'})
 
@@ -654,3 +688,84 @@ def	setIdBc(request, tournament_id):
 			len = contract.functions.getTournamentLength().call()
 			tournament.idBC = len - 1
 			tournament.save()
+
+def profile(request, user_id):
+	if request.method == 'POST':
+		perso = True
+		if user_id != request.user.id:
+			perso = False
+			user = User.objects.get(id=user_id)
+		else:
+			user = request.user
+		singleGames = Game.objects.filter(Q(p1=user) | Q(p2=user)).order_by('-date')
+		p1vsAiWinCount = Game.objects.filter(p1=user, p2=None, p2Local='').filter(p1Score__gte=F('scoreToWin')).count()
+		p1vsAiLossCount = Game.objects.filter(p1=user, p2=None, p2Local='').filter(p2Score__gte=F('scoreToWin')).count()
+		p1vsAiWinForfeitCount = Game.objects.filter(p1=user, p2=None, p2Local='').filter(~Q(forfeit=user) & ~Q(forfeit=None)).count()
+		p1vsAiLossForfeitCount = Game.objects.filter(p1=user, p2=None, p2Local='').filter(forfeit=user).count()
+
+		p1vs1WinCount = Game.objects.filter(p1=user).filter(~Q(p2=None) | ~Q(p2Local='')).filter(p1Score__gte=F('scoreToWin')).count()
+		p1vs1LossCount = Game.objects.filter(p1=user).filter(~Q(p2=None) | ~Q(p2Local='')).filter(p2Score__gte=F('scoreToWin')).count()
+		p1vs1WinForfeitCount = Game.objects.filter(p1=user).filter(~Q(p2=None) | ~Q(p2Local='')).filter(~Q(forfeit=user) & ~Q(forfeit=None)).count()
+		p1vs1LossForfeitCount = Game.objects.filter(p1=user).filter(~Q(p2=None) | ~Q(p2Local='')).filter(forfeit=user).count()
+
+		p2vs1WinCount = Game.objects.filter(p2=user).filter(p2Score__gte=F('scoreToWin')).count()
+		p2vs1LossCount = Game.objects.filter(p2=user).filter(p1Score__gte=F('scoreToWin')).count()
+		p2vs1WinForfeitCount = Game.objects.filter(p2=user).filter(~Q(forfeit=user) & ~Q(forfeit=None)).count()
+		p2vs1LossForfeitCount = Game.objects.filter(p2=user).filter(forfeit=user).count()
+		return JsonResponse({
+			'success': True,
+			'html': render_to_string('website/profile.html', {
+				"user": user,
+				"perso": perso,
+				"singleGames": singleGames,
+				"aiWin": p1vsAiWinCount,
+				"aiLoss": p1vsAiLossCount,
+				"aiTot": p1vsAiWinCount + p1vsAiLossCount,
+				"aiWinForfeit": p1vsAiWinForfeitCount,
+				"aiLossForfeit": p1vsAiLossForfeitCount,
+				"aiForfeitTot": p1vsAiWinForfeitCount + p1vsAiLossForfeitCount,
+				"v1Win": p1vs1WinCount + p2vs1WinCount,
+				"v1Loss": p1vs1LossCount + p2vs1LossCount,
+				"v1Tot": p1vs1WinCount + p2vs1WinCount + p1vs1LossCount + p2vs1LossCount,
+				"v1WinForfeit": p1vs1WinForfeitCount + p2vs1WinForfeitCount,
+				"v1LossForfeit": p1vs1LossForfeitCount + p2vs1LossForfeitCount,
+				"v1ForfeitTot": p1vs1WinForfeitCount + p2vs1WinForfeitCount + p1vs1LossForfeitCount + p2vs1LossForfeitCount,
+				"form": editProfileForm({"username": user.username, "email": user.email})
+			}),
+	})
+def profileEdit(request, user_id):
+    if request.method == 'POST':
+        profile_form = editProfileForm(request.POST, request.FILES, request.user)
+        if profile_form.is_valid():
+            try:
+                profile_picture = request.FILES.get('profilPicture')
+                if profile_picture:
+                    if profile_picture.size > 1 * 1024 * 1024:
+                        raise ValidationError('File size exceeds 1MB.')
+
+                    if profile_picture.content_type not in ['image/jpeg', 'image/png', 'image/gif']:
+                        raise ValidationError('Unsupported file type. Please upload an image file (JPEG, PNG, GIF).')
+
+                    try:
+                        profile_picture.open()
+                        profile_picture.read()
+                    except Exception as e:
+                        raise ValidationError(f'Error reading file: {str(e)}')
+
+                user = profile_form.save()
+                user = authenticate(username=request.POST["username"], password=request.POST["password"])
+                if user is not None:
+                    return JsonResponse({'success': True})
+                else:
+                    return JsonResponse({'success': False, 'message': 'Profile change failed'})
+            except ValidationError as e:
+                return JsonResponse({'success': False, 'message': str(e)})
+
+        errors = profile_form.errors.get_json_data()
+        error_messages = []
+        for field, field_errors in errors.items():
+            for error in field_errors:
+                error_messages.append(error['message'])
+        return JsonResponse({'success': False, 'message': ' '.join(error_messages)})
+
+    return JsonResponse({'success': False, 'message': 'Invalid request method'})
