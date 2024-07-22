@@ -39,7 +39,7 @@ endif
 
 .PHONY : all up down stop clean flcean migrate makemigrations craetesuperuser list help re rere
 
-all up: 
+all up: hostmachine
 	@printf "$(_GREEN)Building and running Transcendence...$(_END)\n"
 	docker compose up -d --build
 
@@ -71,6 +71,9 @@ createsuperuser:
 
 list:
 	@docker ps -a
+
+hostmachine:
+	@sh remoteHost.sh
 
 help:
 	@printf "$(_CYAN)make / make all        $(_ITALIC)$(_THIN)=> build and run transcendence$(_END)\n"
