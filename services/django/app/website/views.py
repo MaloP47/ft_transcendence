@@ -27,6 +27,7 @@ from django.contrib.auth import get_user_model
 from website.forms import CustomUserCreationForm
 from .forms import editProfileForm
 from django.core.exceptions import ValidationError
+from django.core.serializers import serialize
 
 def index(request):
 	return render(request, "website/index.html");
@@ -365,6 +366,19 @@ def homeView(request):
 			'html': render_to_string('website/home.html', {"user": request.user, "friendRequest": friendRequest, "unfinishedGames": unfinishedGames}),
 		});
 
+def getUnfinishedGames(request):
+	if request.method == 'POST':
+		if request.user.is_authenticated:
+			unfinished_games = Game.objects.filter(Q(p1=request.user) | Q(p2=request.user)).exclude(scoreToWin__lte=F('p1Score')).exclude(scoreToWin__lte=F('p2Score')).exclude(forfeit__isnull=False)
+			unfinishedGames = serialize("json", unfinished_games)
+			unfinishedGames = json.loads(unfinishedGames)
+		else:
+			unfinishedGames = []
+		return JsonResponse({
+			'success': True,
+			'games': unfinishedGames,
+		});
+
 def chatView(request):
 	if request.method == 'POST' and request.user.is_authenticated:
 		data = json.loads(request.POST["data"]);
@@ -505,6 +519,14 @@ def gameRequestView(request):
 	if request.method == 'POST':
 		data = json.loads(request.POST["data"]);
 		game = Game.objects.get(id=data['id'])
+		return JsonResponse({
+			'success': True,
+			'html': render_to_string('website/unfinishedGameView.html', {"g": game, "user": request.user}),
+		})
+
+def getGameNotif(request, id):
+	if request.method == 'POST':
+		game = Game.objects.get(id=id)
 		return JsonResponse({
 			'success': True,
 			'html': render_to_string('website/unfinishedGameView.html', {"g": game, "user": request.user}),
@@ -698,38 +720,38 @@ def profile(request, user_id):
 			}),
 	})
 def profileEdit(request, user_id):
-    if request.method == 'POST':
-        profile_form = editProfileForm(request.POST, request.FILES, request.user)
-        if profile_form.is_valid():
-            try:
-                profile_picture = request.FILES.get('profilPicture')
-                if profile_picture:
-                    if profile_picture.size > 1 * 1024 * 1024:
-                        raise ValidationError('File size exceeds 1MB.')
+	if request.method == 'POST':
+		profile_form = editProfileForm(request.POST, request.FILES, request.user)
+		if profile_form.is_valid():
+			try:
+				profile_picture = request.FILES.get('profilPicture')
+				if profile_picture:
+					if profile_picture.size > 1 * 1024 * 1024:
+						raise ValidationError('File size exceeds 1MB.')
 
-                    if profile_picture.content_type not in ['image/jpeg', 'image/png', 'image/gif']:
-                        raise ValidationError('Unsupported file type. Please upload an image file (JPEG, PNG, GIF).')
+					if profile_picture.content_type not in ['image/jpeg', 'image/png', 'image/gif']:
+						raise ValidationError('Unsupported file type. Please upload an image file (JPEG, PNG, GIF).')
 
-                    try:
-                        profile_picture.open()
-                        profile_picture.read()
-                    except Exception as e:
-                        raise ValidationError(f'Error reading file: {str(e)}')
+					try:
+						profile_picture.open()
+						profile_picture.read()
+					except Exception as e:
+						raise ValidationError(f'Error reading file: {str(e)}')
 
-                user = profile_form.save()
-                user = authenticate(username=request.POST["username"], password=request.POST["password"])
-                if user is not None:
-                    return JsonResponse({'success': True})
-                else:
-                    return JsonResponse({'success': False, 'message': 'Profile change failed'})
-            except ValidationError as e:
-                return JsonResponse({'success': False, 'message': str(e)})
+				user = profile_form.save()
+				user = authenticate(username=request.POST["username"], password=request.POST["password"])
+				if user is not None:
+					return JsonResponse({'success': True})
+				else:
+					return JsonResponse({'success': False, 'message': 'Profile change failed'})
+			except ValidationError as e:
+				return JsonResponse({'success': False, 'message': str(e)})
 
-        errors = profile_form.errors.get_json_data()
-        error_messages = []
-        for field, field_errors in errors.items():
-            for error in field_errors:
-                error_messages.append(error['message'])
-        return JsonResponse({'success': False, 'message': ' '.join(error_messages)})
+		errors = profile_form.errors.get_json_data()
+		error_messages = []
+		for field, field_errors in errors.items():
+			for error in field_errors:
+				error_messages.append(error['message'])
+		return JsonResponse({'success': False, 'message': ' '.join(error_messages)})
 
-    return JsonResponse({'success': False, 'message': 'Invalid request method'})
+	return JsonResponse({'success': False, 'message': 'Invalid request method'})

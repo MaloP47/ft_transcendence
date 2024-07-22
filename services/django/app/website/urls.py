@@ -18,11 +18,13 @@ urlpatterns = [
 
 
 	path('api/game/get/', views.getGame, name="getGame"),
-	path('api/game/save/', views.saveGame, name="saveGame"),
+    path('api/game/save/', views.saveGame, name="saveGame"),
 	path('api/game/new/1vsAI/', views.gameNew1vsAi, name="gameNew1vsAi"),
 	path('api/game/new/1vs1/', views.gameNew1vs1, name="gameNew1vs1"),
 	path('api/game/new/multi/', views.gameNewMulti, name="gameNewMulti"),
 	path('api/game/forfeit/', views.gameForfeit, name="gameForfeit"),
+	path('api/game/unfinished/', views.getUnfinishedGames, name="getUnfinishedGames"),
+    path('api/game/notif/<int:id>', views.getGameNotif, name="getGameNotif"),
 
 	path('api/messages/setRead/', views.messageSetRead, name="messageSetRead"),
 	path('api/view/chatMenu/', views.chatMenu, name="chatMenu"),
