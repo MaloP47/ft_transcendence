@@ -24,10 +24,16 @@
 		<div class="input-group mb-3" style="width:400px">
 			<span class="input-group-text"style="--bs-bg-opacity: .5; --bs-border-opacity: .1; width:85px">Password</span>
 			{{form.password}}
+			<button class="btn btn-outline-secondary toggle-password" type="button">
+				<i class="bi bi-eye-slash"></i>
+			</button>
 		</div>
 		<div class="input-group mb-3" style="width:400px">
 			<span class="input-group-text"style="--bs-bg-opacity: .5; --bs-border-opacity: .1; width:85px">Confirm</span>
 			{{form.confirm_password}}
+			<button class="btn btn-outline-secondary toggle-password" type="button">
+				<i class="bi bi-eye-slash"></i>
+			</button>
 		</div>
 		<button type="submit" class="btn btn-primary mt-3"id="profileFormSubmitBtn">Save Changes</button>
 	</form>

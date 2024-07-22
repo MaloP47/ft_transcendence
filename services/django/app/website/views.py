@@ -26,6 +26,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import get_user_model
 from website.forms import CustomUserCreationForm
 from .forms import editProfileForm
+from django.core.exceptions import ValidationError
 
 def index(request):
 	return render(request, "website/index.html");
@@ -653,9 +654,9 @@ def profile(request, user_id):
 				"form": editProfileForm({"username": user.username, "email": user.email})
 			}),
 	})
-def profileEdit(request):
+def profileEdit(request, user_id):
     if request.method == 'POST':
-        profile_form = editProfileForm(request.POST, request.FILES, instance=request.user)
+        profile_form = editProfileForm(request.POST, request.FILES, request.user)
         if profile_form.is_valid():
             try:
                 profile_picture = request.FILES.get('profilPicture')

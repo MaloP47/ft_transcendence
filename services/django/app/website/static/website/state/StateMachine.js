@@ -6,7 +6,7 @@
 /*   By: renstein <renstein@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/13 11:54:22 by gbrunet           #+#    #+#             */
-/*   Updated: 2024/07/22 13:03:22 by renstein         ###   ########.fr       */
+/*   Updated: 2024/07/22 14:56:24 by renstein         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -1805,18 +1805,17 @@ export default class App {
 				this.getApiResponse("/api/user/profile/"+ id, formData).then((response) => {
 					let res = JSON.parse(response);
 					if (res.success) {
-						history.pushState("", "", "/");
-						this.router();
-						this.updateUser();
+						this.getProfile(res.id);
+						alert('Profile updated successfully!');
 					} else {
-						let profileForm = document.getElementById("profileForm");
-						profileForm.classList.add("shake");
+						let profileForm = document.getElementById("profile");
+						// profileForm.classList.add("shake");
 						let profileFormAlert = document.getElementById("profileFormAlert");
 						profileFormAlert.textContent = res.message;
 						profileFormAlert.classList.remove("hided");
-						setTimeout(() => {
-							profileForm.classList.remove("shake");
-						}, 500);
+						// setTimeout(() => {
+						// 	profileForm.classList.remove("shake");
+						// }, 500);
 						setTimeout(() => {
 							profileFormAlert.classList.add("hided");
 						}, 5000);
