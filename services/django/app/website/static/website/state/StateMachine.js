@@ -1924,17 +1924,6 @@ export default class App {
 					previewProfilePicture.innerHTML = `<img src="${e.target.result}" class="img-fluid rounded rounded-circle border border-white" style="width: 150px; height: 150px;">`;
 				};
 				reader.readAsDataURL(file);
-				reader.onerror = function () {
-					registerFormAlert.textContent = 'Error reading file.';
-					registerFormAlert.classList.remove('hided');
-				};
-
-				try {
-					reader.readAsDataURL(file);
-				} catch (error) {
-					registerFormAlert.textContent = `Error reading file: ${error.message}`;
-					registerFormAlert.classList.remove('hided');
-				}
 			}
 		});
 	}
@@ -1960,11 +1949,11 @@ export default class App {
 				setTimeout(() => {
 					profileView.classList.remove("hided");
 				}, 15);
-
 				// this.updateTopContent(res.html);
 				// this.showProfileForm();
 				this.addProfileFormSubmitListener(id);
 				this.addProfilePictureChangeListener();
+				this.addTogglePasswordButtons()
 			}
 		});
 	}

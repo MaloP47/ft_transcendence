@@ -3,33 +3,32 @@
 	<div class="p-3 px-4 bg-blur-5 rounded border border-light d-flex flex-column align-items-center position-fixed overflow-auto" style="--bs-border-opacity:0.25;max-height:calc(100% - 150px); min-width: calc(100% - 300px)">
 		<h2 class="mb-3">{{ user.username }}</h2>
 	{% if perso %}
-
-	<div class="rounded rounded-circle m-2 mb-3 border border-white flex-shrink-0 " \
-		 style="background-image: url('{{ user.profilPicture.url }}'); background-size: cover; --bs-border-opacity:0.2; width:150px; height:150px;"
-		 id="previewProfilePicture"
-		 data-default-image="{{ user.profilPicture.url }}">
+		<div class="rounded rounded-circle m-2 mb-3 border border-white flex-shrink-0 " \
+			style="background-image: url('{{ user.profilPicture.url }}'); background-size: cover; --bs-border-opacity:0.2; width:150px; height:150px;"
+			id="previewProfilePicture"
+			data-default-image="{{ user.profilPicture.url }}">
 		</div>
 		<form method="post" enctype="multipart/form-data"id="profileFormForm">
-		<div class="mb-3"style="width:400px">
+		<div class="mb-3 roboto"style="width:400px">
 			{{ form.profile_picture }}
 		</div>
-		<div class="input-group mb-3" style="width:400px">
-			<span class="input-group-text" style="--bs-bg-opacity: .5; --bs-border-opacity: .1; width:85px">Username</span>
+		<div class="input-group mb-3 roboto" style="width:400px">
+			<span class="input-group-text" style="--bs-bg-opacity: .5; --bs-border-opacity: .1; width:100px">Username</span>
 			{{form.username}}
 		</div>
-		<div class="input-group mb-3" style="width:400px">
-			<span class="input-group-text" style="--bs-bg-opacity: .5; --bs-border-opacity: .1; width:85px">Email</span>
+		<div class="input-group mb-3 roboto" style="width:400px">
+			<span class="input-group-text" style="--bs-bg-opacity: .5; --bs-border-opacity: .1; width:100px">Email</span>
 			{{form.email}}
 		</div>
-		<div class="input-group mb-3" style="width:400px">
-			<span class="input-group-text"style="--bs-bg-opacity: .5; --bs-border-opacity: .1; width:85px">Password</span>
+		<div class="input-group mb-3 roboto" style="width:400px">
+			<span class="input-group-text"style="--bs-bg-opacity: .5; --bs-border-opacity: .1; width:100px">Password</span>
 			{{form.password}}
 			<button class="btn btn-outline-secondary toggle-password" type="button">
 				<i class="bi bi-eye-slash"></i>
 			</button>
 		</div>
-		<div class="input-group mb-3" style="width:400px">
-			<span class="input-group-text"style="--bs-bg-opacity: .5; --bs-border-opacity: .1; width:85px">Confirm</span>
+		<div class="input-group mb-3 roboto" style="width:400px">
+			<span class="input-group-text"style="--bs-bg-opacity: .5; --bs-border-opacity: .1; width:100px">Confirm</span>
 			{{form.confirm_password}}
 			<button class="btn btn-outline-secondary toggle-password" type="button">
 				<i class="bi bi-eye-slash"></i>

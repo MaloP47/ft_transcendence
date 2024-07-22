@@ -5,7 +5,7 @@ from django import forms
 from website.models import User as CustomUser
 
 
-class editProfileForm(forms.Form):
+class editProfileForm(forms.ModelForm):
 	profile_picture = forms.ImageField(
         required=False,
 		widget=forms.FileInput(
@@ -52,13 +52,13 @@ class editProfileForm(forms.Form):
 
 	class Meta:
 			model = CustomUser
-			fields = ("username", "email", "password", "confirm_password", "profilPicture")
+			fields = ("username", "email", "password", "confirm_password", "profile_picture")
 
 	def save(self, commit=True):
 		user = super(editProfileForm, self).save(commit=False)
 		user.email = self.cleaned_data['email']
-		if 'profilPicture' in self.cleaned_data:
-			user.profilPicture = self.cleaned_data['profilPicture']
+		if 'profile_picture' in self.cleaned_data:
+			user.profilPicture = self.cleaned_data['profile_picture']
 		if commit:
 			user.save()
 		return user
