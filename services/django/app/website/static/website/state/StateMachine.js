@@ -1,18 +1,3 @@
-<<<<<<< HEAD
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   StateMachine.js                                    :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: renstein <renstein@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/06/13 11:54:22 by gbrunet           #+#    #+#             */
-/*   Updated: 2024/07/19 16:21:15 by renstein         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
-=======
->>>>>>> 4ab213f (ball position broadcasted, better logic in consumer.py for receive but only for multiHostInfo)
 import Pong from '../pong/Pong.js';
 
 function sleep(ms) {
