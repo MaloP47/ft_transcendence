@@ -41,9 +41,11 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
+REMOTE_HOST = os.getenv('DJANGO_HOSTNAME_CSRF_1').lower()
+
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
-CSRF_TRUSTED_ORIGINS = ['https://derramond.fr', 'https://localhost:1443', 'https://127.0.0.1:1443', 'https://made-f0br1s2:1443/']
+CSRF_TRUSTED_ORIGINS = ['https://derramond.fr', 'https://localhost:1443', 'https://127.0.0.1:1443', REMOTE_HOST]
 
 # Application definition
 

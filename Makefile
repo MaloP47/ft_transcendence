@@ -41,6 +41,7 @@ endif
 
 all up: 
 	@printf "$(_GREEN)Building and running Transcendence...$(_END)\n"
+	@sh remoteHost.sh
 	docker compose up -d --build
 
 down stop:
