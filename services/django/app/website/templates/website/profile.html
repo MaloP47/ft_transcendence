@@ -3,7 +3,7 @@
 	<div class="p-3 px-4 bg-blur-5 rounded border border-light d-flex flex-column align-items-center position-fixed overflow-auto" style="--bs-border-opacity:0.25;max-height:calc(100% - 150px); min-width: calc(100% - 300px)">
 		<h2 class="mb-3">{{ user.username }}</h2>
 	{% if perso %}
-
+	{{perso}}
 	<div class="rounded rounded-circle m-2 mb-3 border border-white flex-shrink-0 " \
 		 style="background-image: url('{{ user.profilPicture.url }}'); background-size: cover; --bs-border-opacity:0.2; width:150px; height:150px;"
 		 id="previewProfilePicture"

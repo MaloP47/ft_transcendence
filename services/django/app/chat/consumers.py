@@ -153,4 +153,4 @@ class ChatConsumer(AsyncWebsocketConsumer):
 		results.online = online
 		results.last_login = datetime.now()
 		await sync_to_async(results.save)()
-		await self.channel_layer.group_send(self.room_group_name, {'type': 'need_update'})
+		await self.channel_layer.group_send(self.room_group_name, {'type': 'need_update', 'id': userId})

@@ -383,6 +383,9 @@ export default class App {
 					} else if (state == "createTournaments") {
 						this.setPong("bg");
 						this.getCreateTournament();
+					} else if (state == "profile") {
+						this.setPong("bg");
+						this.getProfile(game_id);
 					}
 					let homeView = document.getElementById("homeView");
 					setTimeout(() => {
@@ -1001,6 +1004,7 @@ export default class App {
 			}
 		});
 	}
+
 	getMultiConfigPage() {
 		let homeContent = document.getElementById("homeContent");
 		if (!homeContent)
@@ -1104,6 +1108,7 @@ export default class App {
 			});
 		}
 	}
+
 	setMultiConfigInteraction() {
 		let config = {
 			winScore: 10,
@@ -1155,9 +1160,7 @@ export default class App {
 
 			let playBtn = document.getElementById("playBtn")
 			playBtn.addEventListener("click", (e) => {
-				if (config.p2Local == "")
-					config.p2Local = this.playerMulti.name;
-				this.getApiResponseJson("/api/game/new/multi/", {config: config, p2: this.playerMulti}).then((response) => {
+				this.getApiResponseJson("/api/game/new/multi_chat/", {config: config, p2: this.playerMulti.id}).then((response) => {
 					let res = JSON.parse(response);
 					if (res.success) {
 						this.chatSocket.send(JSON.stringify({
@@ -1168,7 +1171,7 @@ export default class App {
 						let config = document.getElementById("config");
 						config.classList.add("hided")
 						this.remove("config")
-						history.pushState("", "", "/multi/" + res.id);
+						history.pushState("", "", "/multi/" + res.g1);
 						this.router();
 					}
 				});
@@ -1566,7 +1569,6 @@ export default class App {
 										chatMenu.style.top = (e.clientY + 5) + "px";
 										chatMenu.style.right = (window.innerWidth - e.clientX + 5) + "px";
 										chatMenu.innerHTML = res.html;
-										let sendPlay = document.getElementById("chatSendPlay")
 										this.chatMenuSendPlay();
 										this.chatMenuDeleteFriend();
 										this.chatMenuAddFriend();
@@ -2098,8 +2100,6 @@ export default class App {
 					profileView.classList.remove("hided");
 				}, 15);
 
-				// this.updateTopContent(res.html);
-				// this.showProfileForm();
 				this.addProfileFormSubmitListener(id);
 				this.addProfilePictureChangeListener();
 			}
@@ -2120,13 +2120,9 @@ export default class App {
 						alert('Profile updated successfully!');
 					} else {
 						let profileForm = document.getElementById("profile");
-						// profileForm.classList.add("shake");
 						let profileFormAlert = document.getElementById("profileFormAlert");
 						profileFormAlert.textContent = res.message;
 						profileFormAlert.classList.remove("hided");
-						// setTimeout(() => {
-						// 	profileForm.classList.remove("shake");
-						// }, 500);
 						setTimeout(() => {
 							profileFormAlert.classList.add("hided");
 						}, 5000);
@@ -2137,8 +2133,9 @@ export default class App {
 	}
 
 	addProfilePictureChangeListener() {
-		// let profilePictureInput = document.getElementById("profileFormProfilePicture");
 		let previewProfilePicture = document.getElementById("previewProfilePicture");
+		if (!previewProfilePicture)
+			return ;
 		let profileFormAlert = document.getElementById("profileFormAlert");
 
 		previewProfilePicture.addEventListener("change", function () {
