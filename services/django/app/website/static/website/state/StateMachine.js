@@ -1,15 +1,3 @@
-// ************************************************************************** //
-//                                                                            //
-//                                                        :::      ::::::::   //
-//   StateMachine.js                                    :+:      :+:    :+:   //
-//                                                    +:+ +:+         +:+     //
-//   By: gbrunet <gbrunet@student.42.fr>            +#+  +:+       +#+        //
-//                                                +#+#+#+#+#+   +#+           //
-//   Created: 2024/07/22 11:54:11 by gbrunet           #+#    #+#             //
-//   Updated: 2024/07/22 12:02:35 by gbrunet          ###   ########.fr       //
-//                                                                            //
-// ************************************************************************** //
-
 import Pong from '../pong/Pong.js';
 
 function sleep(ms) {
@@ -61,6 +49,7 @@ export default class App {
 			"/multi": {title: "Transcendence - 1 VS 1 (multiplayer)", state: "PlayMulti"},
 			"/listTournaments": {title: "Transcendence - Tournaments", state: "listTournaments"},
 			"/createTournaments": {title: "Transcendence - Tournament creation", state: "createTournaments"},
+			"/profile": {title: "Transcendence - Profile", state: "Profile"},
 		}
 	}
 
@@ -107,6 +96,9 @@ export default class App {
 		} else if (path.indexOf("/play1vs1/") == 0) {
 			id = path.substring(10)
 			path = "/play1vs1"
+		} else if (path.indexOf("/profile/") == 0) {
+			id = path.substring(9)
+			path = "/profile"
 		} else if (path.indexOf("/multi/") == 0) {
 			id = path.substring(7)
 			path = "/multi"
@@ -186,6 +178,14 @@ export default class App {
 						this.hideCreateGame();
 					this.getHomePage("createTournaments", id);
 					break;
+				case "Profile":
+					if (document.getElementById("registerForm"))
+						this.hideRegisterForm();
+					if (document.getElementById("loginForm"))
+						this.hideLoginForm();
+					if (document.getElementById("createGame"))
+						this.hideCreateGame();
+					this.getHomePage("profile", id);
 			}
 		} else {
 			history.replaceState("", "", "/");
@@ -297,8 +297,8 @@ export default class App {
 						profilMenu.innerHTML = res.html;
 						profilMenu.classList.remove("hided");
 					}
-				})
-		} else {
+				});
+			} else {
 			profilMenu.classList.add("hided");
 			setTimeout(() => {
 				profilMenu.innerHTML = "";
@@ -330,7 +330,7 @@ export default class App {
 		}, 200);
 	}
 
-	getHomePage(state, game_id) {
+	getHomePage(state, id) {
 		if (this.user.authenticated) {
 			if (this.chatSocket)
 				this.chatSocket.close();
@@ -379,7 +379,7 @@ export default class App {
 						this.setPong("bg");
 						this.getLocalAiConfigPage();
 					} else if (state == "1vsAI" && game_id != -1) {
-						this.getLocalAiGame(game_id);
+						this.getLocalAiGame(id);
 					} else if (state == "1vs1" && !this.user.authenticated) {
 						history.replaceState("", "", "/");
 						this.router();
@@ -402,37 +402,50 @@ export default class App {
 					} else if (state == "createTournaments") {
 						this.setPong("bg");
 						this.getCreateTournament();
+					} else if (state == "profile") {
+						this.setPong("bg");
+						this.getProfile(id);
 					}
 					let homeView = document.getElementById("homeView");
 					setTimeout(() => {
 						homeView.classList.remove("hided");
 					}, 15);
-				}
-			})
+
+			});
 		} else {
 			if (state == "home") {
 				this.setPong("bg");
+				this.hideProfile();
 				this.getCreateGame();
 			} else if (state == "1vsAI" && game_id == -1) {
 				this.setPong("bg");
 				this.hideLocalGame();
+				this.hideProfile();
 				this.getLocalAiConfigPage();
 			} else if (state == "1vsAI" && game_id != -1) {
 				this.hideLocalConfigPage();
+				this.hideProfile();
 				this.getLocalAiGame(game_id);
 			} else if (state == "1vs1" && game_id == -1) {
 				this.setPong("bg");
 				this.hideLocalGame();
+				this.hideProfile();
 				this.getLocalConfigPage();
 			} else if (state == "1vs1" && game_id != -1) {
 				this.hideLocalConfigPage();
+				this.hideProfile();
 				this.getLocalGame(game_id);
+			} else if (state == "profile") {
+				this.setPong("bg");
+				this.getProfile(game_id);
 			} else if (state == "multi" && game_id == -1) {
 				this.setPong("bg");
+				this.hideProfile();
 				this.hideLocalGame();
 				this.getMultiConfigPage();
 			} else if (state == "multi" && game_id != -1) {
 				this.hideLocalConfigPage();
+				this.hideProfile();
 				this.getMultiGame(game_id);
 			} else if (state == "listTournaments") {
 				this.getListTournaments(game_id);
@@ -677,7 +690,7 @@ export default class App {
 					this.setPong("bg")
 				else
 					this.setPong("p1Game");
-				this.pong.game_id = id;
+				this.pong.id = id;
 				this.pong.gameInfo = res;
 				let homeContent = document.getElementById("homeContent");
 				if (document.getElementById("gameOverlay"))
@@ -777,7 +790,7 @@ export default class App {
 					this.setPong("bg")
 				else
 					this.setPong("p1Game");
-				this.pong.game_id = id;
+				this.pong.id = id;
 				this.pong.gameInfo = res;
 				let homeContent = document.getElementById("homeContent");
 				if (document.getElementById("gameOverlay"))
@@ -1913,6 +1926,105 @@ export default class App {
 		});
 	}
 
+	hideProfile() {
+		let profileView = document.getElementById("profile");
+		if (!profileView)
+			return ;
+		profileView.classList.add("hided")
+		this.remove("profile")
+	}
+
+	getProfile(id) {
+		let homeContent = document.getElementById("homeContent");
+		if (!homeContent) return;
+
+		this.getApiResponse("/api/view/profile/" + id).then((response) => {
+			let res = JSON.parse(response);
+			if (res.success) {
+				homeContent.innerHTML = res.html;
+				let profileView = document.getElementById("profile");
+				if (!profileView) return;
+				setTimeout(() => {
+					profileView.classList.remove("hided");
+				}, 15);
+
+				// this.updateTopContent(res.html);
+				// this.showProfileForm();
+				this.addProfileFormSubmitListener(id);
+				this.addProfilePictureChangeListener();
+			}
+		});
+	}
+
+	addProfileFormSubmitListener(id) {
+		let form = document.getElementById("profileFormForm");
+		let formBtn = document.getElementById("profileFormSubmitBtn");
+		if (formBtn) {
+			formBtn.addEventListener("click", (e) => {
+				e.preventDefault();
+				let formData = new FormData(form);
+				this.getApiResponse("/api/user/profile/"+ id, formData).then((response) => {
+					let res = JSON.parse(response);
+					if (res.success) {
+						this.getProfile(res.id);
+						alert('Profile updated successfully!');
+					} else {
+						let profileForm = document.getElementById("profile");
+						// profileForm.classList.add("shake");
+						let profileFormAlert = document.getElementById("profileFormAlert");
+						profileFormAlert.textContent = res.message;
+						profileFormAlert.classList.remove("hided");
+						// setTimeout(() => {
+						// 	profileForm.classList.remove("shake");
+						// }, 500);
+						setTimeout(() => {
+							profileFormAlert.classList.add("hided");
+						}, 5000);
+					}
+				});
+			});
+		}
+	}
+
+	addProfilePictureChangeListener() {
+		// let profilePictureInput = document.getElementById("profileFormProfilePicture");
+		let previewProfilePicture = document.getElementById("previewProfilePicture");
+		let profileFormAlert = document.getElementById("profileFormAlert");
+
+		previewProfilePicture.addEventListener("change", function () {
+			if (this.files && this.files[0]) {
+				let file = this.files[0];
+
+				// Reset alert and preview
+				profileFormAlert.classList.add('hided');
+				profileFormAlert.textContent = '';
+				previewProfilePicture.innerHTML = '';
+
+				// File validation
+				const fileSizeLimit = 1 * 1024 * 1024; // 1MB
+				const allowedFileTypes = ['image/jpeg', 'image/png', 'image/gif'];
+
+				if (!allowedFileTypes.includes(file.type)) {
+					profileFormAlert.textContent = 'Unsupported file type. Please upload an image file (JPEG, PNG, GIF).';
+					profileFormAlert.classList.remove('hided');
+					return;
+				}
+
+				if (file.size > fileSizeLimit) {
+					profileFormAlert.textContent = 'File size exceeds 1MB. Please upload a smaller image.';
+					profileFormAlert.classList.remove('hided');
+					return;
+				}
+
+				let reader = new FileReader();
+				reader.onload = function (e) {
+					previewProfilePicture.style.backgroundImage = `url(${e.target.result})`;
+				};
+				reader.readAsDataURL(file);
+			}
+		});
+	}
+  
 	//-------------------------------------------------------
 	// --------------------- SINGLETON ----------------------
 	//-------------------------------------------------------
