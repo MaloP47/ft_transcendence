@@ -10,3 +10,4 @@ pillow==10.3.0
 web3==6.19.0
 argon2-cffi==23.1.0
 django-prometheus
+djangorestframework

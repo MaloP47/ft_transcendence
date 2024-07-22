@@ -16,7 +16,7 @@ from django.contrib.auth import login, logout, authenticate
 from django.template.loader import render_to_string
 from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Exists, F, Subquery, OuterRef, Q
-from website.models import Game, BlockedUser, User, Message, Room, FriendRequest, Tournament
+from website.models import Game, BlockedUser, User, Message, Room, FriendRequest, Tournament, YourModel
 import json
 from datetime import datetime, timedelta
 from web3 import Web3
@@ -25,6 +25,12 @@ from django.conf import settings
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import get_user_model
 from website.forms import CustomUserCreationForm
+from rest_framework import viewsets
+from .serializers import YourModelSerializer
+
+class YourModelViewSet(viewsets.ModelViewSet):
+    queryset = YourModel.objects.all()
+    serializer_class = YourModelSerializer
 
 
 def index(request):

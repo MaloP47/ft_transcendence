@@ -6,7 +6,7 @@
 #    By: guderram <guderram@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/06/03 16:02:34 by gbrunet           #+#    #+#              #
-#    Updated: 2024/07/21 15:49:17 by guderram         ###   ########.fr        #
+#    Updated: 2024/07/22 11:23:48 by guderram         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -60,6 +60,12 @@ INSTALLED_APPS = [
     'rest_framework',
 	'django_prometheus',
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.AllowAny',
+    ]
+}
 
 
 ASGI_APPLICATION = 'transcendence.asgi.application'

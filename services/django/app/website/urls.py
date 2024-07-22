@@ -1,8 +1,14 @@
-from django.urls import path, re_path
+from django.urls import path, re_path, include
+from rest_framework.routers import DefaultRouter
+from .views import YourModelViewSet
 
 from . import views
 
+router = DefaultRouter()
+router.register(r'yourmodel', YourModelViewSet)
+
 urlpatterns = [
+	path('apirestful', include(router.urls)),
 	path('api/user/logout/', views.logoutUser, name="logout"),
 	path('api/user/register/', views.registerUser, name="registerUser"),
 	path('api/user/signin/', views.signinUser, name="signin"),

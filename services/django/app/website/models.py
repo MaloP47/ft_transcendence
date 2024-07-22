@@ -1,6 +1,14 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
+class YourModel(models.Model):
+
+    name = models.CharField(max_length=100)
+    description = models.TextField()
+    def __str__(self):
+        return self.name
+	
+
 class User(AbstractUser):
 	profilPicture = models.ImageField(verbose_name="Profil picture", upload_to="profilPicture", default="profilPicture/default.jpg")
 	online = models.BooleanField(default=True)
