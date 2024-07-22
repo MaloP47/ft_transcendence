@@ -311,3 +311,7 @@ body {
 .custom-file-label:hover {
 	background-color: #0056b3;
 }
+
+#profile {
+	transition: opacity 200ms;
+}
