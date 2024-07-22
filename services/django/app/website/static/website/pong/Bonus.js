@@ -96,7 +96,19 @@ export default class Bonus {
 		}
 	}
 
+	updateMulti() {
+		this.active = this.pong.multiData.bonus_active;
+		this.bonus.position.x = this.pong.multiData.bonus_pos.x;
+		this.bonus.position.y = this.pong.multiData.bonus_pos.y;
+		this.startTime = this.pong.multiData.bonus_startTime;
+		this.type = this.pong.multiData.bonus_type;
+	}
+
 	update() {
+		// Multi
+		if (this.pong.isMultiNotHost())
+			this.updateMulti();
+		
 		if (!this.active){
 			if (this.bonus.scale.x > 0) {
 				this.bonus.scale.x -= this.pong.elapsedTime / 400;

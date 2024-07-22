@@ -6,7 +6,7 @@
 #    By: guderram <guderram@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/05/28 10:17:29 by gbrunet           #+#    #+#              #
-#    Updated: 2024/07/08 13:33:59 by guderram         ###   ########.fr        #
+#    Updated: 2024/07/22 18:05:01 by guderram         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -37,9 +37,9 @@ ifndef VERBOSE
 endif
 ### Formatting ###
 
-.PHONY : all up down stop clean flcean mkdirs migrate makemigrations craetesuperuser list help re rere
+.PHONY : all up down stop clean flcean migrate makemigrations craetesuperuser list help re rere dev users resetdata 
 
-all up: mkdirs
+all up: hostmachine
 	@printf "$(_GREEN)Building and running Transcendence...$(_END)\n"
 	docker compose up -d --build
 	# remove migrations from here
@@ -54,8 +54,7 @@ down stop:
 	docker compose down
 
 clean: down
-	@printf "$(_YELLOW)Removing all unused containers...$(_END)\n"
-	docker system prune -f
+	@printf "$(_YELLOW)Removing all containers data...$(_END)\n"
 	docker volume prune -f
 	rm -rf data/var-log
 	rm -rf services/postgres/logs
@@ -63,7 +62,7 @@ clean: down
 
 
 fclean: down
-	@printf "$(_YELLOW)Removing all unused containers...$(_END)\n"
+	@printf "$(_YELLOW)Removing all unused containers and data...$(_END)\n"
 	docker system prune -af
 	docker volume prune -af
 	rm -rf data/var-log
@@ -95,6 +94,9 @@ createsuperuser:
 list:
 	@docker ps -a
 
+hostmachine:
+	@sh remoteHost.sh
+
 help:
 	@printf "$(_CYAN)make / make all        $(_ITALIC)$(_THIN)=> build and run transcendence$(_END)\n"
 	@printf "$(_CYAN)make stop              $(_ITALIC)$(_THIN)=> stop transcendence$(_END)\n"
@@ -107,3 +109,12 @@ help:
 re: clean all
 
 rere: fclean all
+
+ln:
+	[ -L ./django_app ] || ln -s services/django/app ./django_app
+
+users:
+	-docker compose exec -e DJANGO_SUPERUSER_PASSWORD=mdpdur42 django python manage.py createsuperuser --no-input --username noa --email noa@example.com
+	-docker compose exec -e DJANGO_SUPERUSER_PASSWORD=mdpdur42 django python manage.py createsuperuser --no-input --username lala --email lala@example.com
+	-docker compose exec -e DJANGO_SUPERUSER_PASSWORD=mdpdur42 django python manage.py createsuperuser --no-input --username hihi --email hihi@example.com
+	-docker compose exec -e DJANGO_SUPERUSER_PASSWORD=mdpdur42 django python manage.py createsuperuser --no-input --username kiki --email kiki@example.com

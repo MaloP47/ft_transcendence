@@ -26,9 +26,13 @@
 			{% block 'body' %}
 			{% endblock %}
 		</div>
+		<audio id="audio_transcendence" src="{% static 'mp3/Transcendence.mp3' %}" loop></audio>
+		<button id="toggleButton" class="btn btn-dark btn-sm" style="position:fixed; bottom:10px; left:10px; z-index:1000;">
+			<i id="toggleIcon" class="bi bi-play-fill"></i>
+		</button>
+		<script src="{% static 'website/music/music.js' %}"></script>
 		{% include "website/navbar.html" %}
 		<script src="{% static 'website/bootstrap/bootstrap.bundle.min.js' %}" crossorigin="anonymous"></script>
 		<script type="module" src="{% static 'website/main.js' %}"></script>
-
 	</body>
 </html>

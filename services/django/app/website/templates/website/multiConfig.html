@@ -1,0 +1,37 @@
+<div id="config" class="d-flex hided flex-column justify-content-center align-items-center position-fixed w-100" style="z-index:300">
+	<div class="p-3 px-4 bg-blur-5 rounded border border-light d-flex flex-column align-items-center position-fixed" style="--bs-border-opacity:0.25;">
+		<h2>Multiplayer 1 vs 1 - Game Configuration</h2>
+		<div class="divider mb-3"></div>
+		<div class="d-flex mb-2" style="width:475px">
+			<label for="winScore" style="width:175px" class="form-label fs-5 flex-shrink-0 me-2">Score to win ( <b><span id="winScoreText">10</span></b> ) :</label>
+			<input type="range" class="form-range mt-1" min="2" max="21" step="1" value="10" id="winScore">
+		</div>
+		<div class="d-flex mb-2" style="width:475px">
+			<label for="startSpeed" style="width:175px" class="form-label fs-5 flex-shrink-0 me-2">Ball start speed ( <b><span id="startSpeedText">8</span></b> ) :</label>
+			<input type="range" class="form-range mt-1" min="5" max="15" step="0.5" value="8" id="startSpeed">
+		</div>
+		<div class="d-flex w-100 align-items-center mb-2">
+			<span class="fs-5 me-auto">Bonuses :</span>
+			<input type="radio" class="btn-check" name="bonuses" id="bonusesOn" autocomplete="off" value="on" checked />
+			<label style="width:140px" class="btn btn-outline-light" for="bonusesOn">On</label>
+			<input type="radio" class="btn-check" name="bonuses" id="bonusesOff" autocomplete="off" value="off" />
+			<label style="width:140px; margin-left:10px" class="btn btn-outline-light" for="bonusesOff">Off</label>
+		</div>
+		<div class="divider my-3"></div>
+		<div class="d-flex w-100 align-items-center mb-2">
+			<span class="fs-5 me-auto">Player 1:</span>
+			<button id="player1Field" disabled class="btn btn-outline-light" style="width:290px">{{user.username}}</button>
+			<!--<button id="leftKey" class="btn btn-outline-light" style="width:290px">LALALA</button>-->
+		</div>
+		<div class="d-flex mb-2 align-items-center" style="width:475px">
+			<label for="addPlayer" style="width:175px" class="fs-5 form-label flex-shrink-0 me-2">Player 2:</label>
+			<input id="addPlayer" class="form-control roboto" placeholder="Search" />
+			<div style="margin-top: 40px">
+				<div id="playerResult" style="right: 0; width: 293px; z-index:10000" class="position-absolute me-4 p-2"></div>
+			</div>
+		</div>
+		<div class="w-100 d-flex" id="players"></div>
+		<div class="divider mt-3 mb-4"></div>
+		<button id="playBtn" disabled class="btn btn-outline-light fs-5 mb-2" style="width:290px">Play</button>
+	</div>
+</div>
