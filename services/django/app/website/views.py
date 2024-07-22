@@ -1,15 +1,3 @@
-# **************************************************************************** #
-#																			   #
-#														  :::	   ::::::::    #
-#	 views.py											:+:		 :+:	:+:    #
-#													  +:+ +:+		  +:+	   #
-#	 By: gbrunet <gbrunet@student.42.fr>			+#+  +:+	   +#+		   #
-#												  +#+#+#+#+#+	+#+			   #
-#	 Created: 2024/06/12 14:48:57 by gbrunet		   #+#	  #+#			   #
-#	 Updated: 2024/06/12 14:59:45 by gbrunet		  ###	########.fr		   #
-#																			   #
-# **************************************************************************** #
-
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.contrib.auth import login, logout, authenticate
@@ -25,6 +13,7 @@ from django.conf import settings
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import get_user_model
 from website.forms import CustomUserCreationForm
+from django.core.serializers import serialize
 
 
 def index(request):
@@ -84,6 +73,27 @@ def gameForfeit(request):
 		return JsonResponse({
 			'success': True,
 		})
+
+def getGameNotif(request, game_id):
+	if request.method == 'POST':
+		game = Game.objects.get(id=game_id)
+		return JsonResponse({
+			'success': True,
+			'html': render_to_string('website/unfinishedGameView.html', {"g": game, "user": request.user}),
+		})
+
+def getUnfinishedGames(request):
+	if request.method == 'POST':
+		if request.user.is_authenticated:
+			unfinished_games = Game.objects.filter(Q(p1=request.user) | Q(p2=request.user)).exclude(scoreToWin__lte=F('p1Score')).exclude(scoreToWin__lte=F('p2Score')).exclude(forfeit__isnull=False)
+			unfinishedGames = serialize("json", unfinished_games)
+			unfinishedGames = json.loads(unfinishedGames)
+		else:
+			unfinishedGames = []
+		return JsonResponse({
+			'success': True,
+			'games': unfinishedGames,
+		});
 
 def saveGame(request):
 	if request.method == 'POST':
@@ -212,6 +222,27 @@ def gameNew1vs1(request):
 			'success': True,
 			'id': game.id,
 		});
+
+def gameNewMultiChat(request):
+	if request.method == 'POST':
+		data = json.loads(request.POST["data"]);
+		config = data['config']
+		p2 = User.objects.get(id=data['p2'])
+		if request.user == p2:
+			return JsonResponse({
+				'success': False,
+			});
+		game = Game(p1=request.user, p2=p2, ai=config['ai'], scoreToWin=config['winScore'], ballSpeed=config['startSpeed'], bonuses=config['bonuses'], p1Left=config['leftKey'], p1Right=config['rightKey'], p2Left=config['leftKey2'], p2Right=config['rightKey2'], p2Local='', gameType=2)
+		game.save()
+		print("asds   d   "+str(p2.id))
+		print("sdfsdfsdf  "+str(request.user.id))
+		return JsonResponse({
+			'success': True,
+			'g1': game.id,
+			'p1': request.user.id,
+			'p2': p2.id,
+		});
+
 def gameNewMulti(request):
 	if request.method == 'POST':
 		data = json.loads(request.POST["data"]);
@@ -222,7 +253,6 @@ def gameNewMulti(request):
 				'success': False,
 			});
 		game = Game(p1=request.user, p2=p2, ai=config['ai'], scoreToWin=config['winScore'], ballSpeed=config['startSpeed'], bonuses=config['bonuses'], p1Left=config['leftKey'], p1Right=config['rightKey'], p2Left=config['leftKey2'], p2Right=config['rightKey2'], p2Local=config['p2Local'], gameType=2)
-		#game = Game(p1=request.user, ai=data['ai'], scoreToWin=data['winScore'], ballSpeed=data['startSpeed'], bonuses=data['bonuses'], p1Left=data['leftKey'], p1Right=data['rightKey'], p2Left=data['leftKey2'], p2Right=data['rightKey2'], p2Local=data['p2Local'], gameType=2)
 		game.save()
 		return JsonResponse({
 			'success': True,

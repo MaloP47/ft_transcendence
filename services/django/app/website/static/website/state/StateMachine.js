@@ -6,7 +6,7 @@
 //   By: gbrunet <gbrunet@student.42.fr>            +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2024/07/22 11:54:11 by gbrunet           #+#    #+#             //
-//   Updated: 2024/07/22 12:02:35 by gbrunet          ###   ########.fr       //
+//   Updated: 2024/07/22 21:52:23 by gbrunet          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -98,93 +98,67 @@ export default class App {
 		});
 	}
 
+	hideAll() {
+		if (document.getElementById("registerForm"))
+			this.hideRegisterForm();
+		if (document.getElementById("loginForm"))
+			this.hideLoginForm();
+		if (document.getElementById("createGame"))
+			this.hideCreateGame();
+		if (document.getElementById("listTournaments"))
+			this.hideListTournaments();
+		if (document.getElementById("gameOverlay"))
+			this.hideLocalGame()
+		if (document.getElementById("aiConfig"))
+			this.hideAiConfig()
+	}
+
 	router(back) {
-		let path = String(location.pathname)
-		let id = -1
-		if (path.indexOf("/play1vsAI/") == 0) {
-			id = path.substring(11)
-			path = "/play1vsAI"
-		} else if (path.indexOf("/play1vs1/") == 0) {
-			id = path.substring(10)
-			path = "/play1vs1"
-		} else if (path.indexOf("/multi/") == 0) {
-			id = path.substring(7)
-			path = "/multi"
-		} else if (path.indexOf("/getTournament/") == 0) {
-			id = path.substring(15)
-			path = "/listTournaments"
+		this.path = String(location.pathname)
+		this.id = -1
+		if (this.path.indexOf("/play1vsAI/") == 0) {
+			this.id = this.path.substring(11)
+			this.path = "/play1vsAI"
+		} else if (this.path.indexOf("/play1vs1/") == 0) {
+			this.id = this.path.substring(10)
+			this.path = "/play1vs1"
+		} else if (this.path.indexOf("/multi/") == 0) {
+			this.id = this.path.substring(7)
+			this.path = "/multi"
+		} else if (this.path.indexOf("/getTournament/") == 0) {
+			this.id = this.path.substring(15)
+			this.path = "/listTournaments"
 		}
-		let view = this.routes[path];
+		let view = this.routes[this.path];
 		if (view) {
 			document.title = view.title;
+			this.hideAll();
+			this.checkNotification();
+			this.addNotificationEvents();
 			switch(view.state) {
 				case "Home":
-					if (document.getElementById("registerForm"))
-						this.hideRegisterForm();
-					if (document.getElementById("loginForm"))
-						this.hideLoginForm();
 					this.getHomePage("home");
 					break;
 				case "Login":
-					if (document.getElementById("registerForm"))
-						this.hideRegisterForm();
 					this.getLoginForm();
 					break;
 				case "Register":
-					if (document.getElementById("loginForm"))
-						this.hideLoginForm();
 					this.getRegisterForm();
 					break;
 				case "Play1vsAI":
-					if (document.getElementById("registerForm"))
-						this.hideRegisterForm();
-					if (document.getElementById("loginForm"))
-						this.hideLoginForm();
-					if (document.getElementById("createGame"))
-						this.hideCreateGame();
-					if (document.getElementById("listTournaments"))
-						this.hideListTournaments();
-					this.getHomePage("1vsAI", id);
+					this.getHomePage("1vsAI", this.id);
 					break;
 				case "Play1vs1":
-					if (document.getElementById("registerForm"))
-						this.hideRegisterForm();
-					if (document.getElementById("loginForm"))
-						this.hideLoginForm();
-					if (document.getElementById("createGame"))
-						this.hideCreateGame();
-					if (document.getElementById("listTournaments"))
-						this.hideListTournaments();
-					this.getHomePage("1vs1", id);
+					this.getHomePage("1vs1", this.id);
 					break;
 				case "PlayMulti":
-					if (document.getElementById("registerForm"))
-						this.hideRegisterForm();
-					if (document.getElementById("loginForm"))
-						this.hideLoginForm();
-					if (document.getElementById("createGame"))
-						this.hideCreateGame();
-					if (document.getElementById("listTournaments"))
-						this.hideListTournaments();
-					this.getHomePage("multi", id);
+					this.getHomePage("multi", this.id);
 					break;
 				case "listTournaments":
-					if (document.getElementById("registerForm"))
-						this.hideRegisterForm();
-					if (document.getElementById("loginForm"))
-						this.hideLoginForm();
-					if (document.getElementById("createGame"))
-						this.hideCreateGame();
-					this.getHomePage("listTournaments", id);
+					this.getHomePage("listTournaments", this.id);
 					break;
 				case "createTournaments":
-					if (document.getElementById("registerForm"))
-						this.hideRegisterForm();
-					if (document.getElementById("loginForm"))
-						this.hideLoginForm();
-					if (document.getElementById("createGame"))
-						this.hideCreateGame();
-					this.getHomePage("createTournaments", id);
+					this.getHomePage("createTournaments", this.id);
 					break;
 			}
 		} else {
@@ -307,11 +281,9 @@ export default class App {
 	}
 
 	remove(domId) {
-		setTimeout(() => {
-			let dom = document.getElementById(domId);
-			if (dom)
-				dom.remove();
-		}, 200);
+		let dom = document.getElementById(domId);
+		if (dom)
+			dom.remove();
 	}
 
 	empty(domId) {
@@ -331,6 +303,8 @@ export default class App {
 	}
 
 	getHomePage(state, game_id) {
+		if (game_id == undefined)
+			game_id = -1;
 		if (this.user.authenticated) {
 			if (this.chatSocket)
 				this.chatSocket.close();
@@ -350,10 +324,8 @@ export default class App {
 					this.handleFriendRequestMessage(data);
 				if (data.game_notif)
 					this.handleTournamentNotif(data);
-				if (data.type && (data.type == 'multiDataHost' || data.type == 'multiDataGuest')) {
-					//console.log("sender -> " + data.sender);
-					this.pong.handleMultiData(data.type, data.data); // not sure how safe it is to access pong like that
-				}
+				if (data.type && (data.type == 'multiDataHost' || data.type == 'multiDataGuest'))
+					this.pong.handleMultiData(data.type, data.data);
 			}.bind(this);
 		}
 
@@ -440,6 +412,37 @@ export default class App {
 				this.getCreateTournament();
 			}
 		}
+	}
+
+	checkNotification() {
+		this.getApiResponse("/api/game/unfinished/").then((response) => {
+			let res = JSON.parse(response);
+			if (res.success) {
+				for (let i in res.games) {
+					this.getApiResponse("/api/game/notif/" + res.games[i].pk).then((re) => {
+						let r = JSON.parse(re);
+						if (r.success) {
+							let notifs = document.getElementsByClassName("notification")
+							var show = true;
+							for (let j in notifs){
+								if (notifs[j].dataset && notifs[j].dataset.game
+									&& parseInt(notifs[j].dataset.game) == res.games[i].pk) {
+									show = false;
+									break;
+								}
+							}
+							if (show) {
+								let notificationCenter = document.getElementById("notif")
+								if (notificationCenter) {
+									notificationCenter.innerHTML += r.html;
+									this.addNotificationEvents();
+								}
+							}
+						}
+					});
+				}
+			}
+		});
 	}
 
 	getCreateTournament() {
@@ -651,6 +654,14 @@ export default class App {
 				})
 			}
 		}
+	}
+
+	hideAiConfig() {
+		let config = document.getElementById("aiConfig");
+		if (!config)
+			return ;
+		config.classList.add("hided")
+		this.remove("aiConfig")
 	}
 
 	hideLocalGame() {
@@ -1306,7 +1317,7 @@ export default class App {
 								chatMenu.style.top = (e.clientY + 5) + "px";
 								chatMenu.style.right = (window.innerWidth - e.clientX + 5) + "px";
 								chatMenu.innerHTML = res.html;
-								let sendPlay = document.getElementById("chatSendPlay")
+								this.chatMenuSendPlay();
 								this.chatMenuDeleteFriend();
 								this.chatMenuAddFriend();
 								this.chatMenuBlockUser();
@@ -1521,6 +1532,37 @@ export default class App {
 					setTimeout(() => {
 						messages[messages.length - 1].classList.remove("hided");
 						messages[messages.length - 1].classList.remove("height0");
+						let avatar = messages[messages.length - 1].querySelector(".message__avatar");
+						let i = messages.length - 1;
+						if (avatar) {
+							if (messages[i].dataset.user == this.user.id)
+								return ;
+							messages[i].addEventListener("click", (e) => {
+								this.getApiResponseJson("/api/view/chatMenu/", {id: e.target.dataset.user}).then((response) => {
+									let res = JSON.parse(response);
+									if (res.success) {
+										let chatMenu = document.getElementById("chatMenu")
+										if (!chatMenu)
+											return ;
+										chatMenu.style.top = (e.clientY + 5) + "px";
+										chatMenu.style.right = (window.innerWidth - e.clientX + 5) + "px";
+										chatMenu.innerHTML = res.html;
+										let sendPlay = document.getElementById("chatSendPlay")
+										this.chatMenuSendPlay();
+										this.chatMenuDeleteFriend();
+										this.chatMenuAddFriend();
+										this.chatMenuBlockUser();
+										let menuBack = document.getElementById("menuBack")
+										menuBack.classList.remove("pe-none");
+										chatMenu.classList.remove("displayNone");
+										chatMenu.style.pointerEvents = "all";
+										setTimeout(() => {
+											chatMenu.classList.remove("hided");
+										}, 15)
+									}
+								});
+							})
+						}
 						chatBottom.scrollIntoView()
 					}, 15);
 				}
@@ -1528,8 +1570,59 @@ export default class App {
 		});
 	}
 
+	chatMenuSendPlay() {
+		let config = {
+			winScore: 10,
+			startSpeed: 8,
+			bonuses: true,
+			ai: 1,
+			leftKey: 65,
+			rightKey: 68,
+			leftKey2: 37, // disable local p2 controls
+			rightKey2: 39, // disable local p2 controls
+		}
+		let sendPlay = document.getElementById("chatSendPlay");
+		if (!sendPlay)
+			return ;
+		sendPlay.addEventListener("click", (e) => {
+			this.getApiResponseJson("/api/game/new/multi_chat/", {config: config, p2: e.target.dataset.id}).then((response) => {
+				let res = JSON.parse(response);
+				if (res.success) {
+					this.chatSocket.send(JSON.stringify({
+						'gameNotif': res.g1,
+						'p1': res.p1,
+						'p2': res.p2,
+					}));
+					history.pushState("", "", "/multi/" + res.g1);
+					this.router();
+				}
+			});
+		});
+
+/*
+			this.getApiResponseJson("/api/user/addfriend/", {id: e.target.dataset.id}).then((response) => {
+				let res = JSON.parse(response);
+				if (res.success) {
+					this.chatSocket.send(JSON.stringify({
+						'friendRequest': e.target.dataset.id
+					}));
+					let menu = document.getElementById("chatMenu");
+					if (!menu)
+						return ;
+					menu.classList.add("hided");
+					menu.style.pointerEvents = ("none");
+					this.displayNone("chatMenu")
+					let menuBack = document.getElementById("menuBack");
+					menuBack.classList.add("hided");
+					menuBack.classList.add("pe-none");
+				}
+			});
+		});
+*/
+	}
+
 	handleTournamentNotif(data) {
-		if (this.user.id != data.p1 && this.user.id != data.p2)
+		if (!(this.user.id == data.p1 || this.user.id == data.p2))
 			return ;
 		this.getApiResponseJson("/api/view/gameRequestView/", {id: data.game_notif}).then((response) => {
 			let res = JSON.parse(response);
@@ -1565,6 +1658,30 @@ export default class App {
 		let notif = notificationCenter.getElementsByClassName("notification")
 		for (let i=0; i < notif.length; i++) {
 			if (notif[i].classList.contains("hided")) {
+				if (notif[i].dataset
+					&& parseInt(notif[i].dataset.gametype) == 0
+					&& this.path == "/play1vsAI"
+					&& notif[i].dataset.game
+					&& parseInt(notif[i].dataset.game) == this.id) {
+					notif[i].remove();
+					continue;
+				}
+				if (notif[i].dataset
+					&& parseInt(notif[i].dataset.gametype) == 1
+					&& this.path == "/play1vs1"
+					&& notif[i].dataset.game
+					&& parseInt(notif[i].dataset.game) == this.id) {
+					notif[i].remove();
+					continue;
+				}
+				if (notif[i].dataset
+					&& parseInt(notif[i].dataset.gametype) == 2
+					&& this.path == "/multi"
+					&& notif[i].dataset.game
+					&& parseInt(notif[i].dataset.game) == this.id) {
+					notif[i].remove();
+					continue;
+				}
 				setTimeout(() => {
 					notif[i].classList.remove("hided")
 				}, 15)
@@ -1578,6 +1695,31 @@ export default class App {
 					deleteBtn.addEventListener("click", this.deleteFriendRequest.bind(this), false);
 				else if (deleteBtn.classList.contains("forfeit"))
 					deleteBtn.addEventListener("click", this.forfeitUnfinishedGame.bind(this), false);
+			} else {
+				if (notif[i].dataset
+					&& parseInt(notif[i].dataset.gametype) == 0
+					&& this.path == "/play1vsAI"
+					&& notif[i].dataset.game
+					&& parseInt(notif[i].dataset.game) == this.id) {
+					notif[i].remove();
+					continue;
+				}
+				if (notif[i].dataset
+					&& parseInt(notif[i].dataset.gametype) == 1
+					&& this.path == "/play1vs1"
+					&& notif[i].dataset.game
+					&& parseInt(notif[i].dataset.game) == this.id) {
+					notif[i].remove();
+					continue;
+				}
+				if (notif[i].dataset
+					&& parseInt(notif[i].dataset.gametype) == 2
+					&& this.path == "/multi"
+					&& notif[i].dataset.game
+					&& parseInt(notif[i].dataset.game) == this.id) {
+					notif[i].remove();
+					continue;
+				}
 			}
 		}
 	}
@@ -1590,7 +1732,7 @@ export default class App {
 		else if (gameType == 1) // Local 1 vs 1
 			history.pushState("", "", "/play1vs1/" + gameId);
 		else if (gameType == 2) // Remote 1 vs 1
-			history.pushState("", "", "/play/" + gameId);
+			history.pushState("", "", "/multi/" + gameId);
 		let notif = e.target.parentNode.parentNode;
 		notif.classList.add("hided");
 		setTimeout(() => {

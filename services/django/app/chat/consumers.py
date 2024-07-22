@@ -35,16 +35,18 @@ class ChatConsumer(AsyncWebsocketConsumer):
 				await self.channel_layer.group_send(self.room_group_name, text_data_json) # add url multi/<room_id> to room_group_name
 			if text_data_json['type'] == 'multiDataGuest': 
 				await self.channel_layer.group_send(self.room_group_name, text_data_json)
-            # add if text_data_json['type'] == 'gameNotif':
+			# add if text_data_json['type'] == 'gameNotif':
 		else:
 			print('No type field in received data')
 
 		# Multiplayer logic --^
-        # la partie qui va pas --v
+		# la partie qui va pas --v
 		try:
 			gameNotif = text_data_json['gameNotif']
 			p1 = text_data_json['p1']
 			p2 = text_data_json['p2']
+			print(p1)
+			print(p2)
 			await self.channel_layer.group_send(
 				self.room_group_name,
 				{
@@ -136,7 +138,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
 		await self.send(text_data=json.dumps({
 			'game_notif': event['id'],
 			'p1': event['p1'],
-			'p2': event['p1'],
+			'p2': event['p2'],
 		}))
 
 	async def friend_request(self, event):
