@@ -46,6 +46,11 @@ export default class Ball {
 		if (this.pong.endRound) {
 			return ;
 		}
+
+		// Multi
+		if (this.pong.isMultiNotHost())
+			return this.updateMulti();
+
 		// Sides collisions
 		if (this.ball.position.x + this.velocity.x * this.speed * this.pong.elapsedTime / 10 > this.maxXPos
 				|| this.ball.position.x + this.velocity.x * this.speed * this.pong.elapsedTime / 10 < -this.maxXPos){
@@ -95,6 +100,19 @@ export default class Ball {
 		this.prevPos = this.currentPos.clone();
 		this.currentPos = this.ball.position.clone();
 	}
+	updateMulti() {
+		if (this.pong.multiData.t_impactParticles)
+			this.pong.assets.impactParticles.AddParticles();
+		if (this.pong.multiData.t_resetBall)
+			this.resetBallMulti(this.pong.multiData.t_resetBall_player);
+		this.velocity.x = this.pong.multiData.ball_vel.x;
+		this.velocity.y = this.pong.multiData.ball_vel.y;
+		this.ball.position.x = this.pong.multiData.ball_pos.x;
+		this.ball.position.y = this.pong.multiData.ball_pos.y;
+
+		this.prevPos = this.currentPos.clone();
+		this.currentPos = this.ball.position.clone();
+	}
 
 	reset() {
 		clearTimeout(this.nextTimeout);
@@ -110,6 +128,12 @@ export default class Ball {
 	}
 
 	resetBall(player) {
+
+		if (this.pong.isMultiHost()) {
+			this.pong.setMultiData('t_resetBall', true);
+			this.pong.setMultiData('t_resetBall_player', player);
+		}
+
 		this.pong.endRound = true;
 		if (this.pong.assets.bonus)
 			this.pong.assets.bonus.setActive(false);
@@ -198,7 +222,40 @@ export default class Ball {
 			}, 1000);
 		}
 	}
-	
+	resetBallMulti() {
+		//this.pong.endRound = true; // might not be safe?
+		if (!this.pong.bg) {
+			let p1score = document.getElementById("p1score");
+			if (p1score)
+				p1score.innerHTML = this.pong.assets.p1.score;
+			let p2score = document.getElementById("p2score");
+			if (p2score)
+				p2score.innerHTML = this.pong.assets.p2.score;
+		}
+		if (!this.pong.bg && (this.pong.assets.p1.score >= this.pong.winScore || this.pong.assets.p2.score >= this.pong.winScore)) {
+			let endDiv = document.getElementById("countdown");
+			if (endDiv) {
+				let p1 = "A.I.";
+				if (!this.pong.assets.p1.AI)
+					p1 = this.pong.p1Infos.username;
+				let p2 = "A.I.";
+				if (!this.pong.assets.p2.AI && this.pong.p2Local == '')
+					p2 = this.pong.p2Infos.username;
+				else if (this.pong.p2Local != '')
+					p2 = this.pong.p2Local;
+				let gameVs = "<span class='fs-2 text-light-emphasis'>" + p1 + " vs " + p2 + "</span>";
+				if (this.pong.assets.p1.score > this.pong.assets.p2.score) {
+					endDiv.innerHTML = gameVs + "<p style='font-size:5rem; margin-top: -30px'>" + p1 + " wins this game !</p>"
+				} else {
+					endDiv.innerHTML = gameVs + "<p style='font-size:5rem; margin-top: -30px'>" + p2 + " wins this game !</p>"
+				}
+				endDiv.classList.remove("countdown");
+				endDiv.style.fontSize = "5rem";
+				endDiv.classList.add("visible");
+			}
+		}
+	}
+
 	checkCollisionPlayer(player) {
 		let x = this.getPos().x;
 		let pong = this.pong;

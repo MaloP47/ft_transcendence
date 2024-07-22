@@ -43,12 +43,30 @@ export default class BallFire {
 	}
 
 	AddParticles() {
+		// Multi Host
+		if (this.pong.isMultiHost()) {
+			this.pong.setMultiData('t_ballFire', true);
+			this.pong.setMultiData('t_ballFire_pos', this.pong.assets.ball.prevPos);
+		}
+		// Multi Guest
+		if (this.pong.isMultiNotHost() && !this.pong.multiData.t_ballFire)
+			return ;
+		var trigger_multi = this.pong.isMultiNotHost() && this.pong.multiData.t_ballFire;
+		if (trigger_multi)
+			var pospos = this.pong.multiData.t_ballFire_pos;
+
 		for (let i = 0; i < (30 + 50 * this.pong.assets.ball.getSpeed()) * this.pong.elapsedTime / 5; i++) {
 			const life = (Math.random() + 0.5) / 2 * this.pong.assets.ball.getSpeed() * 5;
 			var rdm = new THREE.Vector3(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5);
+
+			if (trigger_multi)
+				var pos = new THREE.Vector3(pospos.x, pospos.y, pospos.z);
+			else
+				var pos = this.pong.assets.ball.getPos();
 			rdm.divideScalar(4);
 			this.ballFire.push({
-				position: this.pong.assets.ball.getPos(),
+				//position: this.pong.assets.ball.getPos(),
+				position: pos,
 				velocity: this.pong.assets.ball.getVelocity().multiplyScalar(-0.55).add(rdm).multiplyScalar(Math.random() + 0.5 * this.pong.elapsedTime / 20),
 				size: Math.random() * this.pong.scaleFactor,
 				life: life,

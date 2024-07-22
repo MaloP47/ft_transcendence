@@ -114,6 +114,11 @@ export default class PongTransi {
 		} else {
 			this.pong.scene.camera.position.set(0, -13, 20);
 			this.pong.scene.camera.lookAt(new THREE.Vector3(0, -2, 0));	
+			
+			// Rotate scene if multiplayer and not host, good angle but inputs are still reversed
+			//this.pong.scene.camera.position.set(0, 13, 20);
+			//this.pong.scene.camera.lookAt(new THREE.Vector3(0, 2, 0));	
+			//this.pong.scene.camera.rotation.z = Math.PI;
 		}
 	}
 

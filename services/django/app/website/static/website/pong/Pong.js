@@ -1,15 +1,3 @@
-// ************************************************************************** //
-//                                                                            //
-//                                                        :::      ::::::::   //
-//   Pong.js                                            :+:      :+:    :+:   //
-//                                                    +:+ +:+         +:+     //
-//   By: gbrunet <gbrunet@student.42.fr>            +#+  +:+       +#+        //
-//                                                +#+#+#+#+#+   +#+           //
-//   Created: 2024/05/21 13:52:15 by gbrunet           #+#    #+#             //
-//   Updated: 2024/06/20 15:04:32 by gbrunet          ###   ########.fr       //
-//                                                                            //
-// ************************************************************************** //
-
 import * as THREE from 'three';
 
 import PongScene from './PongScene.js';
@@ -36,15 +24,16 @@ export default class Pong {
 	constructor(data) {
 		this.stateMachine = data.stateMachine;
 		this.initKeys();
-		this.initEvents();
 		this.initGameVariable();
+		this.initMultiData();
+		this.initEvents();
 		this.scene = new PongScene({pong: this});
 		this.assets = new PongAssets({pong: this});
 		this.transi = new PongTransi({pong: this});
 		this.update();
 	}
 
- initKeys() {
+	initKeys() {
 		this.p1LeftKey = 65;
 		this.p1RightKey = 68;
 		this.p2LeftKey = 37;
@@ -67,10 +56,12 @@ export default class Pong {
 				this.p1Left = true;
 			else if (keyCode == this.p1RightKey && !this.p1Right && !this.assets.p1.AI)
 				this.p1Right = true;
-			else if (keyCode == this.p2LeftKey && !this.p2Left && !this.assets.p2.AI)
-				this.p2Left = true;
-			else if (keyCode == this.p2RightKey && !this.p2Right && !this.assets.p2.AI)
-				this.p2Right = true;
+			if (!this.isMulti()) {
+				if (keyCode == this.p2LeftKey && !this.p2Left && !this.assets.p2.AI)
+					this.p2Left = true;
+				else if (keyCode == this.p2RightKey && !this.p2Right && !this.assets.p2.AI)
+					this.p2Right = true;
+			}
 		}
 
 		function onDocumentKeyUp(event) {
@@ -79,10 +70,12 @@ export default class Pong {
 				this.p1Left = false;
 			else if (keyCode == this.p1RightKey && this.p1Right && !this.assets.p1.AI)
 				this.p1Right = false;
-			else if (keyCode == this.p2LeftKey && this.p2Left && !this.assets.p2.AI)
-				this.p2Left = false;
-			else if (keyCode == this.p2RightKey && this.p2Right && !this.assets.p2.AI)
-				this.p2Right = false
+			if (!this.isMulti()) {
+				if (keyCode == this.p2LeftKey && this.p2Left && !this.assets.p2.AI)
+					this.p2Left = false;
+				else if (keyCode == this.p2RightKey && this.p2Right && !this.assets.p2.AI)
+					this.p2Right = false
+			}
 		}
 
 		function onResizeEvent() {
@@ -108,6 +101,7 @@ export default class Pong {
 		this.scaleFactor = 0.75;
 		this.bonus = true;
 		this.resetGameInfo();
+		//this.resetMultiData();
 	}
 
 	resetGameInfo() {
@@ -132,6 +126,7 @@ export default class Pong {
 			p2score: 0,
 			winScore: 10,
 			p2Local: '',
+			//gameType: ?????,
 		}
 	}
 
@@ -157,6 +152,7 @@ export default class Pong {
 				p2score: 0,
 				winScore: 10,
 				p2Local: '',
+				//gameType: ?????,
 			}
 			this.transi.to("toBg", 1500);
 		}
@@ -168,11 +164,218 @@ export default class Pong {
 		this.elapsedTime = performance.now() - this.totalTime;
 		this.totalTime = performance.now()
 
+		// create new var for receiving multiData and set MultiData here before loop
+
 		this.transi.update();
 		this.scene.update();
 		this.assets.update();
-		
+
+		if (this.isMulti()) {
+			if (this.isHost() || this.isGuest())  {
+				//console.log('sending multidata');
+				this.sendMultiData();
+			}
+
+			// Reset
+			this.resetMultiData();
+		}
+
 		requestAnimationFrame(this.update.bind(this));
+	}
+
+	// -----------------------------
+	// -------- Multi utils --------
+	// --------------v--------------
+	sendMultiData() {
+		if (!this.socketIsReady())
+			return;
+		if (!this.isHost() && !this.isGuest())
+			return;
+
+		// Set data
+		if (this.isHost()) {
+			var type = 'multiDataHost';
+			// Ball
+			this.setMultiData('ball_pos', this.assets.ball.ball.position);
+			this.setMultiData('ball_vel', this.assets.ball.velocity);
+			this.setMultiData('p1_pos', this.assets.p1.bar.position);
+			this.setMultiData('p2_pos', this.assets.p2.bar.position);
+			// Score
+			this.setMultiData('p1_score', this.assets.p1.score);
+			this.setMultiData('p2_score', this.assets.p2.score);
+			this.setMultiData('winScore', this.winScore);
+			// Bonus
+			this.setMultiData('p1_bonus', this.assets.p1.bonus);
+			this.setMultiData('p2_bonus', this.assets.p2.bonus);
+			this.setMultiData('bonus_active', this.assets.bonus.active);
+			this.setMultiData('bonus_pos', this.assets.bonus.bonus.position);
+			this.setMultiData('bonus_startTime', this.assets.bonus.startTime);
+			this.setMultiData('bonus_type', this.assets.bonus.type);
+			this.setMultiData('endRound', this.endRound);
+			// Other
+			this.setMultiData('start', this.start);
+		}
+		else if (this.isGuest()) {
+			//console.log('Sending guest inputs');
+			var type = 'multiDataGuest';
+
+			// does this depend on fps?
+			this.setMultiData('p2_left', this.p1Left);
+			this.setMultiData('p2_right', this.p1Right);
+			// inputs
+			//if (this.p1Left)
+			//	this.setMultiData('p2_left', this.p1Left);
+			//if (this.p1Right)
+			//	this.setMultiData('p2_right', this.p1Right);
+		}
+
+		// Send data 
+		this.stateMachine.chatSocket.send(JSON.stringify({
+			'type': type,
+			//'sender': this.stateMachine.user.username,
+			data: this.multiData,
+		}));
+	}
+	setMultiData(key, value) {
+		this.multiData[key] = value;
+	}
+	handleMultiData(type, data) {
+		if (!this.isMulti())
+			return;
+
+		// IMP: don't set multiData during this,
+		// only at the beggining of a render loop
+
+		if (type == 'multiDataGuest' && this.isHost()) {
+			//console.log('Receiving guest inputs');
+			// Guest inputs
+			this.p2Left = data.p2_left;
+			this.p2Right = data.p2_right;
+			//this.multiData.p2_left = data.p2_left;
+			//this.multiData.p2_left = data.p2_left;
+		}
+		else if (type == 'multiDataHost' && this.isGuest())
+		{
+			this.multiData = data;
+			
+			// don't need endRoung YET but KEEP IT
+			//this.endRound = data.endRound;
+			
+			// Score
+			this.assets.p1.score = data.p1_score;
+			this.assets.p2.score = data.p2_score;
+			this.winScore = data.winScore;
+			// Other
+			this.start = data.start;
+			if (data.t_countdown != -1)
+				this.animateCountdownMulti();
+		}
+	}
+	zeroVec3() {
+		return {x: 0, y: 0, z: 0};
+	}
+	initMultiData() {
+		this.multiData = {
+			// Ball
+			'ball_pos': {x: 0, y: 0, z: 0},
+			'ball_vel': {x: 0, y: 0, z: 0},
+			'p1_pos': {x: 0, y: 0, z: 0},
+			'p2_pos': {x: 0, y: 0, z: 0},
+			// Particles
+			't_impactParticles': false,
+			't_impactParticles_pos': {x: 0, y: 0, z: 0},
+			't_ballParticles': false,
+			't_ballParticles_pos': {x: 0, y: 0, z: 0},
+			't_ballFire': false,
+			't_ballFire_pos': {x: 0, y: 0, z: 0},
+			// Score
+			't_resetBall': false,
+			't_resetBall_player': 0, // not used yet
+			'p1_score': 0,
+			'p2_score': 0,
+			'winScore': 0,
+			// Bonuses
+			'bonus_active': false,
+			'bonus_pos': {x: 0, y: 0, z: 0},
+			'bonus_startTime': 0,
+			'bonus_type': 0,
+			't_endRound': false,
+			'p1_bonus': {
+				big: {on: false, end: false, time: 0.0001},
+				small: {on: false, end: false, time: 0.0001},
+				line: {on: false, end: false, time: 0.0001},
+				frozen: {on: false, end: false, time: 0.0001},
+				reversed: {on: false, end: false, time: 0.0001}
+			},
+			'p2_bonus': {
+				big: {on: false, end: false, time: 0.0001},
+				small: {on: false, end: false, time: 0.0001},
+				line: {on: false, end: false, time: 0.0001},
+				frozen: {on: false, end: false, time: 0.0001},
+				reversed: {on: false, end: false, time: 0.0001}
+			},
+			// Other
+			'start': false,
+			't_countdown': -1,
+			// Inputs
+			'p2_left': false,
+			'p2_right': false,
+		}
+	}
+	resetMultiData() {
+		// Only some stuff needs to be reset
+		this.setMultiData('t_endRound', false);
+		this.setMultiData('t_resetBall', false);
+		this.setMultiData('t_countdown', -1); // or timer?
+
+		// Time sensitive
+		if (this.multiData['t_impactParticles']){
+			setTimeout(() => {
+				this.setMultiData('t_impactParticles', false);
+			}, 10);
+		}
+		if (this.multiData['t_ballParticles']){
+			setTimeout(() => {
+				this.setMultiData('t_ballParticles', false);
+			}, 10);
+		}
+		if (this.multiData['t_ballFire']){
+			setTimeout(() => {
+				this.setMultiData('t_ballFire', false);
+			}, 10);
+		}
+		//if (this.multiData['t_countdown']){
+		//	setTimeout(() => {
+		//		this.setMultiData('t_countdown', 0);
+		//	}, 10);
+		//}
+	}
+	isMulti() {
+		return (this.gameInfo.gameType == 2);
+	}
+	isMultiHost() {
+		return (this.gameInfo.gameType == 2 && this.isHost());
+	}
+	isMultiNotHost() {
+		return (this.gameInfo.gameType == 2 && !this.isHost());
+	}
+	isMultiGuest() {
+		return (this.gameInfo.gameType == 2 && this.isGuest());
+	}
+	isMultiNotGuest() {
+		return (this.gameInfo.gameType == 2 && this.isGuest());
+	}
+	isHost() {
+		return (this.stateMachine.user.id == this.gameInfo.p1.id);
+	}
+	isGuest() {
+		return (this.stateMachine.user.id == this.gameInfo.p2.id);
+	}
+	isSpectator() {
+		return (!this.isHost() && !this.isGuest());
+	}
+	socketIsReady() {
+		return (this.stateMachine.chatSocket.readyState === WebSocket.OPEN);
 	}
 
 	preConfig() {
@@ -202,6 +405,17 @@ export default class Pong {
 			this.assets.p2.AI = true;
 		if (this.countTimeout)
 			clearTimeout(this.countTimeout)
+
+		// Multi skip countdown
+		if (this.isMultiNotHost()) {
+			if (this.multiData.t_countdown != -1) {
+				this.animateCountdownMulti();
+			}
+			return ;
+		}
+		// ball is locked for some reason
+
+		// Countdown
 		if (!(this.gameInfo.p1score >= this.winScore || this.gameInfo.p2score >= this.winScore)) {
 			this.countTimeout = setTimeout(() => {
 				this.animateCountdown(5);	
@@ -212,6 +426,10 @@ export default class Pong {
 	animateCountdown(sec) {
 		let countdown = document.getElementById("countdown");
 		if (sec >= 0 && countdown && countdown.innerHTML != sec) {
+			// Multi trigger
+			this.setMultiData('t_countdown', sec);
+			//console.log('Sending countdown trigger... -> ' + sec);
+
 			countdown.innerHTML = sec;
 			countdown.classList.remove("countdown");
 			setTimeout(()=>{
@@ -230,5 +448,17 @@ export default class Pong {
 				}
 			}, 500);
 		}
+	}
+	animateCountdownMulti() {
+		//console.log('Receiving countdown trigger! -> ' + this.multiData.t_countdown);
+		let countdown = document.getElementById("countdown");
+		countdown.innerHTML = this.multiData.t_countdown;
+
+		countdown.classList.remove("countdown");
+		setTimeout(()=>{
+			countdown.classList.add("countdown");
+		}, 15)
+		countdown.classList.remove("countdown");
+		
 	}
 }
