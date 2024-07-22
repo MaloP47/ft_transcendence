@@ -61,6 +61,7 @@ export default class App {
 			"/multi": {title: "Transcendence - 1 VS 1 (multiplayer)", state: "PlayMulti"},
 			"/listTournaments": {title: "Transcendence - Tournaments", state: "listTournaments"},
 			"/createTournaments": {title: "Transcendence - Tournament creation", state: "createTournaments"},
+			"/profile": {title: "Transcendence - Profile", state: "Profile"},
 		}
 	}
 
@@ -110,6 +111,9 @@ export default class App {
 		} else if (path.indexOf("/multi/") == 0) {
 			id = path.substring(7)
 			path = "/multi"
+		} else if (path.indexOf("/profile/") == 0) {
+			id = path.substring(9)
+			path = "/profile"
 		} else if (path.indexOf("/getTournament/") == 0) {
 			id = path.substring(15)
 			path = "/listTournaments"
@@ -176,6 +180,15 @@ export default class App {
 					if (document.getElementById("createGame"))
 						this.hideCreateGame();
 					this.getHomePage("listTournaments", id);
+					break;
+				case "Profile":
+					if (document.getElementById("registerForm"))
+						this.hideRegisterForm();
+					if (document.getElementById("loginForm"))
+						this.hideLoginForm();
+					if (document.getElementById("createGame"))
+						this.hideCreateGame();
+					this.getHomePage("profile", id);
 					break;
 				case "createTournaments":
 					if (document.getElementById("registerForm"))
@@ -1907,6 +1920,107 @@ export default class App {
 				let reader = new FileReader();
 				reader.onload = function (e) {
 					previewProfilePicture.innerHTML = `<img src="${e.target.result}" class="img-fluid rounded rounded-circle border border-white" style="width: 150px; height: 150px;">`;
+				};
+				reader.readAsDataURL(file);
+			}
+		});
+	}
+
+
+
+	hideProfile() {
+		let profileView = document.getElementById("profile");
+		if (!profileView)
+			return ;
+		profileView.classList.add("hided")
+		this.remove("profile")
+	}
+
+	getProfile(id) {
+		let homeContent = document.getElementById("homeContent");
+		if (!homeContent) return;
+
+		this.getApiResponse("/api/view/profile/" + id).then((response) => {
+			let res = JSON.parse(response);
+			if (res.success) {
+				homeContent.innerHTML = res.html;
+				let profileView = document.getElementById("profile");
+				if (!profileView) return;
+				setTimeout(() => {
+					profileView.classList.remove("hided");
+				}, 15);
+
+				// this.updateTopContent(res.html);
+				// this.showProfileForm();
+				this.addProfileFormSubmitListener(id);
+				this.addProfilePictureChangeListener();
+			}
+		});
+	}
+
+	addProfileFormSubmitListener(id) {
+		let form = document.getElementById("profileFormForm");
+		let formBtn = document.getElementById("profileFormSubmitBtn");
+		if (formBtn) {
+			formBtn.addEventListener("click", (e) => {
+				e.preventDefault();
+				let formData = new FormData(form);
+				this.getApiResponse("/api/user/profile/"+ id, formData).then((response) => {
+					let res = JSON.parse(response);
+					if (res.success) {
+						this.getProfile(res.id);
+						alert('Profile updated successfully!');
+					} else {
+						let profileForm = document.getElementById("profile");
+						// profileForm.classList.add("shake");
+						let profileFormAlert = document.getElementById("profileFormAlert");
+						profileFormAlert.textContent = res.message;
+						profileFormAlert.classList.remove("hided");
+						// setTimeout(() => {
+						// 	profileForm.classList.remove("shake");
+						// }, 500);
+						setTimeout(() => {
+							profileFormAlert.classList.add("hided");
+						}, 5000);
+					}
+				});
+			});
+		}
+	}
+
+	addProfilePictureChangeListener() {
+		// let profilePictureInput = document.getElementById("profileFormProfilePicture");
+		let previewProfilePicture = document.getElementById("previewProfilePicture");
+		let profileFormAlert = document.getElementById("profileFormAlert");
+
+		previewProfilePicture.addEventListener("change", function () {
+			if (this.files && this.files[0]) {
+				let file = this.files[0];
+
+				// Reset alert and preview
+				profileFormAlert.classList.add('hided');
+				profileFormAlert.textContent = '';
+				previewProfilePicture.innerHTML = '';
+
+				// File validation
+				const fileSizeLimit = 1 * 1024 * 1024; // 1MB
+				const allowedFileTypes = ['image/jpeg', 'image/png', 'image/gif'];
+
+				if (!allowedFileTypes.includes(file.type)) {
+					profileFormAlert.textContent = 'Unsupported file type. Please upload an image file (JPEG, PNG, GIF).';
+					profileFormAlert.classList.remove('hided');
+					return;
+				}
+
+				if (file.size > fileSizeLimit) {
+					profileFormAlert.textContent = 'File size exceeds 1MB. Please upload a smaller image.';
+					profileFormAlert.classList.remove('hided');
+					return;
+				}
+
+				let reader = new FileReader();
+				reader.onload = function (e) {
+					previewProfilePicture.style.backgroundImage = `url(${e.target.result})`;
 				};
 				reader.readAsDataURL(file);
 			}
