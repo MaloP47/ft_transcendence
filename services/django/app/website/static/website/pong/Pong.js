@@ -24,16 +24,16 @@ export default class Pong {
 	constructor(data) {
 		this.stateMachine = data.stateMachine;
 		this.initKeys();
-		this.initEvents();
 		this.initGameVariable();
 		this.initMultiData();
+		this.initEvents();
 		this.scene = new PongScene({pong: this});
 		this.assets = new PongAssets({pong: this});
 		this.transi = new PongTransi({pong: this});
 		this.update();
 	}
 
- initKeys() {
+	initKeys() {
 		this.p1LeftKey = 65;
 		this.p1RightKey = 68;
 		this.p2LeftKey = 37;
@@ -56,10 +56,12 @@ export default class Pong {
 				this.p1Left = true;
 			else if (keyCode == this.p1RightKey && !this.p1Right && !this.assets.p1.AI)
 				this.p1Right = true;
-			else if (keyCode == this.p2LeftKey && !this.p2Left && !this.assets.p2.AI)
-				this.p2Left = true;
-			else if (keyCode == this.p2RightKey && !this.p2Right && !this.assets.p2.AI)
-				this.p2Right = true;
+			if (!this.isMulti()) {
+				if (keyCode == this.p2LeftKey && !this.p2Left && !this.assets.p2.AI)
+					this.p2Left = true;
+				else if (keyCode == this.p2RightKey && !this.p2Right && !this.assets.p2.AI)
+					this.p2Right = true;
+			}
 		}
 
 		function onDocumentKeyUp(event) {
@@ -68,10 +70,12 @@ export default class Pong {
 				this.p1Left = false;
 			else if (keyCode == this.p1RightKey && this.p1Right && !this.assets.p1.AI)
 				this.p1Right = false;
-			else if (keyCode == this.p2LeftKey && this.p2Left && !this.assets.p2.AI)
-				this.p2Left = false;
-			else if (keyCode == this.p2RightKey && this.p2Right && !this.assets.p2.AI)
-				this.p2Right = false
+			if (!this.isMulti()) {
+				if (keyCode == this.p2LeftKey && this.p2Left && !this.assets.p2.AI)
+					this.p2Left = false;
+				else if (keyCode == this.p2RightKey && this.p2Right && !this.assets.p2.AI)
+					this.p2Right = false
+			}
 		}
 
 		function onResizeEvent() {
@@ -160,16 +164,16 @@ export default class Pong {
 		this.elapsedTime = performance.now() - this.totalTime;
 		this.totalTime = performance.now()
 
+		// create new var for receiving multiData and set MultiData here before loop
+
 		this.transi.update();
 		this.scene.update();
 		this.assets.update();
 
 		if (this.isMulti()) {
-			if (this.isHost()) {
+			if (this.isHost() || this.isGuest())  {
+				//console.log('sending multidata');
 				this.sendMultiData();
-			}
-			else {
-				//console.log(this.multiData.t_countdown);
 			}
 
 			// Reset
@@ -185,12 +189,10 @@ export default class Pong {
 	sendMultiData() {
 		if (!this.socketIsReady())
 			return;
-		if (!this.isHost())
+		if (!this.isHost() && !this.isGuest())
 			return;
-		//if (!this.isHost() && !this.isGuest())
-		//	return;
 
-		//// Set data
+		// Set data
 		if (this.isHost()) {
 			var type = 'multiDataHost';
 			// Ball
@@ -213,28 +215,46 @@ export default class Pong {
 			// Other
 			this.setMultiData('start', this.start);
 		}
-		//else if (isGuest()) {
-		//	type = 'multiGuestInfo'
-		//}
-		//else {
-		//	return ;
-		//}
+		else if (this.isGuest()) {
+			//console.log('Sending guest inputs');
+			var type = 'multiDataGuest';
+
+			// does this depend on fps?
+			this.setMultiData('p2_left', this.p1Left);
+			this.setMultiData('p2_right', this.p1Right);
+			// inputs
+			//if (this.p1Left)
+			//	this.setMultiData('p2_left', this.p1Left);
+			//if (this.p1Right)
+			//	this.setMultiData('p2_right', this.p1Right);
+		}
 
 		// Send data 
-		//console.log('Host sending data!');
 		this.stateMachine.chatSocket.send(JSON.stringify({
 			'type': type,
-			//'sender': this.stateMachine.user.username, // tmp
+			//'sender': this.stateMachine.user.username,
 			data: this.multiData,
 		}));
 	}
 	setMultiData(key, value) {
 		this.multiData[key] = value;
 	}
-	handleMultiData(data) {
+	handleMultiData(type, data) {
 		if (!this.isMulti())
 			return;
-		if (!this.isHost())
+
+		// IMP: don't set multiData during this,
+		// only at the beggining of a render loop
+
+		if (type == 'multiDataGuest' && this.isHost()) {
+			//console.log('Receiving guest inputs');
+			// Guest inputs
+			this.p2Left = data.p2_left;
+			this.p2Right = data.p2_right;
+			//this.multiData.p2_left = data.p2_left;
+			//this.multiData.p2_left = data.p2_left;
+		}
+		else if (type == 'multiDataHost' && this.isGuest())
 		{
 			this.multiData = data;
 			
@@ -297,6 +317,9 @@ export default class Pong {
 			// Other
 			'start': false,
 			't_countdown': -1,
+			// Inputs
+			'p2_left': false,
+			'p2_right': false,
 		}
 	}
 	resetMultiData() {

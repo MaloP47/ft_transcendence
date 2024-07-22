@@ -19,6 +19,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
 	async def disconnect(self, close_code):
 		await self.channel_layer.group_discard(
 			self.room_group_name,
+			#self.room_group_name, # here you can create 2 rooms
 			self.channel_name
 		)
 		await ChatConsumer.updateOnline(self, False)
@@ -31,9 +32,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
 		# Multiplayer logic --v
 		if 'type' in text_data_json:
 			if text_data_json['type'] == 'multiDataHost': 
-				# Checks can be performed here or in the handler function below for permission
-				# Need to restrict access to data too with rooms or groups or something
-				# Check if sender is really host or guest for example
+				await self.channel_layer.group_send(self.room_group_name, text_data_json) # add url multi/<room_id> to room_group_name
+			if text_data_json['type'] == 'multiDataGuest': 
 				await self.channel_layer.group_send(self.room_group_name, text_data_json)
             # add if text_data_json['type'] == 'gameNotif':
 		else:
@@ -102,8 +102,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
 			pass
 
 	async def multiDataHost(self, event):
-		# Try except can be performed here if need
-		# This way it lowers number of try except per received message greatly
+		await self.send(text_data=json.dumps(event))
+	async def multiDataGuest(self, event):
 		await self.send(text_data=json.dumps(event))
 
 	#async def host_game_info(self, event):

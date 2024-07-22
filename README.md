@@ -26,6 +26,8 @@ rm -rf ~/.local/share/Trash/*
     - [ ] sometimes there's an AI in multi game, not sure how to recreate
     - [ ] nginx 10s to close (not critical but worth investigating)
 ### Multiplayer
+- login
+    - [ ] when signing in, if signed in on another machine, logout other user and redirect to home with message "logged in from remote location"
 - multi config page:
     - [ ] fix small field size when nothing inside
     - [ ] player search field:
