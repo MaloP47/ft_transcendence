@@ -126,6 +126,9 @@ export default class App {
 		} else if (this.path.indexOf("/multi/") == 0) {
 			this.id = this.path.substring(7)
 			this.path = "/multi"
+		} else if (this.path.indexOf("/profile/") == 0) {
+			this.id = this.path.substring(9)
+			this.path = "/profile"
 		} else if (this.path.indexOf("/getTournament/") == 0) {
 			this.id = this.path.substring(15)
 			this.path = "/listTournaments"
@@ -152,20 +155,14 @@ export default class App {
 				case "Play1vs1":
 					this.getHomePage("1vs1", this.id);
 					break;
+				case "Profile":
+					this.getHomePage("profile", this.id);
+					break;
 				case "PlayMulti":
 					this.getHomePage("multi", this.id);
 					break;
 				case "listTournaments":
 					this.getHomePage("listTournaments", this.id);
-					break;
-				case "Profile":
-					if (document.getElementById("registerForm"))
-						this.hideRegisterForm();
-					if (document.getElementById("loginForm"))
-						this.hideLoginForm();
-					if (document.getElementById("createGame"))
-						this.hideCreateGame();
-					this.getHomePage("profile", id);
 					break;
 				case "createTournaments":
 					this.getHomePage("createTournaments", this.id);
