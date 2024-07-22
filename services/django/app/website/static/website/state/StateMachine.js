@@ -98,93 +98,66 @@ export default class App {
 		});
 	}
 
+	hideAll() {
+		if (document.getElementById("registerForm"))
+			this.hideRegisterForm();
+		if (document.getElementById("loginForm"))
+			this.hideLoginForm();
+		if (document.getElementById("createGame"))
+			this.hideCreateGame();
+		if (document.getElementById("listTournaments"))
+			this.hideListTournaments();
+		if (document.getElementById("gameOverlay"))
+			this.hideLocalGame()
+		if (document.getElementById("aiConfig"))
+			this.hideAiConfig()
+	}
+
 	router(back) {
-		let path = String(location.pathname)
-		let id = -1
-		if (path.indexOf("/play1vsAI/") == 0) {
-			id = path.substring(11)
-			path = "/play1vsAI"
-		} else if (path.indexOf("/play1vs1/") == 0) {
-			id = path.substring(10)
-			path = "/play1vs1"
-		} else if (path.indexOf("/multi/") == 0) {
-			id = path.substring(7)
-			path = "/multi"
-		} else if (path.indexOf("/getTournament/") == 0) {
-			id = path.substring(15)
-			path = "/listTournaments"
+		this.path = String(location.pathname)
+		this.id = -1
+		if (this.path.indexOf("/play1vsAI/") == 0) {
+			this.id = this.path.substring(11)
+			this.path = "/play1vsAI"
+		} else if (this.path.indexOf("/play1vs1/") == 0) {
+			this.id = this.path.substring(10)
+			this.path = "/play1vs1"
+		} else if (this.path.indexOf("/multi/") == 0) {
+			this.id = this.path.substring(7)
+			this.path = "/multi"
+		} else if (this.path.indexOf("/getTournament/") == 0) {
+			this.id = this.path.substring(15)
+			this.path = "/listTournaments"
 		}
-		let view = this.routes[path];
+		let view = this.routes[this.path];
 		if (view) {
 			document.title = view.title;
+			this.hideAll();
+			this.checkNotification();
 			switch(view.state) {
 				case "Home":
-					if (document.getElementById("registerForm"))
-						this.hideRegisterForm();
-					if (document.getElementById("loginForm"))
-						this.hideLoginForm();
 					this.getHomePage("home");
 					break;
 				case "Login":
-					if (document.getElementById("registerForm"))
-						this.hideRegisterForm();
 					this.getLoginForm();
 					break;
 				case "Register":
-					if (document.getElementById("loginForm"))
-						this.hideLoginForm();
 					this.getRegisterForm();
 					break;
 				case "Play1vsAI":
-					if (document.getElementById("registerForm"))
-						this.hideRegisterForm();
-					if (document.getElementById("loginForm"))
-						this.hideLoginForm();
-					if (document.getElementById("createGame"))
-						this.hideCreateGame();
-					if (document.getElementById("listTournaments"))
-						this.hideListTournaments();
-					this.getHomePage("1vsAI", id);
+					this.getHomePage("1vsAI", this.id);
 					break;
 				case "Play1vs1":
-					if (document.getElementById("registerForm"))
-						this.hideRegisterForm();
-					if (document.getElementById("loginForm"))
-						this.hideLoginForm();
-					if (document.getElementById("createGame"))
-						this.hideCreateGame();
-					if (document.getElementById("listTournaments"))
-						this.hideListTournaments();
-					this.getHomePage("1vs1", id);
+					this.getHomePage("1vs1", this.id);
 					break;
 				case "PlayMulti":
-					if (document.getElementById("registerForm"))
-						this.hideRegisterForm();
-					if (document.getElementById("loginForm"))
-						this.hideLoginForm();
-					if (document.getElementById("createGame"))
-						this.hideCreateGame();
-					if (document.getElementById("listTournaments"))
-						this.hideListTournaments();
-					this.getHomePage("multi", id);
+					this.getHomePage("multi", this.id);
 					break;
 				case "listTournaments":
-					if (document.getElementById("registerForm"))
-						this.hideRegisterForm();
-					if (document.getElementById("loginForm"))
-						this.hideLoginForm();
-					if (document.getElementById("createGame"))
-						this.hideCreateGame();
-					this.getHomePage("listTournaments", id);
+					this.getHomePage("listTournaments", this.id);
 					break;
 				case "createTournaments":
-					if (document.getElementById("registerForm"))
-						this.hideRegisterForm();
-					if (document.getElementById("loginForm"))
-						this.hideLoginForm();
-					if (document.getElementById("createGame"))
-						this.hideCreateGame();
-					this.getHomePage("createTournaments", id);
+					this.getHomePage("createTournaments", this.id);
 					break;
 			}
 		} else {
@@ -307,11 +280,9 @@ export default class App {
 	}
 
 	remove(domId) {
-		setTimeout(() => {
-			let dom = document.getElementById(domId);
-			if (dom)
-				dom.remove();
-		}, 200);
+		let dom = document.getElementById(domId);
+		if (dom)
+			dom.remove();
 	}
 
 	empty(domId) {
@@ -331,6 +302,8 @@ export default class App {
 	}
 
 	getHomePage(state, game_id) {
+		if (game_id == undefined)
+			game_id = -1;
 		if (this.user.authenticated) {
 			if (this.chatSocket)
 				this.chatSocket.close();
@@ -350,10 +323,8 @@ export default class App {
 					this.handleFriendRequestMessage(data);
 				if (data.game_notif)
 					this.handleTournamentNotif(data);
-				if (data.type && (data.type == 'multiDataHost' || data.type == 'multiDataGuest')) {
-					//console.log("sender -> " + data.sender);
-					this.pong.handleMultiData(data.type, data.data); // not sure how safe it is to access pong like that
-				}
+				if (data.type && (data.type == 'multiDataHost' || data.type == 'multiDataGuest'))
+					this.pong.handleMultiData(data.type, data.data);
 			}.bind(this);
 		}
 
@@ -440,6 +411,38 @@ export default class App {
 				this.getCreateTournament();
 			}
 		}
+	}
+
+	checkNotification() {
+		this.getApiResponse("/api/game/unfinished/").then((response) => {
+			let res = JSON.parse(response);
+			if (res.success) {
+				for (let i in res.games) {
+					this.getApiResponse("/api/game/notif/" + res.games[i].pk).then((re) => {
+						let r = JSON.parse(re);
+						if (r.success) {
+							let notifs = document.getElementsByClassName("notification")
+							var show = true;
+							for (let j in notifs){
+								if (notifs[j].dataset && notifs[j].dataset.game
+									&& parseInt(notifs[j].dataset.game) == res.games[i].pk) {
+									show = false;
+									break;
+								}
+							}
+							if (show) {
+								let notificationCenter = document.getElementById("notif")
+								if (notificationCenter) {
+									console.log(r)
+									notificationCenter.innerHTML += r.html;
+									this.addNotificationEvents();
+								}
+							}
+						}
+					});
+				}
+			}
+		});
 	}
 
 	getCreateTournament() {
@@ -651,6 +654,14 @@ export default class App {
 				})
 			}
 		}
+	}
+
+	hideAiConfig() {
+		let config = document.getElementById("aiConfig");
+		if (!config)
+			return ;
+		config.classList.add("hided")
+		this.remove("aiConfig")
 	}
 
 	hideLocalGame() {
@@ -1565,6 +1576,30 @@ export default class App {
 		let notif = notificationCenter.getElementsByClassName("notification")
 		for (let i=0; i < notif.length; i++) {
 			if (notif[i].classList.contains("hided")) {
+				if (notif[i].dataset
+					&& parseInt(notif[i].dataset.gametype) == 0
+					&& this.path == "/play1vsAI"
+					&& notif[i].dataset.game
+					&& parseInt(notif[i].dataset.game) == this.id) {
+					notif[i].remove();
+					continue;
+				}
+				if (notif[i].dataset
+					&& parseInt(notif[i].dataset.gametype) == 1
+					&& this.path == "/play1vs1"
+					&& notif[i].dataset.game
+					&& parseInt(notif[i].dataset.game) == this.id) {
+					notif[i].remove();
+					continue;
+				}
+				if (notif[i].dataset
+					&& parseInt(notif[i].dataset.gametype) == 2
+					&& this.path == "/multi"
+					&& notif[i].dataset.game
+					&& parseInt(notif[i].dataset.game) == this.id) {
+					notif[i].remove();
+					continue;
+				}
 				setTimeout(() => {
 					notif[i].classList.remove("hided")
 				}, 15)
@@ -1590,7 +1625,7 @@ export default class App {
 		else if (gameType == 1) // Local 1 vs 1
 			history.pushState("", "", "/play1vs1/" + gameId);
 		else if (gameType == 2) // Remote 1 vs 1
-			history.pushState("", "", "/play/" + gameId);
+			history.pushState("", "", "/multi/" + gameId);
 		let notif = e.target.parentNode.parentNode;
 		notif.classList.add("hided");
 		setTimeout(() => {

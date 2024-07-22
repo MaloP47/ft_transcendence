@@ -1,15 +1,3 @@
-# **************************************************************************** #
-#																			   #
-#														  :::	   ::::::::    #
-#	 views.py											:+:		 :+:	:+:    #
-#													  +:+ +:+		  +:+	   #
-#	 By: gbrunet <gbrunet@student.42.fr>			+#+  +:+	   +#+		   #
-#												  +#+#+#+#+#+	+#+			   #
-#	 Created: 2024/06/12 14:48:57 by gbrunet		   #+#	  #+#			   #
-#	 Updated: 2024/06/12 14:59:45 by gbrunet		  ###	########.fr		   #
-#																			   #
-# **************************************************************************** #
-
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.contrib.auth import login, logout, authenticate
@@ -25,6 +13,7 @@ from django.conf import settings
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import get_user_model
 from website.forms import CustomUserCreationForm
+from django.core.serializers import serialize
 
 
 def index(request):
@@ -84,6 +73,27 @@ def gameForfeit(request):
 		return JsonResponse({
 			'success': True,
 		})
+
+def getGameNotif(request, game_id):
+	if request.method == 'POST':
+		game = Game.objects.get(id=game_id)
+		return JsonResponse({
+			'success': True,
+			'html': render_to_string('website/unfinishedGameView.html', {"g": game, "user": request.user}),
+		})
+
+def getUnfinishedGames(request):
+	if request.method == 'POST':
+		if request.user.is_authenticated:
+			unfinished_games = Game.objects.filter(Q(p1=request.user) | Q(p2=request.user)).exclude(scoreToWin__lte=F('p1Score')).exclude(scoreToWin__lte=F('p2Score')).exclude(forfeit__isnull=False)
+			unfinishedGames = serialize("json", unfinished_games)
+			unfinishedGames = json.loads(unfinishedGames)
+		else:
+			unfinishedGames = []
+		return JsonResponse({
+			'success': True,
+			'games': unfinishedGames,
+		});
 
 def saveGame(request):
 	if request.method == 'POST':
