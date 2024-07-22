@@ -83,8 +83,8 @@ re: clean all
 
 rere: fclean all
 
-dev:
-	ln -s services/django/app django_app
+ln:
+	[ -L ./django_app ] || ln -s services/django/app ./django_app
 
 users:
 	-docker compose exec -e DJANGO_SUPERUSER_PASSWORD=mdpdur42 django python manage.py createsuperuser --no-input --username noa --email noa@example.com
