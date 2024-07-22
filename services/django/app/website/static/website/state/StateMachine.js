@@ -134,6 +134,7 @@ export default class App {
 			document.title = view.title;
 			this.hideAll();
 			this.checkNotification();
+			this.addNotificationEvents();
 			switch(view.state) {
 				case "Home":
 					this.getHomePage("home");
@@ -433,7 +434,6 @@ export default class App {
 							if (show) {
 								let notificationCenter = document.getElementById("notif")
 								if (notificationCenter) {
-									console.log(r)
 									notificationCenter.innerHTML += r.html;
 									this.addNotificationEvents();
 								}
@@ -1532,6 +1532,76 @@ export default class App {
 					setTimeout(() => {
 						messages[messages.length - 1].classList.remove("hided");
 						messages[messages.length - 1].classList.remove("height0");
+						let avatar = messages[messages.length - 1].querySelector(".message__avatar");
+						let i = messages.length - 1;
+						if (avatar) {
+							if (messages[i].dataset.user == this.user.id)
+								return ;
+							messages[i].addEventListener("click", (e) => {
+								this.getApiResponseJson("/api/view/chatMenu/", {id: e.target.dataset.user}).then((response) => {
+									let res = JSON.parse(response);
+									if (res.success) {
+										let chatMenu = document.getElementById("chatMenu")
+										if (!chatMenu)
+											return ;
+										chatMenu.style.top = (e.clientY + 5) + "px";
+										chatMenu.style.right = (window.innerWidth - e.clientX + 5) + "px";
+										chatMenu.innerHTML = res.html;
+										let sendPlay = document.getElementById("chatSendPlay")
+										this.chatMenuDeleteFriend();
+										this.chatMenuAddFriend();
+										this.chatMenuBlockUser();
+										let menuBack = document.getElementById("menuBack")
+										menuBack.classList.remove("pe-none");
+										chatMenu.classList.remove("displayNone");
+										chatMenu.style.pointerEvents = "all";
+										setTimeout(() => {
+											chatMenu.classList.remove("hided");
+										}, 15)
+									}
+								});
+							})
+						}
+
+
+
+
+/*
+				let messages = chatContainer.getElementsByClassName("message__avatar")
+				for (let i = 0; i < messages.length; i++) {
+					if (messages[i].dataset.user == this.user.id)
+						continue ;
+					messages[i].addEventListener("click", (e) => {
+						this.getApiResponseJson("/api/view/chatMenu/", {id: e.target.dataset.user}).then((response) => {
+							let res = JSON.parse(response);
+							if (res.success) {
+								let chatMenu = document.getElementById("chatMenu")
+								if (!chatMenu)
+									return ;
+								chatMenu.style.top = (e.clientY + 5) + "px";
+								chatMenu.style.right = (window.innerWidth - e.clientX + 5) + "px";
+								chatMenu.innerHTML = res.html;
+								let sendPlay = document.getElementById("chatSendPlay")
+								this.chatMenuDeleteFriend();
+								this.chatMenuAddFriend();
+								this.chatMenuBlockUser();
+								let menuBack = document.getElementById("menuBack")
+								menuBack.classList.remove("pe-none");
+								chatMenu.classList.remove("displayNone");
+								chatMenu.style.pointerEvents = "all";
+								setTimeout(() => {
+									chatMenu.classList.remove("hided");
+								}, 15)
+							}
+						});
+					})
+				}
+*/
+
+
+
+
+
 						chatBottom.scrollIntoView()
 					}, 15);
 				}
@@ -1613,6 +1683,32 @@ export default class App {
 					deleteBtn.addEventListener("click", this.deleteFriendRequest.bind(this), false);
 				else if (deleteBtn.classList.contains("forfeit"))
 					deleteBtn.addEventListener("click", this.forfeitUnfinishedGame.bind(this), false);
+			} else {
+				console.log("salut")
+				if (notif[i].dataset
+					&& parseInt(notif[i].dataset.gametype) == 0
+					&& this.path == "/play1vsAI"
+					&& notif[i].dataset.game
+					&& parseInt(notif[i].dataset.game) == this.id) {
+					notif[i].remove();
+					continue;
+				}
+				if (notif[i].dataset
+					&& parseInt(notif[i].dataset.gametype) == 1
+					&& this.path == "/play1vs1"
+					&& notif[i].dataset.game
+					&& parseInt(notif[i].dataset.game) == this.id) {
+					notif[i].remove();
+					continue;
+				}
+				if (notif[i].dataset
+					&& parseInt(notif[i].dataset.gametype) == 2
+					&& this.path == "/multi"
+					&& notif[i].dataset.game
+					&& parseInt(notif[i].dataset.game) == this.id) {
+					notif[i].remove();
+					continue;
+				}
 			}
 		}
 	}
