@@ -1,3 +1,15 @@
+// ************************************************************************** //
+//                                                                            //
+//                                                        :::      ::::::::   //
+//   StateMachine.js                                    :+:      :+:    :+:   //
+//                                                    +:+ +:+         +:+     //
+//   By: gbrunet <gbrunet@student.42.fr>            +#+  +:+       +#+        //
+//                                                +#+#+#+#+#+   +#+           //
+//   Created: 2024/07/22 11:54:11 by gbrunet           #+#    #+#             //
+//   Updated: 2024/07/22 12:02:35 by gbrunet          ###   ########.fr       //
+//                                                                            //
+// ************************************************************************** //
+
 import Pong from '../pong/Pong.js';
 
 function sleep(ms) {
@@ -573,9 +585,6 @@ export default class App {
 							name: btns[i].dataset.name,
 						}
 						this.updatePlayerMulti(); // change field 
-						setTimeout(()=>{
-							this.configureDeleteMultiPlayer()
-						}, 100)
 					})
 				}
 			}
@@ -594,10 +603,8 @@ export default class App {
 		for (let j = 0; j < this.tournamentPlayers.length; j++) {
 			html += '<div id="player-' + this.tournamentPlayers[j].id + '" class="px-1 mx-1 border border-light rounded" style="--bs-border-opacity:0.25;">' + this.tournamentPlayers[j].name + '<button data-id="' + this.tournamentPlayers[j].id + '" class="btn btn-light delPlayerList" style="line-height: 12px; font-size:12px; padding: 0 4px 0 4px; margin-left: 8px">x</button></div>'
 		}
-		//players = document.getElementById("players");
 		var players = document.getElementById("players");
 		players.innerHTML = html;
-		//createBtn = document.getElementById("createBtn");
 		var createBtn = document.getElementById("createBtn");
 		var addPlayerInput = document.getElementById("addPlayer");
 		if (this.tournamentPlayers.length == 4) {
@@ -608,24 +615,24 @@ export default class App {
 			addPlayerInput.disabled = false;
 		}
 	}
+
 	updatePlayerMulti() {
-		document.getElementById("addPlayer").value = "";
+		let addPlayer = document.getElementById("addPlayer");
+		addPlayer.value = "";
 		let playerResult = document.getElementById("playerResult");
 		if (playerResult)
 			playerResult.innerHTML = "";
-		var player2Field = document.getElementById("player2Field");
-		if (this.playerMulti != 0)
-			player2Field.innerHTML = this.playerMulti.name;
-		else
-			player2Field.innerHTML = ""; // this will make it small
+		if (this.playerMulti != 0) {
+			addPlayer.placeholder = this.playerMulti.name;
+		}
+		else {
+			addPlayer.placeholder = "Search";
+		}
 		var playBtn = document.getElementById("playBtn");
-		var addPlayerInput = document.getElementById("addPlayer");
 		if (this.playerMulti != 0) {
 			playBtn.disabled = false;
-			addPlayerInput.disabled = true;
 		} else {
 			playBtn.disabled = true;
-			addPlayerInput.disabled = false;
 		}
 	}
 
@@ -643,18 +650,6 @@ export default class App {
 					}, 100)
 				})
 			}
-		}
-	}
-	configureDeleteMultiPlayer() {
-		let btn = document.getElementById("player2Field");
-		if (btn.type == 'submit') {
-			btn.addEventListener("click", (e) => {
-				this.playerMulti = 0;
-				this.updatePlayerMulti()
-				setTimeout(()=>{
-					this.configureDeleteMultiPlayer()
-				}, 100)
-			})
 		}
 	}
 
@@ -722,6 +717,7 @@ export default class App {
 			}
 		});
 	}
+
 	getMultiGame(id) {
 		this.getApiResponseJson("/api/game/get/", {id: id}).then((response) => {
 			let res = JSON.parse(response);
@@ -1120,7 +1116,6 @@ export default class App {
 				let val = document.getElementById("addPlayer").value;
 				if (val != "")
 					this.searchPlayerMulti(val);
-					//this.searchPlayer(val);
 				else {
 					let playerResult = document.getElementById("playerResult");
 					if (playerResult)
@@ -1129,7 +1124,7 @@ export default class App {
 			})
 
 			let playBtn = document.getElementById("playBtn")
-			playBtn.addEventListener("click", (e) => { // FINAL THING: set this.playerMulti as p2 info
+			playBtn.addEventListener("click", (e) => {
 				if (config.p2Local == "")
 					config.p2Local = this.playerMulti.name;
 				this.getApiResponseJson("/api/game/new/multi/", {config: config, p2: this.playerMulti}).then((response) => {
