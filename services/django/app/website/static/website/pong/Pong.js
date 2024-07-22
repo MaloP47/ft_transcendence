@@ -164,29 +164,39 @@ export default class Pong {
 		this.elapsedTime = performance.now() - this.totalTime;
 		this.totalTime = performance.now()
 
-		// create new var for receiving multiData and set MultiData here before loop
+		if (this.isMulti())
+			this.updateMulti();
+		else {
+			this.transi.update();
+			this.scene.update();
+			this.assets.update();
+		}
+
+		requestAnimationFrame(this.update.bind(this));
+	}
+	updateMulti() {
+		// set data before loop so it doesn't change in the middle
+		this.multiData = this.multiDataAsync;
 
 		this.transi.update();
 		this.scene.update();
 		this.assets.update();
 
-		if (this.isMulti()) {
-			if (this.isHost() || this.isGuest())  {
-				//console.log('sending multidata');
-				this.sendMultiData();
-			}
+		if (this.isHost())
+			this.sendMultiDataHost();
+		else if (this.isGuest())
+			this.sendMultiDataHost();
 
-			// Reset
-			this.resetMultiData();
-		}
-
-		requestAnimationFrame(this.update.bind(this));
+		this.resetMultiData();
 	}
 
 	// -----------------------------
 	// -------- Multi utils --------
 	// --------------v--------------
-	sendMultiData() {
+	sendMultiDataGuest() {
+
+	}
+	sendMultiDataHost() {
 		if (!this.socketIsReady())
 			return;
 		if (!this.isHost() && !this.isGuest())
@@ -275,7 +285,11 @@ export default class Pong {
 		return {x: 0, y: 0, z: 0};
 	}
 	initMultiData() {
-		this.multiData = {
+		this.multiDataAsync = this.getMultiDataDefault;
+		this.multiData = this.getMultiDataDefault();
+	}
+	getMultiDataDefault() {
+		return {
 			// Ball
 			'ball_pos': {x: 0, y: 0, z: 0},
 			'ball_vel': {x: 0, y: 0, z: 0},
