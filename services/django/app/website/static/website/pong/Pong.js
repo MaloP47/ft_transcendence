@@ -164,23 +164,23 @@ export default class Pong {
 		this.elapsedTime = performance.now() - this.totalTime;
 		this.totalTime = performance.now()
 
-		// create new var for receiving multiData and set MultiData here before loop
+		if (this.isMultiPlayer()) {
+			this.updateMulti();
+		} else {
+			this.transi.update();
+			this.scene.update();
+			this.assets.update();
+		}
 
+		requestAnimationFrame(this.update.bind(this));
+	}
+	updateMulti() {
 		this.transi.update();
 		this.scene.update();
 		this.assets.update();
 
-		if (this.isMulti()) {
-			if (this.isHost() || this.isGuest())  {
-				//console.log('sending multidata');
-				this.sendMultiData();
-			}
-
-			// Reset
-			this.resetMultiData();
-		}
-
-		requestAnimationFrame(this.update.bind(this));
+		this.sendMultiData();
+		this.resetMultiData();
 	}
 
 	// -----------------------------
@@ -214,19 +214,15 @@ export default class Pong {
 			this.setMultiData('endRound', this.endRound);
 			// Other
 			this.setMultiData('start', this.start);
+			this.setMultiData('game_id', this.gameInfo.game_id);
 		}
 		else if (this.isGuest()) {
 			//console.log('Sending guest inputs');
 			var type = 'multiDataGuest';
 
-			// does this depend on fps?
+			// Guest inputs
 			this.setMultiData('p2_left', this.p1Left);
 			this.setMultiData('p2_right', this.p1Right);
-			// inputs
-			//if (this.p1Left)
-			//	this.setMultiData('p2_left', this.p1Left);
-			//if (this.p1Right)
-			//	this.setMultiData('p2_right', this.p1Right);
 		}
 
 		// Send data 
@@ -247,25 +243,20 @@ export default class Pong {
 		// only at the beggining of a render loop
 
 		if (type == 'multiDataGuest' && this.isHost()) {
-			//console.log('Receiving guest inputs');
 			// Guest inputs
 			this.p2Left = data.p2_left;
 			this.p2Right = data.p2_right;
-			//this.multiData.p2_left = data.p2_left;
-			//this.multiData.p2_left = data.p2_left;
 		}
-		else if (type == 'multiDataHost' && this.isGuest())
-		{
+		else if (type == 'multiDataHost' && this.isGuest()) {
 			this.multiData = data;
-			
-			// don't need endRoung YET but KEEP IT
-			//this.endRound = data.endRound;
 			
 			// Score
 			this.assets.p1.score = data.p1_score;
 			this.assets.p2.score = data.p2_score;
 			this.winScore = data.winScore;
 			// Other
+			// don't need endRound YET but KEEP IT
+			//this.endRound = data.endRound;
 			this.start = data.start;
 			if (data.t_countdown != -1)
 				this.animateCountdownMulti();
@@ -320,6 +311,7 @@ export default class Pong {
 			// Inputs
 			'p2_left': false,
 			'p2_right': false,
+			'game_id': -1,
 		}
 	}
 	resetMultiData() {
@@ -350,33 +342,15 @@ export default class Pong {
 		//	}, 10);
 		//}
 	}
-	isMulti() {
-		return (this.gameInfo.gameType == 2);
-	}
-	isMultiHost() {
-		return (this.gameInfo.gameType == 2 && this.isHost());
-	}
-	isMultiNotHost() {
-		return (this.gameInfo.gameType == 2 && !this.isHost());
-	}
-	isMultiGuest() {
-		return (this.gameInfo.gameType == 2 && this.isGuest());
-	}
-	isMultiNotGuest() {
-		return (this.gameInfo.gameType == 2 && this.isGuest());
-	}
-	isHost() {
-		return (this.stateMachine.user.id == this.gameInfo.p1.id);
-	}
-	isGuest() {
-		return (this.stateMachine.user.id == this.gameInfo.p2.id);
-	}
-	isSpectator() {
-		return (!this.isHost() && !this.isGuest());
-	}
-	socketIsReady() {
-		return (this.stateMachine.chatSocket.readyState === WebSocket.OPEN);
-	}
+	isMulti() { return (this.gameInfo.gameType == 2); }
+	isMultiHost() { return (this.isMulti() && this.isHost()); }
+	isMultiNotHost() { return (this.isMulti() && !this.isHost()); }
+	isMultiGuest() { return (this.isMulti() && this.isGuest()); }
+	isMultiNotGuest() { return (this.isMulti() && this.isGuest()); }
+	isMultiPlayer() { return (this.isMulti() && (this.isHost() || this.isGuest())); }
+	isHost() { return (this.stateMachine.user.id == this.gameInfo.p1.id); }
+	isGuest() { return (this.stateMachine.user.id == this.gameInfo.p2.id); }
+	socketIsReady() { return (this.stateMachine.chatSocket.readyState === WebSocket.OPEN); }
 
 	preConfig() {
 		this.p1LeftKey = this.gameInfo.p1Left;
