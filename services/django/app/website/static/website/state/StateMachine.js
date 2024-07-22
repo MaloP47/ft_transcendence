@@ -303,7 +303,7 @@ export default class App {
 	toggleProfilMenu() {
 		let profilMenu = document.getElementById("profilMenu");
 		if (this.user.authenticated) {
-			this.getApiResponse("/api/view/profilMenu/")
+			this.getApiResponse("/api/view/profileMenu/")
 				.then((response) => {
 					let res = JSON.parse(response);
 					if (res.success) {
@@ -425,27 +425,37 @@ export default class App {
 		} else {
 			if (state == "home") {
 				this.setPong("bg");
+				this.hideProfile();
 				this.getCreateGame();
 			} else if (state == "1vsAI" && game_id == -1) {
 				this.setPong("bg");
 				this.hideLocalGame();
+				this.hideProfile();
 				this.getLocalAiConfigPage();
 			} else if (state == "1vsAI" && game_id != -1) {
 				this.hideLocalConfigPage();
+				this.hideProfile();
 				this.getLocalAiGame(game_id);
 			} else if (state == "1vs1" && game_id == -1) {
 				this.setPong("bg");
 				this.hideLocalGame();
+				this.hideProfile();
 				this.getLocalConfigPage();
 			} else if (state == "1vs1" && game_id != -1) {
 				this.hideLocalConfigPage();
+				this.hideProfile();
 				this.getLocalGame(game_id);
+			} else if (state == "profile") {
+				this.setPong("bg");
+				this.getProfile(game_id);
 			} else if (state == "multi" && game_id == -1) {
 				this.setPong("bg");
+				this.hideProfile();
 				this.hideLocalGame();
 				this.getMultiConfigPage();
 			} else if (state == "multi" && game_id != -1) {
 				this.hideLocalConfigPage();
+				this.hideProfile();
 				this.getMultiGame(game_id);
 			} else if (state == "listTournaments") {
 				this.getListTournaments(game_id);

@@ -290,7 +290,7 @@ def acceptFriend(request):
 			'success': True,
 		});
 
-def profilMenu(request):
+def profileMenu(request):
 	if request.method == 'POST':
 		return JsonResponse({
 			'success': True,
