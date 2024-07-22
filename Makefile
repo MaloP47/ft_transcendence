@@ -49,7 +49,7 @@ down stop:
 
 clean: down
 	@printf "$(_YELLOW)Removing all containers data...$(_END)\n"
-	docker volume prune -f
+	docker volume prune -af
 
 fclean: down
 	@printf "$(_YELLOW)Removing all unused containers and data...$(_END)\n"

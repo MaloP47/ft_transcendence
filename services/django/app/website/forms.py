@@ -5,10 +5,6 @@ from django import forms
 from website.models import User as CustomUser
 
 def validate_password_strength(value):
-    """
-    Validate that the password has at least one digit, one special character,
-    one uppercase letter, and one lowercase letter.
-    """
     if not re.findall(r'[A-Z]', value):
         raise ValidationError('Password must contain at least one uppercase letter.')
     if not re.findall(r'[a-z]', value):
@@ -65,3 +61,62 @@ class CustomUserCreationForm(UserCreationForm):
         if commit:
             user.save()
         return user
+    
+class editProfileForm(forms.Form):
+	profile_picture = forms.ImageField(
+        required=False,
+		widget=forms.FileInput(
+			attrs = {
+				'class': 'form-control mb-3',
+			}
+		)
+	)
+	username = forms.CharField(
+        required=False,
+		widget=forms.TextInput(
+			attrs = {
+				'placeholder': 'username',
+				'class': 'form-control',
+
+			}
+		)
+	)
+	email = forms.EmailField(
+        required=False,
+        widget=forms.EmailInput(
+            attrs={
+				'placeholder': 'email',
+                'class': 'form-control',
+            }
+        )
+    )
+	password = forms.CharField(
+        required=False,
+		widget=forms.PasswordInput(
+			attrs = {
+				'class': 'form-control',
+			}
+		)
+	)
+	confirm_password = forms.CharField(
+        required=False,
+		widget=forms.PasswordInput(
+			attrs = {
+				'class': 'form-control',
+			}
+		)
+	)
+
+	class Meta:
+			model = CustomUser
+			fields = ("username", "email", "password", "confirm_password", "profilPicture")
+
+	def save(self, commit=True):
+		user = super(editProfileForm, self).save(commit=False)
+		user.email = self.cleaned_data['email']
+		if 'profilPicture' in self.cleaned_data:
+			user.profilPicture = self.cleaned_data['profilPicture']
+		if commit:
+			user.save()
+		return user
+     
