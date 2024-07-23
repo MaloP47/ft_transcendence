@@ -189,31 +189,70 @@ export default class Pong {
 	}
 
 	handlePause() {
+		let countdown = document.getElementById("countdown");
+		if (!countdown)
+			return;
 		if (this.multiData.enemy_connected) {
 			this.multiData.enemy_connected_last = performance.now();
-			if (this.isHost() && this.notConnected ) {
-				this.notConnected = false;
-				let count = 5;
-				this.animateCountdown(count);
-				setTimeout(() => { this.start = true; }, count * 1000);
+			if (this.isHost()) {
+				//let sec = 5;
+				//this.animateCountdown(sec);
+				//setTimeout(()=>{ this.start = true; }, sec * 1000);
+				this.start = true;
 			}
+			countdown.innerHTML = "";
 		}
 		if (!this.multiData.enemy_connected && performance.now() - this.multiData.enemy_connected_last >= 300) {
 			if (this.isHost()) {
-				this.notConnected = true;
 				this.start = false;
-			//	this.endRound = true;
 			}
-			let countdown = document.getElementById("countdown");
-			//countdown.classList.remove("countdown");
 			countdown.style.fontSize = "4rem";
-			if (this.isHost())
+			if (this.isHost()) {
 				countdown.innerHTML = "Waiting for " + this.gameInfo.p2.username + "...";
-			else
+			} else {
 				countdown.innerHTML = "Waiting for " + this.gameInfo.p1.username + "...";
+			}
 		}
 	}
-
+	//handlePause() {
+	//	let countdown = document.getElementById("countdown");
+	//	if (!countdown)
+	//		return;
+	//	if (this.multiData.enemy_connected) {
+	//		this.multiData.enemy_connected_last = performance.now();
+	//		if (this.isHost()) {
+	//			//let count = 5;
+	//			//this.animateCountdown(count);
+	//			//	setTimeout(() => { this.start = true; }, count * 1000);
+	//			this.start = true;
+	//		}
+	//		//if (this.isGuest() && this.notConnected) {
+	//		//	countdown.innerHTML = "";
+	//		//}
+	//		//this.notConnected = false;
+	//	}
+	//	if (!this.multiData.enemy_connected && performance.now() - this.multiData.enemy_connected_last >= 300) {
+	//		if (this.isHost()) {
+	//			this.start = false;
+	//		//	this.endRound = true;
+	//		}
+	//		//setTimeout(()=>{
+	//			//if (!countdown)
+	//			//	return ;
+	//			countdown.style.fontSize = "4rem";
+	//			if (this.isHost()) {
+	//				countdown.innerHTML = "Waiting for " + this.gameInfo.p2.username + "...";
+	//				//if (this.notConnected == false) {
+	//				//}
+	//			} else {
+	//				countdown.innerHTML = "Waiting for " + this.gameInfo.p1.username + "...";
+	//				//if (this.notConnected == false) {
+	//				//}
+	//			}
+	//			//this.notConnected = true;
+	//		//}, 30);
+	//	}
+	//}
 
 	// Utils
 	isFinished() { return (this.assets.p1.score >= this.winScore || this.assets.p2.score >= this.winScore); }
@@ -295,8 +334,8 @@ export default class Pong {
 			// don't need endRound YET but KEEP IT
 			//this.endRound = data.endRound;
 			this.start = data.start;
-			if (data.t_countdown != -1)
-				this.animateCountdownMulti();
+			//if (data.t_countdown != -1)
+			//	this.animateCountdownMulti();
 		}
 	}
 	zeroVec3() {
@@ -421,88 +460,36 @@ export default class Pong {
 			this.assets.p1.AI = true;
 		if (this.gameInfo.p2.id == -1 && this.gameInfo.p2Local == "")
 			this.assets.p2.AI = true;
-		//if (this.countTimeout)
-		//	clearTimeout(this.countTimeout)
-
-		// Multi skip countdown
-		//if (this.isMultiNotHost()) {
-		//	if (this.multiData.t_countdown != -1) {
-		//		this.animateCountdownMulti();
-		//	}
-		//	return ;
-		//}
-
-		// Countdown
-		// move this inside update
-		//if (!(this.gameInfo.p1score >= this.winScore || this.gameInfo.p2score >= this.winScore)) {
-		//	this.countTimeout = setTimeout(() => {
-		//		this.animateCountdown(5);	
-		//	}, 1000)
-		//}
-		if (!(this.gameInfo.p1score >= this.winScore || this.gameInfo.p2score >= this.winScore)) {
-			this.animateCountdown(5);
-		}
 	}
 
-	//	setTimeout(()=>{
-	//		this.start = true;
-	//		this.endRound = false;
-	//		if (this.gameInfo.p2.id == -1 && this.gameInfo.p2Local == "") {
-	//			this.assets.p2.startAI();
-	//		}
-	//	}, sec * 1000);
-	//}
 	//animateCountdown(sec) {
+	//	if (sec < 0)
+	//		return ;
 	//	let countdown = document.getElementById("countdown");
-	//	if (sec >= 0 && countdown) {
-	//		// Multi trigger
-	//		this.setMultiData('t_countdown', sec);
-	//		//console.log('Sending countdown trigger... -> ' + sec);
+	//	if (!countdown)
+	//		return ;
 
-	//		countdown.innerHTML = sec;
-	//		this.countTimout = setTimeout(() => {
-	//			this.animateCountdown(sec - 1);
-	//		}, 1000)	
-	//	}
-	//	if (sec == 0 && countdown) {
+	//	//this.countTimeout = true;
+	//	//clearTimeout(timeoutID);
+	//	for (let secs = 0; secs <= sec; secs++) {
+
 	//		setTimeout(()=>{
-	//			this.start = true;
-	//			this.endRound = false;
-	//			if (this.gameInfo.p2.id == -1 && this.gameInfo.p2Local == "") {
-	//				this.assets.p2.startAI();
-	//			}
-	//		}, 500);
+	//			countdown.innerHTML = secs;
+	//			this.setMultiData('t_countdown', secs);
+	//			if (secs == 0)
+	//				setTimeout(() => { countdown.innerHTML = ""; }, 200);
+	//		}, (sec - secs) * 1000);
 	//	}
 	//}
+	//animateCountdownMulti() {
+	//	let countdown = document.getElementById("countdown");
 
-	animateCountdown(sec) {
-		if (sec < 0)
-			return ;
-		let countdown = document.getElementById("countdown");
-		if (!countdown)
-			return ;
-
-		//this.countTimeout = true;
-		//clearTimeout(timeoutID);
-		for (let secs = 0; secs <= sec; secs++) {
-
-			setTimeout(()=>{
-				countdown.innerHTML = secs;
-				this.setMultiData('t_countdown', secs);
-				if (secs == 0)
-					setTimeout(() => { countdown.innerHTML = ""; }, 200);
-			}, (sec - secs) * 1000);
-		}
-	}
-	animateCountdownMulti() {
-		let countdown = document.getElementById("countdown");
-
-		if (!countdown)
-			return ;
-		countdown.innerHTML = this.multiData.t_countdown;
-		countdown.style.fontSize = "4rem";
-		if (secs == 0)
-			setTimeout(()=>{ countdown.innerHTML = ""; }, 200)
-		
-	}
+	//	if (!countdown)
+	//		return ;
+	//	countdown.innerHTML = this.multiData.t_countdown;
+	//	countdown.style.fontSize = "4rem";
+	//	if (secs == 0)
+	//		setTimeout(()=>{ countdown.innerHTML = ""; }, 200)
+	//	
+	//}
 }
