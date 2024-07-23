@@ -15,10 +15,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     };
 
-    document.addEventListener('click', playAudio);
-    document.addEventListener('mousemove', playAudio);
-    document.addEventListener('keydown', playAudio);
-
     toggleButton.addEventListener('click', function() {
         if (audio.paused) {
             audio.play();
