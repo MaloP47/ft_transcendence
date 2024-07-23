@@ -460,6 +460,12 @@ export default class Pong {
 			this.assets.p1.AI = true;
 		if (this.gameInfo.p2.id == -1 && this.gameInfo.p2Local == "")
 			this.assets.p2.AI = true;
+
+		this.start = true; // timer
+		this.endRound = false;
+		if (this.gameInfo.p2.id == -1 && this.gameInfo.p2Local == "" && this.gameInfo.gameType != 1) {
+			this.assets.p2.startAI();
+		}
 	}
 
 	//animateCountdown(sec) {
