@@ -143,6 +143,7 @@ export default class Ball {
 		if (player == 1) {
 			if (!this.pong.bg) {
 				this.pong.assets.p1.score += 1;
+				this.pong.animateCountdown(); // remove
 				this.pong.stateMachine.getApiResponseJson("/api/game/save/",
 					{
 						id: this.pong.game_id,
