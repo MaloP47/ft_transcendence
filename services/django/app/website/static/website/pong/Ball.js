@@ -149,6 +149,13 @@ export default class Ball {
 						p1: this.pong.assets.p1.score,
 						p2: this.pong.assets.p2.score
 					})
+					.then((response) => {
+						let res = JSON.parse(response);
+						if (res.success) {
+							this.tour = res.tournament;
+							this.game_id = res.game_id;
+						}
+					})
 				let p1score = document.getElementById("p1score");
 				if (p1score)
 					p1score.innerHTML = this.pong.assets.p1.score;
@@ -162,6 +169,13 @@ export default class Ball {
 						id: this.pong.game_id,
 						p1: this.pong.assets.p1.score,
 						p2: this.pong.assets.p2.score
+					})
+					.then((response) => {
+						let res = JSON.parse(response);
+						if (res.success) {
+							this.tour = res.tournament;
+							this.game_id = res.game_id;
+						}
 					})
 				let p2score = document.getElementById("p2score");
 				if (p2score)
@@ -191,6 +205,33 @@ export default class Ball {
 				endDiv.classList.remove("countdown");
 				endDiv.style.fontSize = "5rem";
 				endDiv.classList.add("visible");
+				if (this.tour) {
+					this.pong.stateMachine.getApiResponseJson("/api/tournament/createFinale/",
+						{
+							game_id: this.game_id,
+						})
+						.then((response) => {
+							let res = JSON.parse(response);
+							if(res.success) {
+								if (res.finale_id) {
+									this.chatSocket.send(JSON.stringify({
+										'gameNotif': res.finale_id,
+										'p1': res.p1,
+										'p2': res.p2,
+									}));
+								} else if (res.end) {
+									this.pong.stateMachine.getApiResponseJson("/api/view/tournamentEnd/", {
+										tournament_id: res.tour_id,
+										win_id: res.win_id,
+										wins: 2,
+										losses: 0,
+									})
+								}
+							}
+						})
+
+					console.log('create final')
+				}
 			}
 		} else {
 			this.nextTimeout = setTimeout(() => {

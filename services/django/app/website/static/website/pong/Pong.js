@@ -154,10 +154,10 @@ export default class Pong {
 				p2Local: '',
 				//gameType: ?????,
 			}
-			this.transi.to("toBg", 1500);
+			this.transi.to("toBg", 500);
 		}
 		else if (state == "p1Game")
-			this.transi.to("toP1Game", 1000);
+			this.transi.to("toP1Game", 500);
 	}
 
 	update() {
@@ -463,7 +463,7 @@ export default class Pong {
 
 		this.start = true; // timer
 		this.endRound = false;
-		if (this.gameInfo.p2.id == -1 && this.gameInfo.p2Local == "" && this.gameInfo.gameType != 1) {
+		if (this.gameInfo.p2.id == -1 && this.gameInfo.p2Local == "" && this.gameInfo.gameType < 1) {
 			this.assets.p2.startAI();
 		}
 	}
