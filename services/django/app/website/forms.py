@@ -76,7 +76,7 @@ class editProfileForm(forms.ModelForm):
 		widget=forms.TextInput(
 			attrs = {
 				'placeholder': 'username',
-				'class': 'form-control d-none tohide',
+				'class': 'form-control d-none tohide roboto',
 
 			}
 		)
@@ -86,7 +86,7 @@ class editProfileForm(forms.ModelForm):
 		widget=forms.EmailInput(
 			attrs={
 				'placeholder': 'email',
-				'class': 'form-control d-none tohide',
+				'class': 'form-control d-none tohide roboto',
 			}
 		)
 	)
@@ -94,7 +94,7 @@ class editProfileForm(forms.ModelForm):
 		required=False,
 		widget=forms.PasswordInput(
 			attrs = {
-				'class': 'form-control d-none tohide',
+				'class': 'form-control d-none tohide roboto',
 			}
 		)
 	)
@@ -102,7 +102,7 @@ class editProfileForm(forms.ModelForm):
 		required=False,
 		widget=forms.PasswordInput(
 			attrs = {
-				'class': 'form-control d-none tohide',
+				'class': 'form-control d-none tohide roboto',
 			}
 		)
 	)

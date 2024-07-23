@@ -2130,6 +2130,7 @@ export default class App {
 
 				this.addProfileFormSubmitListener(id);
 				this.addProfilePictureChangeListener();
+				this.addTogglePasswordButtons();
 			}
 		});
 	}
