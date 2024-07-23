@@ -20,6 +20,7 @@ urlpatterns = [
 	path('api/user/acceptfriend/', views.acceptFriend, name="acceptFriend"),
 	path('api/user/deleterequest/', views.deleteRequest, name="deleteRequest"),
 	path('api/user/', views.getUser, name="getUser"),
+	path('api/user/profile/', views.updateProfile, name="updateProfile"),
 
 	path('api/game/get/', views.getGame, name="getGame"),
 	path('api/game/save/', views.saveGame, name="saveGame"),

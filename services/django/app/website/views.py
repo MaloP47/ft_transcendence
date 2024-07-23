@@ -1,3 +1,4 @@
+from django.contrib.auth.hashers import make_password
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.contrib.auth import login, logout, authenticate
@@ -133,26 +134,6 @@ def getGame(request):
 		if game.p2:
 			p2Id = game.p2.id
 			p2Username = game.p2.username
-		# For testing only, put back request.user check later
-		#return JsonResponse({
-		#	'success': True,
-		#	'p1': {'id': p1Id, 'username': p1Username},
-		#	'p2': {'id': p2Id, 'username': p2Username},
-		#	'ai': game.ai,
-		#	'p1score': game.p1Score,
-		#	'p2score': game.p2Score,
-		#	'winScore': game.scoreToWin,
-		#	'ballSpeed': game.ballSpeed,
-		#	'bonuses': game.bonuses,
-		#	'p1Left': game.p1Left,
-		#	'p1Right': game.p1Right,
-		#	'p2Left': game.p2Left,
-		#	'p2Right': game.p2Right,
-		#	'date' : game.date,
-		#	'p2Local': game.p2Local,
-		#	'html': render_to_string('website/gameOverlay.html'),
-		#	'gameType': game.gameType,
-		#});
 		if game.p1 == request.user or game.p2 == request.user:
 			return JsonResponse({
 				'success': True,
@@ -171,7 +152,8 @@ def getGame(request):
 				'date' : game.date,
 				'p2Local': game.p2Local,
 				'html': render_to_string('website/gameOverlay.html'),
-				 'gameType': game.gameType,
+				'gameType': game.gameType,
+                'game_id': game.id,
 			});
 		else:
 			return JsonResponse({
@@ -244,8 +226,6 @@ def gameNewMultiChat(request):
 			});
 		game = Game(p1=request.user, p2=p2, ai=config['ai'], scoreToWin=config['winScore'], ballSpeed=config['startSpeed'], bonuses=config['bonuses'], p1Left=config['leftKey'], p1Right=config['rightKey'], p2Left=config['leftKey2'], p2Right=config['rightKey2'], p2Local='', gameType=2)
 		game.save()
-		print("asds   d   "+str(p2.id))
-		print("sdfsdfsdf  "+str(request.user.id))
 		return JsonResponse({
 			'success': True,
 			'g1': game.id,
@@ -348,6 +328,51 @@ def registerForm(request):
 			'success': True,
 			'html': render_to_string('website/register.html'),
 		});
+
+def updateProfile(request):
+	if request.method == 'POST':
+		pp = request.user.profilPicture
+		psw = request.user.password
+		profile_form = editProfileForm(request.POST, request.FILES, instance=request.user)
+		if profile_form.is_valid():
+			try:
+				profile_picture = request.FILES.get('profile_picture')
+				if profile_picture:
+					if profile_picture.size > 1 * 1024 * 1024:
+						raise ValidationError('File size exceeds 1MB.')
+					if profile_picture.content_type not in ['image/jpeg', 'image/png', 'image/gif']:
+						raise ValidationError('Unsupported file type. Please upload an image file (JPEG, PNG, GIF).')
+					try:
+						profile_picture.open()
+						profile_picture.read()
+					except Exception as e:
+						raise ValidationError(f'Error reading file: {str(e)}')
+
+				user = profile_form.save()
+				user.password = make_password(user.password)
+				user.save()
+				if not profile_picture:
+					user.profilPicture = pp
+					user.save()
+				if request.POST['password'] == '' and request.POST['confirm_password'] == '':
+					user.password = psw
+					user.save()
+			#	user = authenticate(username=request.POST["username"], password=request.user.password)
+				if user is not None:
+					login(request, user)
+					return JsonResponse({'success': True})
+				else:
+					return JsonResponse({'success': False, 'message': 'Authentication failed'})
+			except ValidationError as e:
+				return JsonResponse({'success': False, 'message': str(e)})
+		errors = profile_form.errors.get_json_data()
+		error_messages = []
+		for field, field_errors in errors.items():
+			for error in field_errors:
+				error_messages.append(error['message'])
+		return JsonResponse({'success': False, 'message': ' '.join(error_messages)})
+
+	return JsonResponse({'success': False, 'message': 'Invalid request method'})
 
 def registerUser(request):
 	if request.method == 'POST':
@@ -734,38 +759,38 @@ def profile(request, user_id):
 			}),
 	})
 def profileEdit(request, user_id):
-    if request.method == 'POST':
-        profile_form = editProfileForm(request.POST, request.FILES, request.user)
-        if profile_form.is_valid():
-            try:
-                profile_picture = request.FILES.get('profilPicture')
-                if profile_picture:
-                    if profile_picture.size > 1 * 1024 * 1024:
-                        raise ValidationError('File size exceeds 1MB.')
+	if request.method == 'POST':
+		profile_form = editProfileForm(request.POST, request.FILES, request.user)
+		if profile_form.is_valid():
+			try:
+				profile_picture = request.FILES.get('profilPicture')
+				if profile_picture:
+					if profile_picture.size > 1 * 1024 * 1024:
+						raise ValidationError('File size exceeds 1MB.')
 
-                    if profile_picture.content_type not in ['image/jpeg', 'image/png', 'image/gif']:
-                        raise ValidationError('Unsupported file type. Please upload an image file (JPEG, PNG, GIF).')
+					if profile_picture.content_type not in ['image/jpeg', 'image/png', 'image/gif']:
+						raise ValidationError('Unsupported file type. Please upload an image file (JPEG, PNG, GIF).')
 
-                    try:
-                        profile_picture.open()
-                        profile_picture.read()
-                    except Exception as e:
-                        raise ValidationError(f'Error reading file: {str(e)}')
+					try:
+						profile_picture.open()
+						profile_picture.read()
+					except Exception as e:
+						raise ValidationError(f'Error reading file: {str(e)}')
 
-                user = profile_form.save()
-                user = authenticate(username=request.POST["username"], password=request.POST["password"])
-                if user is not None:
-                    return JsonResponse({'success': True})
-                else:
-                    return JsonResponse({'success': False, 'message': 'Profile change failed'})
-            except ValidationError as e:
-                return JsonResponse({'success': False, 'message': str(e)})
+				user = profile_form.save()
+				user = authenticate(username=request.POST["username"], password=request.POST["password"])
+				if user is not None:
+					return JsonResponse({'success': True})
+				else:
+					return JsonResponse({'success': False, 'message': 'Profile change failed'})
+			except ValidationError as e:
+				return JsonResponse({'success': False, 'message': str(e)})
 
-        errors = profile_form.errors.get_json_data()
-        error_messages = []
-        for field, field_errors in errors.items():
-            for error in field_errors:
-                error_messages.append(error['message'])
-        return JsonResponse({'success': False, 'message': ' '.join(error_messages)})
+		errors = profile_form.errors.get_json_data()
+		error_messages = []
+		for field, field_errors in errors.items():
+			for error in field_errors:
+				error_messages.append(error['message'])
+		return JsonResponse({'success': False, 'message': ' '.join(error_messages)})
 
-    return JsonResponse({'success': False, 'message': 'Invalid request method'})
+	return JsonResponse({'success': False, 'message': 'Invalid request method'})

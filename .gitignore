@@ -9,5 +9,5 @@
 
 # persistent data at project root only
 /data
-
+/django_app
 /services/django/app/staticfiles

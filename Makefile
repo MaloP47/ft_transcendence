@@ -6,7 +6,7 @@
 #    By: guderram <guderram@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/05/28 10:17:29 by gbrunet           #+#    #+#              #
-#    Updated: 2024/07/22 18:05:01 by guderram         ###   ########.fr        #
+#    Updated: 2024/07/23 12:09:26 by guderram         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -55,15 +55,18 @@ down stop:
 
 clean: down
 	@printf "$(_YELLOW)Removing all containers data...$(_END)\n"
+<<<<<<< HEAD
 	docker volume prune -f
 	rm -rf data/var-log
 	rm -rf services/postgres/logs
 	rm -rf data/kibana
 
+=======
+	docker volume prune -af
+>>>>>>> origin/main
 
 fclean: down
 	@printf "$(_YELLOW)Removing all unused containers and data...$(_END)\n"
-	docker system prune -af
 	docker volume prune -af
 	rm -rf data/var-log
 	rm -rf services/postgres/logs
@@ -114,7 +117,7 @@ ln:
 	[ -L ./django_app ] || ln -s services/django/app ./django_app
 
 users:
-	-docker compose exec -e DJANGO_SUPERUSER_PASSWORD=mdpdur42 django python manage.py createsuperuser --no-input --username noa --email noa@example.com
-	-docker compose exec -e DJANGO_SUPERUSER_PASSWORD=mdpdur42 django python manage.py createsuperuser --no-input --username lala --email lala@example.com
-	-docker compose exec -e DJANGO_SUPERUSER_PASSWORD=mdpdur42 django python manage.py createsuperuser --no-input --username hihi --email hihi@example.com
-	-docker compose exec -e DJANGO_SUPERUSER_PASSWORD=mdpdur42 django python manage.py createsuperuser --no-input --username kiki --email kiki@example.com
+	-docker compose exec -e DJANGO_SUPERUSER_PASSWORD=Mdpdur*42 django python manage.py createsuperuser --no-input --username noa --email noa@example.com
+	-docker compose exec -e DJANGO_SUPERUSER_PASSWORD=Mdpdur*42 django python manage.py createsuperuser --no-input --username lala --email lala@example.com
+	-docker compose exec -e DJANGO_SUPERUSER_PASSWORD=Mdpdur*42 django python manage.py createsuperuser --no-input --username hihi --email hihi@example.com
+	-docker compose exec -e DJANGO_SUPERUSER_PASSWORD=Mdpdur*42 django python manage.py createsuperuser --no-input --username kiki --email kiki@example.com

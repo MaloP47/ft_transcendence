@@ -331,8 +331,10 @@ export default class App {
 					this.handleFriendRequestMessage(data);
 				if (data.game_notif)
 					this.handleTournamentNotif(data);
-				if (data.type && (data.type == 'multiDataHost' || data.type == 'multiDataGuest'))
-					this.pong.handleMultiData(data.type, data.data);
+				if (data.type && (data.type == 'multiDataHost' || data.type == 'multiDataGuest')) {
+					if (data.data.game_id == game_id && this.pong)
+						this.pong.handleMultiData(data.type, data.data); // not sure how safe it is to access pong like that
+				}
 			}.bind(this);
 		}
 
@@ -347,6 +349,7 @@ export default class App {
 					this.addNotificationEvents();
 					this.initAddFriendBtn();
 					this.initDeleteFriendBtn();
+					this.initViewProfileBtn();
 					this.updateRooms();
 					if (state == "home") {
 						this.setPong("bg");
@@ -381,6 +384,9 @@ export default class App {
 					} else if (state == "createTournaments") {
 						this.setPong("bg");
 						this.getCreateTournament();
+					} else if (state == "profile") {
+						this.setPong("bg");
+						this.getProfile(game_id);
 					}
 					let homeView = document.getElementById("homeView");
 					setTimeout(() => {
@@ -391,37 +397,24 @@ export default class App {
 		} else {
 			if (state == "home") {
 				this.setPong("bg");
-				this.hideProfile();
 				this.getCreateGame();
 			} else if (state == "1vsAI" && game_id == -1) {
 				this.setPong("bg");
-				this.hideLocalGame();
-				this.hideProfile();
 				this.getLocalAiConfigPage();
 			} else if (state == "1vsAI" && game_id != -1) {
-				this.hideLocalConfigPage();
-				this.hideProfile();
 				this.getLocalAiGame(game_id);
 			} else if (state == "1vs1" && game_id == -1) {
 				this.setPong("bg");
-				this.hideLocalGame();
-				this.hideProfile();
 				this.getLocalConfigPage();
 			} else if (state == "1vs1" && game_id != -1) {
-				this.hideLocalConfigPage();
-				this.hideProfile();
 				this.getLocalGame(game_id);
 			} else if (state == "profile") {
 				this.setPong("bg");
 				this.getProfile(game_id);
 			} else if (state == "multi" && game_id == -1) {
 				this.setPong("bg");
-				this.hideProfile();
-				this.hideLocalGame();
 				this.getMultiConfigPage();
 			} else if (state == "multi" && game_id != -1) {
-				this.hideLocalConfigPage();
-				this.hideProfile();
 				this.getMultiGame(game_id);
 			} else if (state == "listTournaments") {
 				this.getListTournaments(game_id);
@@ -758,6 +751,7 @@ export default class App {
 				this.pong.gameInfo = res;
 				// set pong event handlers here
 				this.pong.initEvents();
+				this.pong.notConnected = true;
 				let homeContent = document.getElementById("homeContent");
 				if (document.getElementById("gameOverlay"))
 					return ;
@@ -999,6 +993,7 @@ export default class App {
 			}
 		});
 	}
+
 	getMultiConfigPage() {
 		let homeContent = document.getElementById("homeContent");
 		if (!homeContent)
@@ -1102,6 +1097,7 @@ export default class App {
 			});
 		}
 	}
+
 	setMultiConfigInteraction() {
 		let config = {
 			winScore: 10,
@@ -1153,9 +1149,7 @@ export default class App {
 
 			let playBtn = document.getElementById("playBtn")
 			playBtn.addEventListener("click", (e) => {
-				if (config.p2Local == "")
-					config.p2Local = this.playerMulti.name;
-				this.getApiResponseJson("/api/game/new/multi/", {config: config, p2: this.playerMulti}).then((response) => {
+				this.getApiResponseJson("/api/game/new/multi_chat/", {config: config, p2: this.playerMulti.id}).then((response) => {
 					let res = JSON.parse(response);
 					if (res.success) {
 						this.chatSocket.send(JSON.stringify({
@@ -1166,7 +1160,7 @@ export default class App {
 						let config = document.getElementById("config");
 						config.classList.add("hided")
 						this.remove("config")
-						history.pushState("", "", "/multi/" + res.id);
+						history.pushState("", "", "/multi/" + res.g1);
 						this.router();
 					}
 				});
@@ -1337,6 +1331,7 @@ export default class App {
 								this.chatMenuSendPlay();
 								this.chatMenuDeleteFriend();
 								this.chatMenuAddFriend();
+								this.chatMenuViewProfile();
 								this.chatMenuBlockUser();
 								let menuBack = document.getElementById("menuBack")
 								menuBack.classList.remove("pe-none");
@@ -1375,6 +1370,25 @@ export default class App {
 				}
 			}
 		})
+	}
+
+	chatMenuViewProfile() {
+		let viewProfile = document.getElementById("chatViewProfile")
+		if (!viewProfile)
+			return ;
+		viewProfile.addEventListener("click", (e) => {
+			let menu = document.getElementById("chatMenu");
+			if (!menu)
+				return ;
+			menu.classList.add("hided");
+			menu.style.pointerEvents = ("none");
+			this.displayNone("chatMenu")
+			let menuBack = document.getElementById("menuBack");
+			menuBack.classList.add("hided");
+			menuBack.classList.add("pe-none");
+			history.pushState("", "", "/profile/" + e.target.dataset.id);
+			this.router();
+		});
 	}
 
 	chatMenuBlockUser() {
@@ -1495,6 +1509,25 @@ export default class App {
 		})
 	}
 
+	initViewProfileBtn() {
+		let profile = document.getElementById("displayProfilBtn");
+		if (!profile)
+			return ;
+		profile.addEventListener("click", (e) => {
+			let menu = document.getElementById("menu");
+			if (!menu)
+				return ;
+			menu.classList.add("hided");
+			menu.style.pointerEvents = ("none");
+			this.displayNone("menu")
+			let menuBack = document.getElementById("menuBack");
+			menuBack.classList.add("hided");
+			menuBack.classList.add("pe-none");
+			history.pushState("", "", "/profile/" + e.target.dataset.id);
+			this.router();
+		});
+	}
+
 	initDeleteFriendBtn() {
 		let delFriend = document.getElementById("deleteFriend");
 		if (!delFriend)
@@ -1564,7 +1597,6 @@ export default class App {
 										chatMenu.style.top = (e.clientY + 5) + "px";
 										chatMenu.style.right = (window.innerWidth - e.clientX + 5) + "px";
 										chatMenu.innerHTML = res.html;
-										let sendPlay = document.getElementById("chatSendPlay")
 										this.chatMenuSendPlay();
 										this.chatMenuDeleteFriend();
 										this.chatMenuAddFriend();
@@ -1883,6 +1915,8 @@ export default class App {
 						}, 15)
 						let delFriendBtn = document.getElementById("deleteFriend");
 						delFriendBtn.dataset.id = e.target.dataset.id
+						let displayProfilBtn = document.getElementById("displayProfilBtn");
+						displayProfilBtn.dataset.id = e.target.dataset.id
 					})
 				}
 			}
@@ -2096,35 +2130,46 @@ export default class App {
 					profileView.classList.remove("hided");
 				}, 15);
 
-				// this.updateTopContent(res.html);
-				// this.showProfileForm();
 				this.addProfileFormSubmitListener(id);
 				this.addProfilePictureChangeListener();
+				this.addTogglePasswordButtons();
 			}
 		});
 	}
 
 	addProfileFormSubmitListener(id) {
 		let form = document.getElementById("profileFormForm");
+		let formEditBtn = document.getElementById("editProfileBtn");
+		if (formEditBtn) {
+			formEditBtn.addEventListener("click", (e) => {
+				e.preventDefault();
+				let notEdit = document.getElementsByClassName("notEdit");
+				let toHide = document.getElementsByClassName("tohide");
+				for (let i in notEdit) {
+					if (notEdit[i].classList)
+						notEdit[i].classList.add("d-none")
+				}
+				for (let i in toHide) {
+					if (toHide[i].classList)
+						toHide[i].classList.remove("d-none")
+				}
+				console.log(notEdit)
+			});
+		}
 		let formBtn = document.getElementById("profileFormSubmitBtn");
 		if (formBtn) {
 			formBtn.addEventListener("click", (e) => {
 				e.preventDefault();
 				let formData = new FormData(form);
-				this.getApiResponse("/api/user/profile/"+ id, formData).then((response) => {
+				this.getApiResponse("/api/user/profile/", formData).then((response) => {
 					let res = JSON.parse(response);
 					if (res.success) {
-						this.getProfile(res.id);
-						alert('Profile updated successfully!');
+						this.getProfile(this.user.id);
 					} else {
 						let profileForm = document.getElementById("profile");
-						// profileForm.classList.add("shake");
 						let profileFormAlert = document.getElementById("profileFormAlert");
 						profileFormAlert.textContent = res.message;
 						profileFormAlert.classList.remove("hided");
-						// setTimeout(() => {
-						// 	profileForm.classList.remove("shake");
-						// }, 500);
 						setTimeout(() => {
 							profileFormAlert.classList.add("hided");
 						}, 5000);
@@ -2135,8 +2180,9 @@ export default class App {
 	}
 
 	addProfilePictureChangeListener() {
-		// let profilePictureInput = document.getElementById("profileFormProfilePicture");
 		let previewProfilePicture = document.getElementById("previewProfilePicture");
+		if (!previewProfilePicture)
+			return ;
 		let profileFormAlert = document.getElementById("profileFormAlert");
 
 		previewProfilePicture.addEventListener("change", function () {

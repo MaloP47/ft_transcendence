@@ -37,7 +37,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
 				await self.channel_layer.group_send(self.room_group_name, text_data_json)
 			# add if text_data_json['type'] == 'gameNotif':
 		else:
-			print('No type field in received data')
+			print('')
 
 		# Multiplayer logic --^
 		# la partie qui va pas --v
@@ -45,8 +45,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
 			gameNotif = text_data_json['gameNotif']
 			p1 = text_data_json['p1']
 			p2 = text_data_json['p2']
-			print(p1)
-			print(p2)
 			await self.channel_layer.group_send(
 				self.room_group_name,
 				{
@@ -153,4 +151,4 @@ class ChatConsumer(AsyncWebsocketConsumer):
 		results.online = online
 		results.last_login = datetime.now()
 		await sync_to_async(results.save)()
-		await self.channel_layer.group_send(self.room_group_name, {'type': 'need_update'})
+		await self.channel_layer.group_send(self.room_group_name, {'type': 'need_update', 'id': userId})
