@@ -343,6 +343,7 @@ def registerForm(request):
 def updateProfile(request):
 	if request.method == 'POST':
 		pp = request.user.profilPicture
+		psw = request.user.password
 		profile_form = editProfileForm(request.POST, request.FILES, instance=request.user)
 		if profile_form.is_valid():
 			try:
@@ -364,7 +365,11 @@ def updateProfile(request):
 				if not profile_picture:
 					user.profilPicture = pp
 					user.save()
-				user = authenticate(username=request.POST["username"], password=request.POST["password"])
+				if request.POST['password'] == '' and request.POST['confirm_password'] == '':
+					print(psw)
+					user.password = psw
+					user.save()
+			#	user = authenticate(username=request.POST["username"], password=request.user.password)
 				if user is not None:
 					login(request, user)
 					return JsonResponse({'success': True})

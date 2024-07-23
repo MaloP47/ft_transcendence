@@ -127,7 +127,7 @@ class editProfileForm(forms.ModelForm):
 		elif CustomUser.objects.filter(email=email).exclude(pk=self.instance.pk).exists():
 			self.add_error('email', 'Email already exists.')
 
-		if not password and not confirm_password:
+		if password == '' and confirm_password == '':
 			password = self.instance.password
 			confirm_password = self.instance.password
 
