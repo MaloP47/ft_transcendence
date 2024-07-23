@@ -763,6 +763,7 @@ export default class App {
 				this.pong.gameInfo = res;
 				// set pong event handlers here
 				this.pong.initEvents();
+				this.pong.notConnected = true;
 				let homeContent = document.getElementById("homeContent");
 				if (document.getElementById("gameOverlay"))
 					return ;

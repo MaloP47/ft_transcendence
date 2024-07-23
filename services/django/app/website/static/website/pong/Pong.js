@@ -100,6 +100,7 @@ export default class Pong {
 		this.scaleFactor = 0.75;
 		this.bonus = true;
 		this.resetGameInfo();
+		this.notConnected = true;
 		//this.resetMultiData();
 	}
 
@@ -186,30 +187,30 @@ export default class Pong {
 		this.sendMultiData();
 		this.resetMultiData();
 	}
+
 	handlePause() {
 		if (this.multiData.enemy_connected) {
 			this.multiData.enemy_connected_last = performance.now();
-			//console.log('connected!!!');
-			if (this.isHost()) {
-				this.start = true;
+			if (this.isHost() && this.notConnected ) {
+				this.notConnected = false;
+				let count = 5;
+				this.animateCountdown(count);
+				setTimeout(() => { this.start = true; }, count * 1000);
 			}
-			// `Waiting for playing...` text
-			let countdown = document.getElementById("countdown");
-			countdown.innerHTML = "";
-			countdown.classList.remove("countdown");
 		}
 		if (!this.multiData.enemy_connected && performance.now() - this.multiData.enemy_connected_last >= 300) {
-			//console.log('pausing...');
 			if (this.isHost()) {
+				this.notConnected = true;
 				this.start = false;
 			//	this.endRound = true;
 			}
 			let countdown = document.getElementById("countdown");
+			//countdown.classList.remove("countdown");
+			countdown.style.fontSize = "4rem";
 			if (this.isHost())
 				countdown.innerHTML = "Waiting for " + this.gameInfo.p2.username + "...";
 			else
 				countdown.innerHTML = "Waiting for " + this.gameInfo.p1.username + "...";
-			countdown.classList.add("countdown");
 		}
 	}
 
@@ -443,45 +444,22 @@ export default class Pong {
 		}
 	}
 
-	animateCountdown(sec) {
-		let countdown = document.getElementById("countdown");
-		if (sec >= -1 && countdown && countdown.innerHTML != sec) {
-			countdown.classList.remove("countdown");
-			for (let secs = 0; secs != sec + 1; secs++) {
-				this.setMultiData('t_countdown', secs);
-
-				//countdown.classList.remove("countdown");
-				setTimeout(()=>{
-					countdown.innerHTML = secs;
-					countdown.classList.remove("countdown");
-					setTimeout(()=>{
-						countdown.innerHTML = secs;
-						countdown.classList.add("countdown");
-					}, 100);
-				}, (sec - secs) * 1000);
-			}
-		}
-
-		setTimeout(()=>{
-			this.start = true;
-			this.endRound = false;
-			if (this.gameInfo.p2.id == -1 && this.gameInfo.p2Local == "") {
-				this.assets.p2.startAI();
-			}
-		}, sec * 1000);
-	}
+	//	setTimeout(()=>{
+	//		this.start = true;
+	//		this.endRound = false;
+	//		if (this.gameInfo.p2.id == -1 && this.gameInfo.p2Local == "") {
+	//			this.assets.p2.startAI();
+	//		}
+	//	}, sec * 1000);
+	//}
 	//animateCountdown(sec) {
 	//	let countdown = document.getElementById("countdown");
-	//	if (sec >= 0 && countdown && countdown.innerHTML != sec) {
+	//	if (sec >= 0 && countdown) {
 	//		// Multi trigger
 	//		this.setMultiData('t_countdown', sec);
 	//		//console.log('Sending countdown trigger... -> ' + sec);
 
 	//		countdown.innerHTML = sec;
-	//		countdown.classList.remove("countdown");
-	//		setTimeout(()=>{
-	//			countdown.classList.add("countdown");
-	//		}, 15)
 	//		this.countTimout = setTimeout(() => {
 	//			this.animateCountdown(sec - 1);
 	//		}, 1000)	
@@ -496,16 +474,35 @@ export default class Pong {
 	//		}, 500);
 	//	}
 	//}
-	animateCountdownMulti() {
-		//console.log('Receiving countdown trigger! -> ' + this.multiData.t_countdown);
-		let countdown = document.getElementById("countdown");
-		countdown.innerHTML = this.multiData.t_countdown;
 
-		countdown.classList.remove("countdown");
-		setTimeout(()=>{
-			countdown.classList.add("countdown");
-		}, 15)
-		countdown.classList.remove("countdown");
+	animateCountdown(sec) {
+		if (sec < 0)
+			return ;
+		let countdown = document.getElementById("countdown");
+		if (!countdown)
+			return ;
+
+		//this.countTimeout = true;
+		//clearTimeout(timeoutID);
+		for (let secs = 0; secs <= sec; secs++) {
+
+			setTimeout(()=>{
+				countdown.innerHTML = secs;
+				this.setMultiData('t_countdown', secs);
+				if (secs == 0)
+					setTimeout(() => { countdown.innerHTML = ""; }, 200);
+			}, (sec - secs) * 1000);
+		}
+	}
+	animateCountdownMulti() {
+		let countdown = document.getElementById("countdown");
+
+		if (!countdown)
+			return ;
+		countdown.innerHTML = this.multiData.t_countdown;
+		countdown.style.fontSize = "4rem";
+		if (secs == 0)
+			setTimeout(()=>{ countdown.innerHTML = ""; }, 200)
 		
 	}
 }
