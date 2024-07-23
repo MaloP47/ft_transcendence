@@ -56,6 +56,7 @@ urlpatterns = [
 	path('api/tournament/create/', views.createTournamentGame, name="createTournamentGame"),
 	path('api/view/tournamentConfig/', views.createTournamentConfig, name="createTournamentConfig"),
 	path('api/tournament/playerSearch/', views.searchPlayer, name="searchPlayer"),
+	path('api/tournament/createFinale/', views.createFinale, name="createFinale"),
 
 	path('', views.index, name="index"),
 	path('login', views.index, name="index"),

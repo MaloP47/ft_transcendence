@@ -115,6 +115,8 @@ def saveGame(request):
 		game.save()
 		return JsonResponse({
 			'success': True,
+			'tournament': game.tournamentGame,
+			'game_id': game.id,
 		})
 
 def getGame(request):
@@ -153,7 +155,7 @@ def getGame(request):
 				'p2Local': game.p2Local,
 				'html': render_to_string('website/gameOverlay.html'),
 				'gameType': game.gameType,
-                'game_id': game.id,
+				'game_id': game.id,
 			});
 		else:
 			return JsonResponse({
@@ -472,6 +474,55 @@ def createTournamentConfig(request):
 			'html': render_to_string('website/tournamentConfig.html'),
 		})
 
+def createFinale(request):
+	if request.method == 'POST':
+		data = json.loads(request.POST["data"]);
+		print(data['game_id'])
+		game = Game.objects.get(id=data['game_id'])
+		tour = game.tournament_set.first();
+		end = True
+		i = 0
+		p1 = None
+		p2 = None
+		for g in tour.games.all():
+			if g.p1Score < g.scoreToWin and g.p2Score < g.scoreToWin:
+				end = False
+			elif g.p1Score >= g.scoreToWin:
+				if not p1:
+					p1 = g.p1
+				else :
+					p2 = g.p1
+				i += 1
+			elif g.p2Score >= g.scoreToWin:
+				if not p1:
+					p1 = g.p2
+				else :
+					p2 = g.p2
+				i += 1
+		if end and i == 2:
+			finale = Game(p1=p1,p2=p2, scoreToWin=tour.scoreToWin, ballSpeed=tour.ballSpeed, bonuses=tour.bonuses, gameType=2, tournamentGame=True)
+			finale.save()
+			tour.games.add(finale)
+			return JsonResponse({
+				'success': True,
+				'finale_id': finale.id,
+				'p1': p1.id,
+				'p2': p2.id,
+			})
+		elif end and i == 3:
+			tour.tournamentOver = True
+			tour.save()
+			return JsonResponse({
+				'success': True,
+				'end': True,
+				'tour_id': tour.id,
+				'win_id': 2
+			})
+		return JsonResponse({
+			'success': False,
+		})
+
+
 def createTournamentGame(request):
 	if request.method == 'POST':
 		data = json.loads(request.POST["data"]);
@@ -494,6 +545,8 @@ def createTournamentGame(request):
 		game1.save()
 		game2 = Game(p1=p3,p2=p4, scoreToWin=tour.scoreToWin, ballSpeed=tour.ballSpeed, bonuses=tour.bonuses, gameType=2, tournamentGame=True)
 		game2.save()
+		tour.games.add(game1)
+		tour.games.add(game2)
 		return JsonResponse({
 			'success': True,
 			'g1': game1.id,
@@ -640,6 +693,10 @@ def createTournament(request):
 			})
 			signed_txn = web3.eth.account.sign_transaction(transaction, private_key=settings.PRIVATE_KEY)
 			tx_hash = web3.eth.send_raw_transaction(signed_txn.rawTransaction)
+			tournament = Tournament.objects.get(id=tournament_id)
+			len = contract.functions.getTournamentLength().call()
+			tournament.idBC = len - 1
+			tournament.save()
 			return JsonResponse({'success': True, 'status': 'success', 'message': 'Transaction successful'})
 		except Exception as e:
 			return JsonResponse({'success': False, 'status': 'error', 'message': str(e)})
