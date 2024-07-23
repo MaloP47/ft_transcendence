@@ -86,6 +86,9 @@ services:
       - ./services/grafana/conf/dashboards:/etc/grafana/provisioning/dashboards
       - ./services/grafana/conf/grafana.ini:/etc/grafana/grafana.ini
     env_file: .env
+    depends_on:
+      - prometheus
+      - logstash
     restart: unless-stopped
 
   postgres-exporter:
