@@ -6,7 +6,7 @@
 #    By: guderram <guderram@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/05/28 10:17:29 by gbrunet           #+#    #+#              #
-#    Updated: 2024/07/23 12:11:01 by guderram         ###   ########.fr        #
+#    Updated: 2024/07/23 12:44:29 by guderram         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -55,7 +55,7 @@ down stop:
 
 clean: down
 	@printf "$(_YELLOW)Removing all containers data...$(_END)\n"
-	docker volume prune -f
+	docker volume prune -af
 	rm -rf data/var-log
 	rm -rf services/postgres/logs
 	rm -rf data/kibana
@@ -64,6 +64,7 @@ clean: down
 fclean: down
 	@printf "$(_YELLOW)Removing all unused containers and data...$(_END)\n"
 	docker volume prune -af
+	docker system prune -af
 	rm -rf data/var-log
 	rm -rf services/postgres/logs
 	rm -rf data/kibana
