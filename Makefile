@@ -49,13 +49,12 @@ down stop:
 
 clean: down
 	@printf "$(_YELLOW)Removing all containers data...$(_END)\n"
-	docker volume prune -f
+	docker volume prune -af
 
 fclean: down
 	@printf "$(_YELLOW)Removing all unused containers and data...$(_END)\n"
-	docker system prune -af
 	docker volume prune -af
-	@# volumes persist here somehow
+	docker system prune -af
 
 migrate:
 	docker compose exec django python manage.py migrate
@@ -90,7 +89,7 @@ ln:
 	[ -L ./django_app ] || ln -s services/django/app ./django_app
 
 users:
-	-docker compose exec -e DJANGO_SUPERUSER_PASSWORD=Mdpdur42? django python manage.py createsuperuser --no-input --username noa --email noa@example.com
-	-docker compose exec -e DJANGO_SUPERUSER_PASSWORD=Mdpdur42? django python manage.py createsuperuser --no-input --username lala --email lala@example.com
-	-docker compose exec -e DJANGO_SUPERUSER_PASSWORD=Mdpdur42? django python manage.py createsuperuser --no-input --username hihi --email hihi@example.com
-	-docker compose exec -e DJANGO_SUPERUSER_PASSWORD=Mdpdur42? django python manage.py createsuperuser --no-input --username kiki --email kiki@example.com
+	-docker compose exec -e DJANGO_SUPERUSER_PASSWORD=Mdpdur*42 django python manage.py createsuperuser --no-input --username noa --email noa@example.com
+	-docker compose exec -e DJANGO_SUPERUSER_PASSWORD=Mdpdur*42 django python manage.py createsuperuser --no-input --username lala --email lala@example.com
+	-docker compose exec -e DJANGO_SUPERUSER_PASSWORD=Mdpdur*42 django python manage.py createsuperuser --no-input --username hihi --email hihi@example.com
+	-docker compose exec -e DJANGO_SUPERUSER_PASSWORD=Mdpdur*42 django python manage.py createsuperuser --no-input --username kiki --email kiki@example.com

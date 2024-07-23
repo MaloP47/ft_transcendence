@@ -12,8 +12,7 @@ rm -rf ~/.local/share/Trash/*
 ```
 
 # TODO
-- [ ] remove temporary logout button from `templates/navbar.html`
-- [ ] uncomment music.js but first fix the constant loop trying to play it
+- [x] remove temporary logout button from `templates/navbar.html`
 ### Bugs
 - Severe:
     - [ ] Connecting from another pc, not localhost give 403 error
@@ -21,6 +20,7 @@ rm -rf ~/.local/share/Trash/*
     - [ ] logout button not working because of music button
 - Moderate:
     - [ ] notif join button not working? no error in chrome console
+    - [ ] uncomment music.js but first fix the constant loop trying to play it
 - Minor:
     - [ ] when refreshing host particles stay on guest
     - [ ] sometimes there's an AI in multi game, not sure how to recreate

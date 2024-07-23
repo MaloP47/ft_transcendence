@@ -186,12 +186,8 @@ body {
 }
 
 #countdown {
-	opacity: 0;
+	opacity: 1;
 	transition: 200ms;
-}
-
-.countdown {
-	animation: zoom-opacity 1s 1;
 }
 
 @keyframes zoom-opacity {

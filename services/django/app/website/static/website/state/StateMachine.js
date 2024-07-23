@@ -331,9 +331,10 @@ export default class App {
 					this.handleFriendRequestMessage(data);
 				if (data.game_notif)
 					this.handleTournamentNotif(data);
-				if (data.type && (data.type == 'multiDataHost' || data.type == 'multiDataGuest'))
-					if (this.pong.handleMultiData)
-						this.pong.handleMultiData(data.type, data.data);
+				if (data.type && (data.type == 'multiDataHost' || data.type == 'multiDataGuest')) {
+					if (data.data.game_id == game_id && this.pong)
+						this.pong.handleMultiData(data.type, data.data); // not sure how safe it is to access pong like that
+				}
 			}.bind(this);
 		}
 
@@ -750,6 +751,7 @@ export default class App {
 				this.pong.gameInfo = res;
 				// set pong event handlers here
 				this.pong.initEvents();
+				this.pong.notConnected = true;
 				let homeContent = document.getElementById("homeContent");
 				if (document.getElementById("gameOverlay"))
 					return ;
