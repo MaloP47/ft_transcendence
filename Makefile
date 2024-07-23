@@ -53,9 +53,8 @@ clean: down
 
 fclean: down
 	@printf "$(_YELLOW)Removing all unused containers and data...$(_END)\n"
-	docker system prune -af
 	docker volume prune -af
-	@# volumes persist here somehow
+	docker system prune -af
 
 migrate:
 	docker compose exec django python manage.py migrate
