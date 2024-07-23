@@ -366,7 +366,6 @@ def updateProfile(request):
 					user.profilPicture = pp
 					user.save()
 				if request.POST['password'] == '' and request.POST['confirm_password'] == '':
-					print(psw)
 					user.password = psw
 					user.save()
 			#	user = authenticate(username=request.POST["username"], password=request.user.password)
