@@ -424,12 +424,12 @@ export default class Pong {
 		//	clearTimeout(this.countTimeout)
 
 		// Multi skip countdown
-		if (this.isMultiNotHost()) {
-			if (this.multiData.t_countdown != -1) {
-				this.animateCountdownMulti();
-			}
-			return ;
-		}
+		//if (this.isMultiNotHost()) {
+		//	if (this.multiData.t_countdown != -1) {
+		//		this.animateCountdownMulti();
+		//	}
+		//	return ;
+		//}
 
 		// Countdown
 		// move this inside update
@@ -438,7 +438,9 @@ export default class Pong {
 		//		this.animateCountdown(5);	
 		//	}, 1000)
 		//}
-		this.animateCountdown(5);
+		if (!(this.gameInfo.p1score >= this.winScore || this.gameInfo.p2score >= this.winScore)) {
+			this.animateCountdown(5);
+		}
 	}
 
 	animateCountdown(sec) {
@@ -455,7 +457,7 @@ export default class Pong {
 					setTimeout(()=>{
 						countdown.innerHTML = secs;
 						countdown.classList.add("countdown");
-					}, 80);
+					}, 100);
 				}, (sec - secs) * 1000);
 			}
 		}
