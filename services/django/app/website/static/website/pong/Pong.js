@@ -10,7 +10,6 @@ function add(val, add, max) {
 	if (val < 0) val = 0;
 	return (Math.min(val + add, max));
 }
-
 function sub(val, sub, max) {
 	if (val > 0) val = 0;
 	return (Math.max(val - sub, -max));
@@ -162,8 +161,10 @@ export default class Pong {
 
 	update() {
 		this.elapsedTime = performance.now() - this.totalTime;
-		this.totalTime = performance.now()
+		this.totalTime = performance.now();
 
+		//console.log('transi -> ' + this.transi.transi);
+		//if (this.isMultiPlayer() && !this.isFinished()) {
 		if (this.isMultiPlayer()) {
 			this.updateMulti();
 		} else {
@@ -175,6 +176,9 @@ export default class Pong {
 		requestAnimationFrame(this.update.bind(this));
 	}
 	updateMulti() {
+		if (!this.isFinished())
+			this.handlePause();
+
 		this.transi.update();
 		this.scene.update();
 		this.assets.update();
@@ -182,7 +186,36 @@ export default class Pong {
 		this.sendMultiData();
 		this.resetMultiData();
 	}
+	handlePause() {
+		if (this.multiData.enemy_connected) {
+			this.multiData.enemy_connected_last = performance.now();
+			//console.log('connected!!!');
+			if (this.isHost()) {
+				this.start = true;
+			}
+			// `Waiting for playing...` text
+			let countdown = document.getElementById("countdown");
+			countdown.innerHTML = "";
+			countdown.classList.remove("countdown");
+		}
+		if (!this.multiData.enemy_connected && performance.now() - this.multiData.enemy_connected_last >= 300) {
+			//console.log('pausing...');
+			if (this.isHost()) {
+				this.start = false;
+			//	this.endRound = true;
+			}
+			let countdown = document.getElementById("countdown");
+			if (this.isHost())
+				countdown.innerHTML = "Waiting for " + this.gameInfo.p2.username + "...";
+			else
+				countdown.innerHTML = "Waiting for " + this.gameInfo.p1.username + "...";
+			countdown.classList.add("countdown");
+		}
+	}
 
+
+	// Utils
+	isFinished() { return (this.assets.p1.score >= this.winScore || this.assets.p2.score >= this.winScore); }
 	// -----------------------------
 	// -------- Multi utils --------
 	// --------------v--------------
@@ -215,6 +248,7 @@ export default class Pong {
 			// Other
 			this.setMultiData('start', this.start);
 			this.setMultiData('game_id', this.gameInfo.game_id);
+			this.setMultiData('enemy_connected', true);
 		}
 		else if (this.isGuest()) {
 			//console.log('Sending guest inputs');
@@ -223,6 +257,7 @@ export default class Pong {
 			// Guest inputs
 			this.setMultiData('p2_left', this.p1Left);
 			this.setMultiData('p2_right', this.p1Right);
+			this.setMultiData('enemy_connected', true);
 		}
 
 		// Send data 
@@ -246,6 +281,7 @@ export default class Pong {
 			// Guest inputs
 			this.p2Left = data.p2_left;
 			this.p2Right = data.p2_right;
+			this.multiData.enemy_connected = data.enemy_connected;
 		}
 		else if (type == 'multiDataHost' && this.isGuest()) {
 			this.multiData = data;
@@ -312,6 +348,10 @@ export default class Pong {
 			'p2_left': false,
 			'p2_right': false,
 			'game_id': -1,
+			// Connection detection
+			//'p1_connected': false,
+			'enemy_connected': false,
+			'enemy_connected_last': 0,
 		}
 	}
 	resetMultiData() {
@@ -319,6 +359,7 @@ export default class Pong {
 		this.setMultiData('t_endRound', false);
 		this.setMultiData('t_resetBall', false);
 		this.setMultiData('t_countdown', -1); // or timer?
+		this.setMultiData('enemy_connected', false); // or timer?
 
 		// Time sensitive
 		if (this.multiData['t_impactParticles']){
@@ -336,10 +377,12 @@ export default class Pong {
 				this.setMultiData('t_ballFire', false);
 			}, 10);
 		}
-		//if (this.multiData['t_countdown']){
+		
+		// connection Detection (will only work for remote right now)
+		//if (this.multiData['enemy_connected']) {
 		//	setTimeout(() => {
-		//		this.setMultiData('t_countdown', 0);
-		//	}, 10);
+		//		this.setMultiData('enemy_connected', false);
+		//	}, 300);
 		//}
 	}
 	isMulti() { return (this.gameInfo.gameType == 2); }
@@ -377,8 +420,8 @@ export default class Pong {
 			this.assets.p1.AI = true;
 		if (this.gameInfo.p2.id == -1 && this.gameInfo.p2Local == "")
 			this.assets.p2.AI = true;
-		if (this.countTimeout)
-			clearTimeout(this.countTimeout)
+		//if (this.countTimeout)
+		//	clearTimeout(this.countTimeout)
 
 		// Multi skip countdown
 		if (this.isMultiNotHost()) {
@@ -390,39 +433,67 @@ export default class Pong {
 
 		// Countdown
 		// move this inside update
-		if (!(this.gameInfo.p1score >= this.winScore || this.gameInfo.p2score >= this.winScore)) {
-			this.countTimeout = setTimeout(() => {
-				this.animateCountdown(5);	
-			}, 1000)
-		}
+		//if (!(this.gameInfo.p1score >= this.winScore || this.gameInfo.p2score >= this.winScore)) {
+		//	this.countTimeout = setTimeout(() => {
+		//		this.animateCountdown(5);	
+		//	}, 1000)
+		//}
+		this.animateCountdown(5);
 	}
 
 	animateCountdown(sec) {
 		let countdown = document.getElementById("countdown");
-		if (sec >= 0 && countdown && countdown.innerHTML != sec) {
-			// Multi trigger
-			this.setMultiData('t_countdown', sec);
-			//console.log('Sending countdown trigger... -> ' + sec);
-
-			countdown.innerHTML = sec;
+		if (sec >= -1 && countdown && countdown.innerHTML != sec) {
 			countdown.classList.remove("countdown");
-			setTimeout(()=>{
-				countdown.classList.add("countdown");
-			}, 15)
-			this.countTimout = setTimeout(() => {
-				this.animateCountdown(sec - 1);
-			}, 1000)	
+			for (let secs = 0; secs != sec + 1; secs++) {
+				this.setMultiData('t_countdown', secs);
+
+				//countdown.classList.remove("countdown");
+				setTimeout(()=>{
+					countdown.innerHTML = secs;
+					countdown.classList.remove("countdown");
+					setTimeout(()=>{
+						countdown.innerHTML = secs;
+						countdown.classList.add("countdown");
+					}, 80);
+				}, (sec - secs) * 1000);
+			}
 		}
-		if (sec == 0 && countdown) {
-			setTimeout(()=>{
-				this.start = true;
-				this.endRound = false;
-				if (this.gameInfo.p2.id == -1 && this.gameInfo.p2Local == "") {
-					this.assets.p2.startAI();
-				}
-			}, 500);
-		}
+
+		setTimeout(()=>{
+			this.start = true;
+			this.endRound = false;
+			if (this.gameInfo.p2.id == -1 && this.gameInfo.p2Local == "") {
+				this.assets.p2.startAI();
+			}
+		}, sec * 1000);
 	}
+	//animateCountdown(sec) {
+	//	let countdown = document.getElementById("countdown");
+	//	if (sec >= 0 && countdown && countdown.innerHTML != sec) {
+	//		// Multi trigger
+	//		this.setMultiData('t_countdown', sec);
+	//		//console.log('Sending countdown trigger... -> ' + sec);
+
+	//		countdown.innerHTML = sec;
+	//		countdown.classList.remove("countdown");
+	//		setTimeout(()=>{
+	//			countdown.classList.add("countdown");
+	//		}, 15)
+	//		this.countTimout = setTimeout(() => {
+	//			this.animateCountdown(sec - 1);
+	//		}, 1000)	
+	//	}
+	//	if (sec == 0 && countdown) {
+	//		setTimeout(()=>{
+	//			this.start = true;
+	//			this.endRound = false;
+	//			if (this.gameInfo.p2.id == -1 && this.gameInfo.p2Local == "") {
+	//				this.assets.p2.startAI();
+	//			}
+	//		}, 500);
+	//	}
+	//}
 	animateCountdownMulti() {
 		//console.log('Receiving countdown trigger! -> ' + this.multiData.t_countdown);
 		let countdown = document.getElementById("countdown");
